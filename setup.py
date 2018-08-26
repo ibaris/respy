@@ -5,6 +5,12 @@
 For COPYING and LICENSE details, please refer to the LICENSE file
 """
 
+try:
+    from pip import main as pipmain
+
+except ImportError:
+    from pip._internal import main as pipmain
+
 import pip
 from setuptools import find_packages
 from setuptools import setup
@@ -14,8 +20,8 @@ from setuptools.command.install import install
 class install_local(install):
     def run(self):
         install.run(self)
-        pip.main(['install',
-                  'dependence'])
+        pipmain(['install',
+                 'dependence'])
 
 
 def get_packages():

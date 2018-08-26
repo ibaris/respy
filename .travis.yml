@@ -12,6 +12,7 @@ before_install:
   - python setup.py install
 
 install:
+  - pip install --upgrade pip
   - pip install -r requirements.txt
   - pip install coveralls
   - pip install coverage
