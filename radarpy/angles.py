@@ -1,17 +1,7 @@
 # -*- coding: utf-8 -*-
-from __future__ import division
-
-import sys
-
 import numpy as np
 
 from .auxiliary import (rad, deg, sec, align_all, asarrays)
-
-# python 3.6 comparability
-if sys.version_info < (3, 0):
-    srange = xrange
-else:
-    srange = range
 
 
 class Angles(object):
@@ -109,16 +99,16 @@ class Angles(object):
             self.iza, self.vza, self.raa = align_all((self.iza, self.vza, self.raa))
 
         else:
-            try:
-                if len(self.vza) != len(self.iza) or len(self.vza) != len(self.raa):
-                    raise AssertionError("Input dimensions must agree. "
-                                         "The actual dimensions are "
-                                         "iza: {0}, vza: {1} and raa: {2}".format(str(len(self.iza)),
-                                                                                  str(len(self.vza)),
-                                                                                  str(len(self.raa))))
+            # try:
+            if len(self.vza) != len(self.iza) or len(self.vza) != len(self.raa):
+                raise AssertionError("Input dimensions must agree. "
+                                     "The actual dimensions are "
+                                     "iza: {0}, vza: {1} and raa: {2}".format(str(len(self.iza)),
+                                                                              str(len(self.vza)),
+                                                                              str(len(self.raa))))
 
-            except (AttributeError, TypeError):
-                pass
+            # except (AttributeError, TypeError):
+            #     pass
 
     def __set_angle(self):
         """
