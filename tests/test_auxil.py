@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from radarpy import (BRF, BSC, BRDF, dB, sec, cot, linear)
+from radarpy import (BRF, BSC, BRDF, dB, sec, cot, linear, rad, deg, align_all)
 
 
 @pytest.mark.webtest
@@ -55,3 +55,25 @@ class TestAuxil:
     def test_cot(self):
         test = cot(35)
         assert test == 1 / np.tan(35)
+
+    def test_rad(self):
+        xza = 35
+        a = np.radians(xza)
+        b = rad(xza)
+        assert np.allclose(a, b)
+
+    def test_deg(self):
+        xza = 35
+        a = np.radians(xza)
+        b = rad(xza)
+        a = np.degrees(a)
+        b = deg(b)
+        assert np.allclose(a, b)
+
+    def test_allign_all(self):
+        a = np.array([1, 2, 3])
+        b = np.array([1, 2])
+
+        a, b = align_all((a, b), constant_values=1)
+
+        assert b[-1] == 1
