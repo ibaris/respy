@@ -1,5 +1,5 @@
 from numpy import cos, tan, pi, log10, errstate
-from auxiliary import rad
+from .auxiliary import rad
 
 
 def dB(x):
