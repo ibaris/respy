@@ -10,6 +10,14 @@ from radarpy import Angles
     (35, 45, 50, radians(35), radians(45), radians(50))
 ])
 class TestAnglesAngle:
+    def test_normalize_iza_RAD(self, izaDeg, vzaDeg, raaDeg, izaRad, vzaRad, raaRad):
+        kernel = Angles(izaDeg, vzaDeg, raaDeg, normalize=True)
+        assert len(kernel.iza) == 2
+
+    def test_normalize_iza_DEG(self, izaDeg, vzaDeg, raaDeg, izaRad, vzaRad, raaRad):
+        kernel = Angles(izaDeg, vzaDeg, raaDeg, normalize=True, angle_unit='DEG')
+        assert len(kernel.iza) == 2
+
     def test_kernel_DEG_iza(self, izaDeg, vzaDeg, raaDeg, izaRad, vzaRad, raaRad):
         kernel = Angles(izaDeg, vzaDeg, raaDeg)
         assert allclose(izaRad, kernel.iza[0], atol=1e-4)
@@ -41,3 +49,11 @@ class TestAnglesAngle:
     def test_align_except(self, izaRad, vzaRad, raaRad, izaDeg, vzaDeg, raaDeg):
         with pytest.raises(AssertionError):
             Angles(array([izaRad, 2, 3]), array([izaRad, 2]), array([izaRad]), angle_unit='RAD', align=False)
+
+    def test_unit_except(self, izaRad, vzaRad, raaRad, izaDeg, vzaDeg, raaDeg):
+        with pytest.raises(AssertionError):
+            Angles(array([izaRad, 2, 3]), array([izaRad, 2]), array([izaRad]), angle_unit='XXX', align=False)
+
+    def test_dimension_except(self, izaRad, vzaRad, raaRad, izaDeg, vzaDeg, raaDeg):
+        with pytest.raises(AssertionError):
+            Angles(array([izaRad, 2, 3]), array([izaRad, 2]), array([izaRad]), angle_unit='XXX', align=False)
