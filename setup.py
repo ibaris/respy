@@ -33,7 +33,7 @@ setup(name='radarpy',
 
       version='0.0.1',
 
-      description='Fundamental Formulas for Radar',
+      description='Fundamental Formulas for Radar and Angle Management',
       cmdclass={'install': install_local},
       packages=get_packages(),
       # package_dir={'dir': 'dir', 'dir': 'dir',
@@ -46,7 +46,7 @@ setup(name='radarpy',
 
       url='https://github.com/ibaris/radarpy',
 
-      long_description='Fundamental Formulas for Radar',
+      long_description='Fundamental Formulas for Radar and Angle Management',
       # install_requires=install_requires,
 
       keywords=["radar", "remote-sensing", "optics", "integration",
@@ -56,12 +56,17 @@ setup(name='radarpy',
       classifiers=[
           'Intended Audience :: Science/Research',
           'Topic :: Scientific/Engineering :: Atmospheric Science',
-
-          # Pick your license as you wish (should match "license" above)
-          # ~ 'License :: OSI Approved :: MIT License',
-
-          'Programming Language :: Python :: 2.7',
-          'Operating System :: Microsoft',
+          "Development Status :: 5 - Production/Stable",
+          "Intended Audience :: Developers",
+          "Natural Language :: English",
+          "License :: OSI Approved :: Custom",
+          "Operating System :: OS Independent",
+          "Programming Language :: Python",
+          "Programming Language :: Python :: 2",
+          "Programming Language :: Python :: 2.7",
+          "Programming Language :: Python :: 3",
+          "Programming Language :: Python :: 3.3",
+          "Programming Language :: Python :: 3.4",
 
       ],
       include_package_data=True,
