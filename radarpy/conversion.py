@@ -1,4 +1,5 @@
-from numpy import cos, tan, pi, log10, errstate
+from numpy import cos, pi, log10, errstate, nan_to_num
+
 from .auxiliary import rad
 
 
@@ -7,7 +8,7 @@ def dB(x):
     Convert a linear value to dB.
     """
     with errstate(invalid='ignore'):
-        return 10 * log10(x)
+        return nan_to_num(10 * log10(x))
 
 
 def linear(x):
@@ -29,13 +30,8 @@ def BRDF(BSC, vza, angle_unit='RAD'):
     ----------
     BSC : int, float or array_like
         Radar Backscatter Coefficient (sigma 0).
-
-    iza : int, float or array_like
-        Sun or incidence zenith angle.
-
     vza : int, float or array_like
         View or scattering zenith angle.
-
     angle_unit : {'DEG', 'RAD'} (default = 'RAD'), optional
         * 'DEG': All input angles (iza, vza, raa) are in [DEG].
         * 'RAD': All input angles (iza, vza, raa) are in [RAD].
@@ -87,13 +83,8 @@ def BSC(BRDF, vza, angle_unit='RAD'):
     ----------
     BSC : int, float or array_like
         Radar Backscatter Coefficient (sigma 0).
-
-    iza : int, float or array_like
-        Sun or incidence zenith angle.
-
     vza : int, float or array_like
         View or scattering zenith angle.
-
     angle_unit : {'DEG', 'RAD'} (default = 'RAD'), optional
         * 'DEG': All input angles (iza, vza, raa) are in [DEG].
         * 'RAD': All input angles (iza, vza, raa) are in [RAD].

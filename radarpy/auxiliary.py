@@ -1,4 +1,5 @@
-from numpy import cos, tan, pi, asarray, pad, max
+from numpy import cos, tan, pi, asarray, pad, max, zeros, zeros_like
+import numpy as np
 
 
 def rad(angle):
@@ -62,3 +63,75 @@ def asarrays(data):
 
 def same_len(args):
     return all(len(item) == len(args[0]) for item in args)
+
+
+def stacks(items):
+    try:
+        shape = items[0].shape[0]
+
+    except AttributeError:
+        shape = 1
+
+    array = zeros((len(items), shape))
+
+    for i, item in enumerate(items):
+        array[i] = item
+
+    return array
+
+
+def zeros_likes(data, rep=1, dtype=None):
+    dtype = data.dtype if dtype is None else dtype
+
+    return [zeros_like(data, dtype=dtype) for i in range(rep)]
+
+
+def inf_to_num(data, num=0, nan=True):
+    if type(data) == tuple or type(data) == list:
+        data_list = list()
+        for item in data:
+            item[np.isinf(item)] = 0
+            if nan:
+                item = np.nan_to_num(item)
+
+            data_list.append(item)
+        return data_list
+
+    else:
+        data[np.isneginf(data)] = 0
+        if nan:
+            data = np.nan_to_num(data)
+
+        return data
+
+
+def get_geometries(type='HB'):
+    """
+    Function to return typical geometries for different aquicistions.
+
+    Parameters
+    ----------
+    type : {'HB', 'HF', 'VB', 'VF'}
+        Backscatter type:
+            * HB: Horizontal Back Scattering (90.0, 90.0, 0.0, 180.0, 0.0, 0.0).
+            * HF: Horizontal Forward Scattering (90.0, 90.0, 0.0, 0.0, 0.0, 0.0).
+            * VB: Vertical Back Scattering (0.0, 180.0, 0.0, 0.0, 0.0, 0.0).
+            * VF: Vertical Forward Scattering (180.0, 180.0, 0.0, 0.0, 0.0, 0.0).
+
+    Returns
+    -------
+    geometry : tuple
+        A tuple with (iza, vza, iaa, vaa, alpha, beta) parameters.
+
+    """
+    if type is 'HB':
+        return (90.0, 90.0, 0.0, 180.0, 0.0, 0.0)
+    elif type is 'HF':
+        return (90.0, 90.0, 0.0, 0.0, 0.0, 0.0)
+    elif type is 'VB':
+        return (0.0, 180.0, 0.0, 0.0, 0.0, 0.0)
+    elif type is 'VF':
+        return (180.0, 180.0, 0.0, 0.0, 0.0, 0.0)
+    else:
+        raise ValueError(
+            "The parameter type should be 'HB', 'HF', 'VB', 'VF'. The actual parameter is: {0}".format(str(type)))
