@@ -20,7 +20,7 @@ from setuptools.command.install import install
 def get_version():
     version = dict()
 
-    with open("pyrism/version.py") as fp:
+    with open("radarpy/version.py") as fp:
         exec (fp.read(), version)
 
     return version['__version__']
