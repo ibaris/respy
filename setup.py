@@ -17,6 +17,14 @@ from setuptools import setup
 from setuptools.command.install import install
 
 
+def get_version():
+    version = dict()
+
+    with open("pyrism/version.py") as fp:
+        exec (fp.read(), version)
+
+    return version['__version__']
+
 class install_local(install):
     def run(self):
         install.run(self)
@@ -31,7 +39,7 @@ def get_packages():
 
 setup(name='radarpy',
 
-      version='0.0.1',
+      version=get_version(),
 
       description='Fundamental Formulas for Radar and Angle Management',
       cmdclass={'install': install_local},
