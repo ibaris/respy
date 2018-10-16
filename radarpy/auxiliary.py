@@ -43,6 +43,7 @@ def cot(x):
 
 
 def align_all(data, constant_values='default'):
+    data = asarrays(data)
     max_len = max_length(data)
 
     if constant_values == 'default':
