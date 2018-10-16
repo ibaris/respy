@@ -25,12 +25,6 @@ def get_version():
 
     return version['__version__']
 
-class install_local(install):
-    def run(self):
-        install.run(self)
-        pipmain(['install',
-                 'dependence'])
-
 
 def get_packages():
     find_packages(exclude=['docs', 'tests', 'invert']),
@@ -40,9 +34,7 @@ def get_packages():
 setup(name='radarpy',
 
       version=get_version(),
-
       description='Fundamental Formulas for Radar and Angle Management',
-      cmdclass={'install': install_local},
       packages=get_packages(),
       # package_dir={'dir': 'dir', 'dir': 'dir',
       #              'dir': 'dir', 'dir': 'dir'},
