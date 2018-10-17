@@ -149,20 +149,20 @@ def wavelength(frequency, unit='GHz', output="cm"):
 
 def frequency(wavelength, unit='cm', output="GHz"):
     """
-    Convert frequencies in wavelength.
+    Convert wavelengths in frequencies.
 
     Parameters
     ----------
-    frequency : int, float or array_like
-        Frequency.
-    unit : {'Hz', 'MHz', 'GHz', 'THz'}
-        Unit of entered frequency.
-    output : {'m', 'cm', 'nm'}
-        Unit of the wavelength.
+    wavelength : int, float or array_like
+        Wavelength.
+    unit : {'m', 'cm', 'nm'}
+        Unit of entered wavelength.
+    output : {'Hz', 'MHz', 'GHz', 'THz'}
+        Unit of the frequency.
 
     Returns
     -------
-    Wavelength: float or array_like
+    frequency: float or array_like
     """
     c = 299792458
 
