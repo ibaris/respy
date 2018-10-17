@@ -101,3 +101,91 @@ def BSC(BRDF, vza, angle_unit='RAD'):
         return BRDF * cos(rad(vza)) * (4 * pi)
     else:
         raise ValueError("angle_unit must be 'RAD' or 'DEG'")
+
+
+def wavelength(frequency, unit='GHz', output="cm"):
+    """
+    Convert frequencies in wavelength.
+
+    Parameters
+    ----------
+    frequency : int, float or array_like
+        Frequency.
+    unit : {'Hz', 'MHz', 'GHz', 'THz'}
+        Unit of entered frequency.
+    output : {'m', 'cm', 'nm'}
+        Unit of the wavelength.
+
+    Returns
+    -------
+    Wavelength: float or array_like
+    """
+    c = 299792458
+
+    if unit is "Hz":
+        pass
+    elif unit is "MHz":
+        frequency *= 1e6
+    elif unit is "GHz":
+        frequency *= 1e9
+    elif unit is "THz":
+        frequency *= 1e12
+    else:
+        raise ValueError("unit must be MHz, GHz or THz.")
+
+    w = c / frequency
+
+    if output is "m":
+        pass
+    elif output is "cm":
+        w *= 100
+    elif output is "nm":
+        w *= 1e+9
+    else:
+        raise ValueError("output must be m, cm or nm.")
+
+    return w
+
+
+def frequency(wavelength, unit='cm', output="GHz"):
+    """
+    Convert frequencies in wavelength.
+
+    Parameters
+    ----------
+    frequency : int, float or array_like
+        Frequency.
+    unit : {'Hz', 'MHz', 'GHz', 'THz'}
+        Unit of entered frequency.
+    output : {'m', 'cm', 'nm'}
+        Unit of the wavelength.
+
+    Returns
+    -------
+    Wavelength: float or array_like
+    """
+    c = 299792458
+
+    if unit is "m":
+        pass
+    elif unit is "cm":
+        wavelength /= 100
+    elif unit is "nm":
+        wavelength /= 1e+9
+    else:
+        raise ValueError("output must be m, cm or nm.")
+
+    f = c / wavelength
+
+    if output is "Hz":
+        pass
+    elif output is "MHz":
+        f /= 1e6
+    elif output is "GHz":
+        f /= 1e9
+    elif output is "THz":
+        f /= 1e12
+    else:
+        raise ValueError("unit must be MHz, GHz or THz.")
+
+    return f
