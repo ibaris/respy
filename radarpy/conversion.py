@@ -2,6 +2,9 @@ from numpy import cos, pi, log10, errstate, nan_to_num
 
 from .auxiliary import rad
 
+C = 299792458
+PI = 3.14159265359
+
 
 def dB(x):
     """
@@ -120,7 +123,6 @@ def wavelength(frequency, unit='GHz', output="cm"):
     -------
     Wavelength: float or array_like
     """
-    c = 299792458
 
     if unit is "Hz":
         pass
@@ -133,7 +135,7 @@ def wavelength(frequency, unit='GHz', output="cm"):
     else:
         raise ValueError("unit must be MHz, GHz or THz.")
 
-    w = c / frequency
+    w = C / frequency
 
     if output is "m":
         pass
@@ -164,7 +166,6 @@ def frequency(wavelength, unit='cm', output="GHz"):
     -------
     frequency: float or array_like
     """
-    c = 299792458
 
     if unit is "m":
         pass
@@ -175,7 +176,7 @@ def frequency(wavelength, unit='cm', output="GHz"):
     else:
         raise ValueError("output must be m, cm or nm.")
 
-    f = c / wavelength
+    f = C / wavelength
 
     if output is "Hz":
         pass
@@ -189,3 +190,23 @@ def frequency(wavelength, unit='cm', output="GHz"):
         raise ValueError("unit must be MHz, GHz or THz.")
 
     return f
+
+
+def wavenumber(frequency, unit='GHz', output='cm'):
+    """
+    Convert frequencies in free space wavenumbers.
+
+    Parameters
+    ----------
+    frequency : int, float or array_like
+        Frequency.
+    unit : {'Hz', 'MHz', 'GHz', 'THz'}
+        Unit of entered frequency.
+    output : {'m', 'cm', 'nm'}
+        Unit of the wavelength.
+
+    Returns
+    -------
+    wavenumber: float or array_like
+    """
+    return 2 * PI / wavelength(frequency, unit=unit, output=output)
