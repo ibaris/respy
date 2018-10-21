@@ -1,3 +1,5 @@
+import warnings
+
 from numpy import cos, pi, log10, errstate, nan_to_num, arange, concatenate, argsort
 
 from .auxiliary import rad, check_unit_frequency, check_unit_wavelength, CONVERT_FREQ, CONVERT_WAVE
@@ -126,11 +128,21 @@ def wavelength(frequency, unit='GHz', output="cm"):
     check_unit_frequency(unit)
     check_unit_wavelength(output)
 
+    try:
+        if len(frequency) > 1:
+            frequency = frequency.astype(float)
+        else:
+            frequency = float(frequency)
+
+    except TypeError:
+        frequency = float(frequency)
+
     frequency *= CONVERT_FREQ[unit]
 
     w = C / frequency
 
     return w * CONVERT_WAVE[output]
+
 
 def frequency(wavelength, unit='cm', output="GHz"):
     """
@@ -151,6 +163,15 @@ def frequency(wavelength, unit='cm', output="GHz"):
     """
     check_unit_frequency(output)
     check_unit_wavelength(unit)
+
+    try:
+        if len(wavelength) > 1:
+            wavelength = wavelength.astype(float)
+        else:
+            wavelength = float(wavelength)
+
+    except TypeError:
+        wavelength = float(wavelength)
 
     wavelength /= CONVERT_WAVE[unit]
     f = C / wavelength
@@ -178,7 +199,7 @@ def wavenumber(frequency, unit='GHz', output='cm'):
     return 2 * PI / wavelength(frequency, unit=unit, output=output)
 
 
-def convert_frequency(frequecy, unit="GHz", output="Hz"):
+def convert_frequency(frequency, unit="GHz", output="Hz"):
     """
     Convert frequencies in other units.
 
@@ -198,7 +219,16 @@ def convert_frequency(frequecy, unit="GHz", output="Hz"):
     check_unit_frequency(unit)
     check_unit_frequency(output)
 
-    f = frequecy * CONVERT_FREQ[unit]
+    try:
+        if len(frequency) > 1:
+            frequency = frequency.astype(float)
+        else:
+            frequency = float(frequency)
+
+    except TypeError:
+        frequency = float(frequency)
+
+    f = frequency * CONVERT_FREQ[unit]
     return f / CONVERT_FREQ[output]
 
 
@@ -263,6 +293,37 @@ def select_region(region, output="GHz"):
                          format(str(output)))
 
     return output_region
+
+
+def which_to_band(input, unit='GHz'):
+    if 'Hz' in unit or 'MHz' in unit or 'GHz' in unit or 'THz' in unit:
+        frequence = convert_frequency(input, unit=unit, output='GHz')
+
+    elif 'm' in unit or 'cm' in unit or 'nm' in unit:
+        frequence = frequency(input, unit, 'GHz')
+
+        Lb = band(region="L", output="GHz")
+        Sb = band(region="S", output="GHz")
+        Cb = band(region="C", output="GHz")
+        Xb = band(region="X", output="GHz")
+        VIS = band(region="VIS", output="GHz")
+        NIR = band(region="NIR", output="GHz")
+
+    if Lb[0] <= frequence <= Lb[-1]:
+        return "L"
+    elif Sb[0] <= frequence <= Sb[-1]:
+        return "S"
+    elif Cb[0] <= frequence <= round(Cb[-1], 2):
+        return "C"
+    elif Xb[0] <= frequence <= round(Xb[-1], 2):
+        return "X"
+    elif VIS[0] <= frequence <= VIS[-1]:
+        return "VIS"
+    elif NIR[0] <= frequence <= NIR[-1]:
+        return "NIR"
+    else:
+        warnings.warn("Frequency not in RADAR or OPTIC range. Returning None.")
+        return None
 
 
 def band(region="L", output="GHz"):
