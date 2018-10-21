@@ -295,7 +295,7 @@ def select_region(region, output="GHz"):
     return output_region
 
 
-def which_to_band(input, unit='GHz'):
+def which_band(input, unit='GHz'):
     if 'Hz' in unit or 'MHz' in unit or 'GHz' in unit or 'THz' in unit:
         frequence = convert_frequency(input, unit=unit, output='GHz')
 
