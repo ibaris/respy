@@ -149,6 +149,44 @@ def wavelength(frequency, unit='GHz', output="cm"):
     return w
 
 
+def convert_frequency(frequecy, unit="GHz", output="Hz"):
+    """
+    Convert frequencies in other units.
+
+    Parameters
+    ----------
+    frequency : int, float or array_like
+        Frequency.
+    unit : {'Hz', 'MHz', 'GHz', 'THz'}
+        Unit of entered frequency.
+    output : {'Hz', 'MHz', 'GHz', 'THz'}
+        Unit of desired frequency.
+
+    Returns
+    -------
+    frequency: float or array_like
+    """
+    if unit is "Hz":
+        pass
+    elif unit is "MHz":
+        f = frequecy * 1e6
+    elif unit is "GHz":
+        f = frequecy * 1e9
+    elif unit is "THz":
+        f = frequecy * 1e12
+    else:
+        raise ValueError("unit must be MHz, GHz or THz.")
+
+    if output is "Hz":
+        return f
+    elif output is "MHz":
+        return f / 1e6
+    elif output is "GHz":
+        return f / 1e9
+    elif output is "THz":
+        return f / 1e12
+
+
 def frequency(wavelength, unit='cm', output="GHz"):
     """
     Convert wavelengths in frequencies.
