@@ -1,6 +1,23 @@
 from numpy import cos, tan, pi, asarray, pad, max, zeros, zeros_like
 import numpy as np
 
+CONVERT_FREQ = {'Hz': 1, 'MHz': 1e6, 'GHz': 1e9, 'THz': 1e12}
+CONVERT_WAVE = {'m': 1, 'cm': 100, 'nm': 1e+9}
+
+
+def check_unit_frequency(unit):
+    if unit == "Hz" or unit == "MHz" or unit == "GHz" or unit == "THz":
+        return None
+    else:
+        raise ValueError("unit must be MHz, GHz or THz.")
+
+
+def check_unit_wavelength(unit):
+    if unit == "m" or unit == "cm" or unit == "nm":
+        return None
+    else:
+        raise ValueError("unit must be m, cm or nm.")
+
 
 def rad(angle):
     """
