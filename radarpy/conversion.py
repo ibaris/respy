@@ -302,12 +302,12 @@ def which_band(input, unit='GHz'):
     elif 'm' in unit or 'cm' in unit or 'nm' in unit:
         frequence = frequency(input, unit, 'GHz')
 
-        Lb = band(region="L", output="GHz")
-        Sb = band(region="S", output="GHz")
-        Cb = band(region="C", output="GHz")
-        Xb = band(region="X", output="GHz")
-        VIS = band(region="VIS", output="GHz")
-        NIR = band(region="NIR", output="GHz")
+    Lb = band(region="L", output="GHz")
+    Sb = band(region="S", output="GHz")
+    Cb = band(region="C", output="GHz")
+    Xb = band(region="X", output="GHz")
+    VIS = band(region="VIS", output="GHz")
+    NIR = band(region="NIR", output="GHz")
 
     if Lb[0] <= frequence <= Lb[-1]:
         return "L"
