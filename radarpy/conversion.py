@@ -1,6 +1,7 @@
+from __future__ import division
 import warnings
 
-from numpy import cos, pi, log10, errstate, nan_to_num, arange, concatenate, argsort
+from numpy import cos, pi, log10, errstate, nan_to_num, arange, concatenate, argsort, ndarray
 
 from .auxiliary import rad, check_unit_frequency, check_unit_wavelength, CONVERT_FREQ, CONVERT_WAVE
 
@@ -128,16 +129,10 @@ def wavelength(frequency, unit='GHz', output="cm"):
     check_unit_frequency(unit)
     check_unit_wavelength(output)
 
-    try:
-        if len(frequency) > 1:
-            frequency = frequency.astype(float)
-        else:
-            frequency = float(frequency)
-
-    except TypeError:
-        frequency = float(frequency)
-
-    frequency *= CONVERT_FREQ[unit]
+    if isinstance(frequency, ndarray):
+        frequency = frequency.astype(float) * CONVERT_FREQ[unit]
+    elif isinstance(frequency, float) or isinstance(frequency, int):
+        frequency = float(frequency) * CONVERT_FREQ[unit]
 
     w = C / frequency
 
@@ -164,16 +159,11 @@ def frequency(wavelength, unit='cm', output="GHz"):
     check_unit_frequency(output)
     check_unit_wavelength(unit)
 
-    try:
-        if len(wavelength) > 1:
-            wavelength = wavelength.astype(float)
-        else:
-            wavelength = float(wavelength)
+    if isinstance(wavelength, ndarray):
+        wavelength = wavelength.astype(float) / CONVERT_WAVE[unit]
+    elif isinstance(wavelength, float) or isinstance(wavelength, int):
+        wavelength = float(wavelength) / CONVERT_WAVE[unit]
 
-    except TypeError:
-        wavelength = float(wavelength)
-
-    wavelength /= CONVERT_WAVE[unit]
     f = C / wavelength
 
     return f / CONVERT_FREQ[output]
@@ -219,17 +209,12 @@ def convert_frequency(frequency, unit="GHz", output="Hz"):
     check_unit_frequency(unit)
     check_unit_frequency(output)
 
-    try:
-        if len(frequency) > 1:
-            frequency = frequency.astype(float)
-        else:
-            frequency = float(frequency)
+    if isinstance(frequency, ndarray):
+        frequency = frequency.astype(float) * CONVERT_FREQ[unit]
+    elif isinstance(frequency, float) or isinstance(frequency, int):
+        frequency = float(frequency) * CONVERT_FREQ[unit]
 
-    except TypeError:
-        frequency = float(frequency)
-
-    f = frequency * CONVERT_FREQ[unit]
-    return f / CONVERT_FREQ[output]
+    return frequency / CONVERT_FREQ[output]
 
 
 def select_region(region, output="GHz"):
@@ -358,3 +343,12 @@ def band(region="L", output="GHz"):
         return frequency(NIR[argsort(-NIR)], 'nm', output)
     else:
         raise ValueError("The parameter region must be L, S, C, X, VIS or NIR")
+
+
+def volume_eq_radius(h, d):
+    n = 1 / 3
+    ar = h / d  # axis ratio
+    V = (4 / 3) * PI * h * d / 2  # volume of particle
+    rv = ((6 / PI * V) ** n) / 2  # volume equivalent radius
+
+    return ar, rv
