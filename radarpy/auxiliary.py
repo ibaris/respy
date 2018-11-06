@@ -59,16 +59,17 @@ def cot(x):
     return 1 / tan(x)
 
 
-def align_all(data, constant_values='default'):
+def align_all(data, constant_values='default', dtype=np.double):
     data = asarrays(data)
     max_len = max_length(data)
 
     if constant_values == 'default':
         return asarray(
-            [pad(item, (0, max_len - len(item)), 'constant', constant_values=item[-1]) for item in data])
+            [pad(item, (0, max_len - len(item)), 'constant', constant_values=item[-1]) for item in data], dtype=dtype)
     else:
         return asarray(
-            [pad(item, (0, max_len - len(item)), 'constant', constant_values=constant_values) for item in data])
+            [pad(item, (0, max_len - len(item)), 'constant', constant_values=constant_values) for item in data],
+            dtype=dtype)
 
 
 def max_length(data):
