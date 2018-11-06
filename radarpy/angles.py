@@ -57,26 +57,17 @@ class Angles(object):
         Hot spot direction is vza == iza and raa = 0.0
 
         """
-
-        # # Initialize values
-        # if raa is None and iaa is None and vaa is None:
-        #     raise AssertionError("At least raa or iaa and vaa should be defined.")
-        #
-        # elif raa is None:
-        #     if iaa is None or vaa is None:
-        #         raise AssertionError("If raa is not defined iaa AND vaa should be defined.")
-
         if raa is None:
             if iaa is None or vaa is None:
                 raise AssertionError("If raa is not defined iaa AND vaa should be defined.")
 
-            raa_flag = False
+            self.raa_flag = False
             self.iaa = iaa
             self.vaa = vaa
             self.raa = iaa - vaa
 
         else:
-            raa_flag = True
+            self.raa_flag = True
             self.raa = raa
             self.iaa = np.zeros_like(raa)
             self.vaa = np.zeros_like(raa)
@@ -98,7 +89,17 @@ class Angles(object):
         # Initialize angle information
         self.__pre_process(align)
         self.__set_angle()
-        self.__set_geometries(raa_flag)
+        self.__set_geometries(self.raa_flag)
+
+    def align_with(self, value):
+        _, self.iza, self.vza, self.raa, self.iaa, self.vaa, self.alpha, self.beta, self._B = align_all(
+            (value, self.iza, self.vza, self.raa, self.iaa, self.vaa, self.alpha, self.beta, self._B))
+
+        _, self.izaDeg, self.vzaDeg, self.raaDeg, self.iaaDeg, self.vaaDeg, self.alphaDeg, self.betaDeg, self._BDeg = align_all(
+            (value, self.izaDeg, self.vzaDeg, self.raaDeg, self.iaaDeg, self.vaaDeg, self.alphaDeg, self.betaDeg,
+             self._BDeg))
+
+        self.__set_geometries(self.raa_flag)
 
     def normalization(self, kernel=None, args=None):
         if args is None and kernel is None:
@@ -164,8 +165,10 @@ class Angles(object):
                 self.betaDeg = np.array(list(self.betaDeg) + [0.0]).flatten()
 
                 self.BDeg = (sec(np.mean(rad(self.izaDeg[0:-1]))) + sec(np.mean(rad(self.vzaDeg[0:-1]))))
+                self._BDeg = (sec(rad(self.izaDeg[0:-1])) + sec(rad(self.vzaDeg[0:-1])))
             else:
                 self.BDeg = (sec(np.mean(rad(self.izaDeg))) + sec(np.mean(rad(self.vzaDeg))))
+                self._BDeg = (sec(rad(self.izaDeg)) + sec(rad(self.vzaDeg)))
 
             self.vza = rad(self.vzaDeg)
             self.iza = rad(self.izaDeg)
@@ -174,6 +177,8 @@ class Angles(object):
             self.vaa = rad(self.vaaDeg)
             self.alpha = rad(self.alphaDeg)
             self.beta = rad(self.betaDeg)
+            self.B = rad(self.BDeg)
+            self._B = rad(self._BDeg)
 
             # Check if there are negative angle values
             w = np.where(self.vza < 0)[0]
@@ -212,9 +217,11 @@ class Angles(object):
                 self.iaa = np.array(list(self.iaa) + [0.0]).flatten()
                 self.vaa = np.array(list(self.vaa) + [0.0]).flatten()
                 self.B = (sec(np.mean(self.iza[0:-1])) + sec(np.mean(self.vza[0:-1])))
+                self._B = (sec(self.iza[0:-1]) + sec(self.vza[0:-1]))
 
             else:
                 self.B = (sec(np.mean(self.iza)) + sec(np.mean(self.vza)))
+                self._B = (sec(self.iza) + sec(self.vza))
 
             # Check if there are negative angle values
             w = np.where(self.vza < 0)[0]
@@ -233,6 +240,8 @@ class Angles(object):
             self.vaaDeg = deg(self.vaa)
             self.alphaDeg = deg(self.alpha)
             self.betaDeg = deg(self.beta)
+            self.BDeg = deg(self.B)
+            self._BDeg = deg(self._B)
 
             # Turn the raa values in to a range between 0 and 2 pi
             try:
