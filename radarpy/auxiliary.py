@@ -76,8 +76,11 @@ def max_length(data):
     return max([len(item) for item in data])
 
 
-def asarrays(data):
-    return [asarray(item).flatten() for item in data]
+def asarrays(data, dtype=None):
+    if dtype is None:
+        return [asarray(item).flatten() for item in data]
+    else:
+        return [asarray(item).flatten().astype(dtype) for item in data]
 
 
 def same_len(args):
