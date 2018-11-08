@@ -4,6 +4,12 @@ import numpy as np
 CONVERT_FREQ = {'Hz': 1, 'MHz': 1e6, 'GHz': 1e9, 'THz': 1e12}
 CONVERT_WAVE = {'m': 1, 'cm': 100, 'nm': 1e+9}
 
+DTYPES = [np.bool, np.byte, np.ubyte, np.short, np.ushort, np.intc, np.uintc, np.int_, np.uint, np.longlong,
+          np.ulonglong, np.half, np.float, np.float16, np.single, np.double, np.longdouble, np.csingle, np.cdouble,
+          np.clongdouble, np.int, np.int8, np.int16, np.int32, np.int64, np.uint8, np.uint16, np.uint32, np.uint64,
+          np.intp,
+          np.uintp, np.float32, np.float64, np.complex, np.complex64, np.complex128, float, int, complex]
+
 
 def check_unit_frequency(unit):
     if unit == "Hz" or unit == "MHz" or unit == "GHz" or unit == "THz":
