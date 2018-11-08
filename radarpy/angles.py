@@ -3,7 +3,7 @@ import warnings
 
 import numpy as np
 
-from radarpy.auxiliary import (sec, align_all, asarrays)
+from radarpy.auxiliary import (sec, align_all, asarrays, DTYPES)
 
 PI = 3.1415926535897932384626433832795028841971693993751058209749445923078164
 
@@ -85,7 +85,15 @@ class Angles(object):
         else:
             raise ValueError("angle_unit must be 'DEG' or 'RAD', but angle_unit is: {}".format(str(angle_unit)))
 
+        if dtype in DTYPES:
+            pass
+        else:
+            raise TypeError("dtype must be a numpy.dtype object. The dtype is {0}".format(str(dtype)))
+
         # Assign relative azimuth angle flag
+        if raa is not None and iaa is not None and vaa is not None:
+            raise AssertionError("The relative, incidence and viewing azimuth angle is defined. "
+                                 "Either raa or iaa AND vaa must be defined. ")
         if raa is None:
             self.raa_flag = False
             iaa = iaa
@@ -528,6 +536,11 @@ class Angles(object):
         -------
         None
         """
+        if value in DTYPES:
+            pass
+        else:
+            raise TypeError("dtype must be a numpy.dtype object. The dtype is {0}".format(str(value)))
+
         self.__dtype = value
 
         if self.__dtype == np.int:
@@ -639,7 +652,7 @@ class Angles(object):
         elif value == 1 or value == 0:
             value = True if value == 1 else False
         else:
-            raise AttributeError("Only bool type can be assigned.")
+            raise TypeError("Only bool type can be assigned.")
 
         if value is True:
             if self.__normalize is True:
