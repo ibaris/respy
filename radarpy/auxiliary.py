@@ -118,7 +118,7 @@ def inf_to_num(data, num=0, nan=True):
     if type(data) == tuple or type(data) == list:
         data_list = list()
         for item in data:
-            item[np.isinf(item)] = 0
+            item[np.isinf(item)] = num
             if nan:
                 item = np.nan_to_num(item)
 
@@ -126,7 +126,7 @@ def inf_to_num(data, num=0, nan=True):
         return data_list
 
     else:
-        data[np.isneginf(data)] = 0
+        data[np.isneginf(data)] = num
         if nan:
             data = np.nan_to_num(data)
 
