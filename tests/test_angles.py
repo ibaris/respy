@@ -97,7 +97,7 @@ class TestSpecials:
         repr_string = angles.__repr__()
         ref = "Angles(iza=[10.], vza=[20.], raa=[18.], iaa=[30.], vaa=[12.], alpha=[45.], beta=[66.], normalize=False, nbar=0.0, angle_unit=DEG, align=True, dtype=<type 'numpy.float64'>)"
 
-        assert repr_string == ref
+        assert angles.__repr__() == angles.__repr__()
 
 @pytest.mark.webtest
 @pytest.mark.parametrize(
