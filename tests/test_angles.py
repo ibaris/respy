@@ -37,6 +37,11 @@ class TestRaises:
         with pytest.raises(AssertionError):
             anlges = Angles(iza=np.array([10, 20]).flatten(), vza=10, raa=10, align=False)
 
+    def test_no_raise_at_RADDEG(self):
+        angles = Angles(iza=10, vza=10, raa=10, angle_unit='RAD')
+        angles = Angles(iza=10, vza=10, raa=10, angle_unit='rad')
+        angles = Angles(iza=10, vza=10, raa=10, angle_unit='DEG')
+        angles = Angles(iza=10, vza=10, raa=10, angle_unit='deg')
 
 class TestSpecials:
     def test__str__(self):
@@ -82,6 +87,18 @@ class TestSpecials:
         assert str_output[69][0:-1] == str(round(angles.B[0], 11))
         assert str_output[70] == str(round(angles.BDeg[0], 11))
 
+    def test__len__(self):
+        angles = Angles(iza=10, vza=10, raa=10, alpha=10, beta=10, normalize=True)
+        assert angles.shape == (7, 2)
+        assert len(angles) == 7
+
+    def test__repr__(self):
+        angles = Angles(iza=10, vza=20, iaa=30, vaa=12, alpha=45, beta=66)
+        repr_string = angles.__repr__()
+        ref = "Angles(iza=[10.], vza=[20.], raa=[18.], iaa=[30.], vaa=[12.], alpha=[45.], beta=[66.], normalize=False, nbar=0.0, angle_unit=DEG, align=True, dtype=<type 'numpy.float64'>)"
+
+        assert repr_string == ref
+
 @pytest.mark.webtest
 @pytest.mark.parametrize(
     "izaDegSingle, vzaDegSingle, raaDegSingle, iaaDegSingle, vaaDegSingle, alphaDegSingle, betaDegSingle", [
@@ -118,28 +135,35 @@ class TestAngleConversionDEG:
         B = 1 / mui + 1 / muv
         BDeg = 1 / np.cos(izaDegSingle) + 1 / np.cos(vzaDegSingle)
 
-        angle = Angles(iza=izaDegSingle, vza=vzaDegSingle, raa=raaDegSingle, alpha=alphaDegSingle, beta=betaDegSingle)
+        angles = Angles(iza=izaDegSingle, vza=vzaDegSingle, raa=raaDegSingle, alpha=alphaDegSingle, beta=betaDegSingle)
 
-        assert allclose(angle.iza, izaRadSingle)
-        assert allclose(angle.vza, vzaRadSingle)
-        assert allclose(angle.raa, raaRadSingle)
-        assert allclose(angle.iaa, 0)
-        assert allclose(angle.vaa, 0)
-        assert allclose(angle.alpha, alphaRadSingle)
-        assert allclose(angle.beta, betaRadSingle)
+        assert allclose(angles.iza, izaRadSingle)
+        assert allclose(angles.vza, vzaRadSingle)
+        assert allclose(angles.raa, raaRadSingle)
+        assert allclose(angles.iaa, 0)
+        assert allclose(angles.vaa, 0)
+        assert allclose(angles.alpha, alphaRadSingle)
+        assert allclose(angles.beta, betaRadSingle)
+        assert angles.phi == angles.raa
 
-        assert allclose(angle.izaDeg, izaDegSingle)
-        assert allclose(angle.vzaDeg, vzaDegSingle)
-        assert allclose(angle.raaDeg, raaDegSingle)
-        assert allclose(angle.iaaDeg, 0)
-        assert allclose(angle.vaaDeg, 0)
-        assert allclose(angle.alphaDeg, alphaDegSingle)
-        assert allclose(angle.betaDeg, betaDegSingle)
+        assert allclose(angles.izaDeg, izaDegSingle)
+        assert allclose(angles.vzaDeg, vzaDegSingle)
+        assert allclose(angles.raaDeg, raaDegSingle)
+        assert allclose(angles.iaaDeg, 0)
+        assert allclose(angles.vaaDeg, 0)
+        assert allclose(angles.alphaDeg, alphaDegSingle)
+        assert allclose(angles.betaDeg, betaDegSingle)
 
-        assert allclose(angle.mui, mui)
-        assert allclose(angle.muv, muv)
-        assert allclose(angle.B, B)
-        assert allclose(angle.BDeg, BDeg)
+        assert allclose(angles.mui, mui)
+        assert allclose(angles.muv, muv)
+        assert allclose(angles.B, B)
+        assert allclose(angles.BDeg, BDeg)
+
+        for i in range(7):
+            assert angles.array[i] == angles.geometries[0][i]
+
+        for i in range(7):
+            assert angles.arrayDeg[i] == angles.geometriesDeg[0][i]
 
     def test_deg2rad_iaa_vaa(self, izaDegSingle, vzaDegSingle, raaDegSingle, iaaDegSingle, vaaDegSingle,
                              alphaDegSingle, betaDegSingle):
@@ -151,29 +175,35 @@ class TestAngleConversionDEG:
         B = 1 / mui + 1 / muv
         BDeg = 1 / np.cos(izaDegSingle) + 1 / np.cos(vzaDegSingle)
 
-        angle = Angles(iza=izaDegSingle, vza=vzaDegSingle, iaa=iaaDegSingle, vaa=vaaDegSingle, alpha=alphaDegSingle,
-                       beta=betaDegSingle)
+        angles = Angles(iza=izaDegSingle, vza=vzaDegSingle, iaa=iaaDegSingle, vaa=vaaDegSingle, alpha=alphaDegSingle,
+                        beta=betaDegSingle)
 
-        assert allclose(angle.iza, izaRadSingle)
-        assert allclose(angle.vza, vzaRadSingle)
-        assert allclose(angle.iaa, iaaRadSingle)
-        assert allclose(angle.vaa, vaaRadSingle)
-        assert allclose(angle.raa, iaaRadSingle - vaaRadSingle)
-        assert allclose(angle.alpha, alphaRadSingle)
-        assert allclose(angle.beta, betaRadSingle)
+        assert allclose(angles.iza, izaRadSingle)
+        assert allclose(angles.vza, vzaRadSingle)
+        assert allclose(angles.iaa, iaaRadSingle)
+        assert allclose(angles.vaa, vaaRadSingle)
+        assert allclose(angles.raa, iaaRadSingle - vaaRadSingle)
+        assert allclose(angles.alpha, alphaRadSingle)
+        assert allclose(angles.beta, betaRadSingle)
 
-        assert allclose(angle.izaDeg, izaDegSingle)
-        assert allclose(angle.vzaDeg, vzaDegSingle)
-        assert allclose(angle.iaaDeg, iaaDegSingle)
-        assert allclose(angle.vaaDeg, vaaDegSingle)
-        assert allclose(angle.raaDeg, iaaDegSingle - vaaDegSingle)
-        assert allclose(angle.alphaDeg, alphaDegSingle)
-        assert allclose(angle.betaDeg, betaDegSingle)
+        assert allclose(angles.izaDeg, izaDegSingle)
+        assert allclose(angles.vzaDeg, vzaDegSingle)
+        assert allclose(angles.iaaDeg, iaaDegSingle)
+        assert allclose(angles.vaaDeg, vaaDegSingle)
+        assert allclose(angles.raaDeg, iaaDegSingle - vaaDegSingle)
+        assert allclose(angles.alphaDeg, alphaDegSingle)
+        assert allclose(angles.betaDeg, betaDegSingle)
 
-        assert allclose(angle.mui, mui)
-        assert allclose(angle.muv, muv)
-        assert allclose(angle.B, B)
-        assert allclose(angle.BDeg, BDeg)
+        assert allclose(angles.mui, mui)
+        assert allclose(angles.muv, muv)
+        assert allclose(angles.B, B)
+        assert allclose(angles.BDeg, BDeg)
+
+        for i in range(7):
+            assert angles.array[i] == angles.geometries[0][i]
+
+        for i in range(7):
+            assert angles.arrayDeg[i] == angles.geometriesDeg[0][i]
 
 
 @pytest.mark.webtest
@@ -224,29 +254,29 @@ class TestAngleConversionRAD:
         B = 1 / mui + 1 / muv
         BDeg = 1 / np.cos(izaDegSingle) + 1 / np.cos(vzaDegSingle)
 
-        angle = Angles(iza=izaRadSingle, vza=vzaRadSingle, raa=raaRadSingle, alpha=alphaRadSingle, beta=betaRadSingle,
-                       angle_unit='RAD')
+        angles = Angles(iza=izaRadSingle, vza=vzaRadSingle, raa=raaRadSingle, alpha=alphaRadSingle, beta=betaRadSingle,
+                        angle_unit='RAD')
 
-        assert allclose(angle.iza, izaRadSingle)
-        assert allclose(angle.vza, vzaRadSingle)
-        assert allclose(angle.raa, raaRadSingle)
-        assert allclose(angle.iaa, 0)
-        assert allclose(angle.vaa, 0)
-        assert allclose(angle.alpha, alphaRadSingle)
-        assert allclose(angle.beta, betaRadSingle)
+        assert allclose(angles.iza, izaRadSingle)
+        assert allclose(angles.vza, vzaRadSingle)
+        assert allclose(angles.raa, raaRadSingle)
+        assert allclose(angles.iaa, 0)
+        assert allclose(angles.vaa, 0)
+        assert allclose(angles.alpha, alphaRadSingle)
+        assert allclose(angles.beta, betaRadSingle)
 
-        assert allclose(angle.izaDeg, izaDegSingle)
-        assert allclose(angle.vzaDeg, vzaDegSingle)
-        assert allclose(angle.raaDeg, raaDegSingle)
-        assert allclose(angle.iaaDeg, 0)
-        assert allclose(angle.vaaDeg, 0)
-        assert allclose(angle.alphaDeg, alphaDegSingle)
-        assert allclose(angle.betaDeg, betaDegSingle)
+        assert allclose(angles.izaDeg, izaDegSingle)
+        assert allclose(angles.vzaDeg, vzaDegSingle)
+        assert allclose(angles.raaDeg, raaDegSingle)
+        assert allclose(angles.iaaDeg, 0)
+        assert allclose(angles.vaaDeg, 0)
+        assert allclose(angles.alphaDeg, alphaDegSingle)
+        assert allclose(angles.betaDeg, betaDegSingle)
 
-        assert allclose(angle.mui, mui)
-        assert allclose(angle.muv, muv)
-        assert allclose(angle.B, B)
-        assert allclose(angle.BDeg, BDeg)
+        assert allclose(angles.mui, mui)
+        assert allclose(angles.muv, muv)
+        assert allclose(angles.B, B)
+        assert allclose(angles.BDeg, BDeg)
 
     def test_deg2rad_iaa_vaa(self, izaRadSingle, vzaRadSingle, raaRadSingle, iaaRadSingle, vaaRadSingle,
                              alphaRadSingle, betaRadSingle):
@@ -258,31 +288,34 @@ class TestAngleConversionRAD:
         B = 1 / mui + 1 / muv
         BDeg = 1 / np.cos(izaDegSingle) + 1 / np.cos(vzaDegSingle)
 
-        angle = Angles(iza=izaRadSingle, vza=vzaRadSingle, iaa=iaaRadSingle, vaa=vaaRadSingle, alpha=alphaRadSingle,
-                       beta=betaRadSingle, angle_unit='RAD')
+        angles = Angles(iza=izaRadSingle, vza=vzaRadSingle, iaa=iaaRadSingle, vaa=vaaRadSingle, alpha=alphaRadSingle,
+                        beta=betaRadSingle, angle_unit='RAD')
 
-        assert allclose(angle.iza, izaRadSingle)
-        assert allclose(angle.vza, vzaRadSingle)
-        assert allclose(angle.iaa, iaaRadSingle)
-        assert allclose(angle.vaa, vaaRadSingle)
-        assert allclose(angle.raa, iaaRadSingle - vaaRadSingle)
-        assert allclose(angle.alpha, alphaRadSingle)
-        assert allclose(angle.beta, betaRadSingle)
+        assert allclose(angles.iza, izaRadSingle)
+        assert allclose(angles.vza, vzaRadSingle)
+        assert allclose(angles.iaa, iaaRadSingle)
+        assert allclose(angles.vaa, vaaRadSingle)
+        assert allclose(angles.raa, iaaRadSingle - vaaRadSingle)
+        assert allclose(angles.alpha, alphaRadSingle)
+        assert allclose(angles.beta, betaRadSingle)
 
-        assert allclose(angle.izaDeg, izaDegSingle)
-        assert allclose(angle.vzaDeg, vzaDegSingle)
-        assert allclose(angle.iaaDeg, iaaDegSingle)
-        assert allclose(angle.vaaDeg, vaaDegSingle)
-        assert allclose(angle.raaDeg, iaaDegSingle - vaaDegSingle)
-        assert allclose(angle.alphaDeg, alphaDegSingle)
-        assert allclose(angle.betaDeg, betaDegSingle)
+        assert allclose(angles.izaDeg, izaDegSingle)
+        assert allclose(angles.vzaDeg, vzaDegSingle)
+        assert allclose(angles.iaaDeg, iaaDegSingle)
+        assert allclose(angles.vaaDeg, vaaDegSingle)
+        assert allclose(angles.raaDeg, iaaDegSingle - vaaDegSingle)
+        assert allclose(angles.alphaDeg, alphaDegSingle)
+        assert allclose(angles.betaDeg, betaDegSingle)
 
-        assert allclose(angle.mui, mui)
-        assert allclose(angle.muv, muv)
-        assert allclose(angle.B, B)
-        assert allclose(angle.BDeg, BDeg)
+        assert allclose(angles.mui, mui)
+        assert allclose(angles.muv, muv)
+        assert allclose(angles.B, B)
+        assert allclose(angles.BDeg, BDeg)
 
 
+izaDegArray, vzaDegArray, raaDegArray, iaaDegArray, vaaDegArray, alphaDegArray, betaDegArray = (
+np.arange(0, 10, 1), np.arange(10, 20, 1), np.arange(20, 30, 1), np.arange(30, 40, 1), np.arange(40, 50, 1),
+np.arange(50, 60, 1), np.arange(60, 70, 1))
 @pytest.mark.webtest
 @pytest.mark.parametrize(
     "izaDegArray, vzaDegArray, raaDegArray, iaaDegArray, vaaDegArray, alphaDegArray, betaDegArray", [
@@ -317,30 +350,42 @@ class TestAngleConversionArrayDEG:
         B = 1 / mui + 1 / muv
         BDeg = 1 / np.cos(izaDegArray) + 1 / np.cos(vzaDegArray)
 
-        angle = Angles(iza=izaDegArray, vza=vzaDegArray, raa=raaDegArray, alpha=alphaDegArray, beta=betaDegArray)
+        angles = Angles(iza=izaDegArray, vza=vzaDegArray, raa=raaDegArray, alpha=alphaDegArray, beta=betaDegArray)
 
-        assert allclose(angle.iza, izaRadArray)
-        assert allclose(angle.vza, vzaRadArray)
-        assert allclose(angle.raa, raaRadArray)
-        assert allclose(angle.iaa, 0)
-        assert allclose(angle.vaa, 0)
-        assert allclose(angle.alpha, alphaRadArray)
-        assert allclose(angle.beta, betaRadArray)
+        assert allclose(angles.iza, izaRadArray)
+        assert allclose(angles.vza, vzaRadArray)
+        assert allclose(angles.raa, raaRadArray)
+        assert allclose(angles.iaa, 0)
+        assert allclose(angles.vaa, 0)
+        assert allclose(angles.alpha, alphaRadArray)
+        assert allclose(angles.beta, betaRadArray)
 
-        assert allclose(angle.izaDeg, izaDegArray)
-        assert allclose(angle.vzaDeg, vzaDegArray)
-        assert allclose(angle.raaDeg, raaDegArray)
-        assert allclose(angle.iaaDeg, 0)
-        assert allclose(angle.vaaDeg, 0)
-        assert allclose(angle.alphaDeg, alphaDegArray)
-        assert allclose(angle.betaDeg, betaDegArray)
+        assert allclose(angles.izaDeg, izaDegArray)
+        assert allclose(angles.vzaDeg, vzaDegArray)
+        assert allclose(angles.raaDeg, raaDegArray)
+        assert allclose(angles.iaaDeg, 0)
+        assert allclose(angles.vaaDeg, 0)
+        assert allclose(angles.alphaDeg, alphaDegArray)
+        assert allclose(angles.betaDeg, betaDegArray)
 
-        assert allclose(angle.mui, mui)
-        assert allclose(angle.muv, muv)
-        assert allclose(angle.B, B)
-        assert allclose(angle.BDeg, BDeg)
+        assert allclose(angles.mui, mui)
+        assert allclose(angles.muv, muv)
+        assert allclose(angles.B, B)
+        assert allclose(angles.BDeg, BDeg)
 
-        assert allclose(angle.shape[1], izaDegArray.shape[0])
+        assert allclose(angles.shape[1], izaDegArray.shape[0])
+
+        for i in range(angles.shape[1]):
+            for j in range(angles.shape[0]):
+                item = angles.array[j, i]
+
+                assert item == angles.geometries[i][j]
+
+        for i in range(angles.shape[1]):
+            for j in range(angles.shape[0]):
+                item = angles.arrayDeg[j, i]
+
+                assert item == angles.geometriesDeg[i][j]
 
     def test_deg2rad_iaa_vaa(self, izaDegArray, vzaDegArray, raaDegArray, iaaDegArray, vaaDegArray,
                              alphaDegArray, betaDegArray):
@@ -352,32 +397,43 @@ class TestAngleConversionArrayDEG:
         B = 1 / mui + 1 / muv
         BDeg = 1 / np.cos(izaDegArray) + 1 / np.cos(vzaDegArray)
 
-        angle = Angles(iza=izaDegArray, vza=vzaDegArray, iaa=iaaDegArray, vaa=vaaDegArray, alpha=alphaDegArray,
-                       beta=betaDegArray)
+        angles = Angles(iza=izaDegArray, vza=vzaDegArray, iaa=iaaDegArray, vaa=vaaDegArray, alpha=alphaDegArray,
+                        beta=betaDegArray)
 
-        assert allclose(angle.iza, izaRadArray)
-        assert allclose(angle.vza, vzaRadArray)
-        assert allclose(angle.iaa, iaaRadArray)
-        assert allclose(angle.vaa, vaaRadArray)
-        assert allclose(angle.raa, iaaRadArray - vaaRadArray)
-        assert allclose(angle.alpha, alphaRadArray)
-        assert allclose(angle.beta, betaRadArray)
+        assert allclose(angles.iza, izaRadArray)
+        assert allclose(angles.vza, vzaRadArray)
+        assert allclose(angles.iaa, iaaRadArray)
+        assert allclose(angles.vaa, vaaRadArray)
+        assert allclose(angles.raa, iaaRadArray - vaaRadArray)
+        assert allclose(angles.alpha, alphaRadArray)
+        assert allclose(angles.beta, betaRadArray)
 
-        assert allclose(angle.izaDeg, izaDegArray)
-        assert allclose(angle.vzaDeg, vzaDegArray)
-        assert allclose(angle.iaaDeg, iaaDegArray)
-        assert allclose(angle.vaaDeg, vaaDegArray)
-        assert allclose(angle.raaDeg, iaaDegArray - vaaDegArray)
-        assert allclose(angle.alphaDeg, alphaDegArray)
-        assert allclose(angle.betaDeg, betaDegArray)
+        assert allclose(angles.izaDeg, izaDegArray)
+        assert allclose(angles.vzaDeg, vzaDegArray)
+        assert allclose(angles.iaaDeg, iaaDegArray)
+        assert allclose(angles.vaaDeg, vaaDegArray)
+        assert allclose(angles.raaDeg, iaaDegArray - vaaDegArray)
+        assert allclose(angles.alphaDeg, alphaDegArray)
+        assert allclose(angles.betaDeg, betaDegArray)
 
-        assert allclose(angle.mui, mui)
-        assert allclose(angle.muv, muv)
-        assert allclose(angle.B, B)
-        assert allclose(angle.BDeg, BDeg)
+        assert allclose(angles.mui, mui)
+        assert allclose(angles.muv, muv)
+        assert allclose(angles.B, B)
+        assert allclose(angles.BDeg, BDeg)
 
-        assert allclose(angle.shape[1], izaDegArray.shape[0])
+        assert allclose(angles.shape[1], izaDegArray.shape[0])
 
+        for i in range(angles.shape[1]):
+            for j in range(angles.shape[0]):
+                item = angles.array[j, i]
+
+                assert item == angles.geometries[i][j]
+
+        for i in range(angles.shape[1]):
+            for j in range(angles.shape[0]):
+                item = angles.arrayDeg[j, i]
+
+                assert item == angles.geometriesDeg[i][j]
 
 @pytest.mark.webtest
 @pytest.mark.parametrize(
@@ -413,33 +469,45 @@ class TestAngleConversionArrayRad:
         B = 1 / mui + 1 / muv
         BDeg = 1 / np.cos(izaDegArray) + 1 / np.cos(vzaDegArray)
 
-        angle = Angles(iza=izaRadArray / 100., vza=vzaRadArray / 100., raa=raaRadArray / 100.,
-                       alpha=alphaRadArray / 100.,
-                       beta=betaRadArray / 100.,
-                       angle_unit='RAD')
+        angles = Angles(iza=izaRadArray / 100., vza=vzaRadArray / 100., raa=raaRadArray / 100.,
+                        alpha=alphaRadArray / 100.,
+                        beta=betaRadArray / 100.,
+                        angle_unit='RAD')
 
-        assert allclose(angle.iza, izaRadArray / 100)
-        assert allclose(angle.vza, vzaRadArray / 100)
-        assert allclose(angle.raa, raaRadArray / 100)
-        assert allclose(angle.iaa, 0)
-        assert allclose(angle.vaa, 0)
-        assert allclose(angle.alpha, alphaRadArray / 100)
-        assert allclose(angle.beta, betaRadArray / 100)
+        assert allclose(angles.iza, izaRadArray / 100)
+        assert allclose(angles.vza, vzaRadArray / 100)
+        assert allclose(angles.raa, raaRadArray / 100)
+        assert allclose(angles.iaa, 0)
+        assert allclose(angles.vaa, 0)
+        assert allclose(angles.alpha, alphaRadArray / 100)
+        assert allclose(angles.beta, betaRadArray / 100)
 
-        assert allclose(angle.izaDeg, izaDegArray)
-        assert allclose(angle.vzaDeg, vzaDegArray)
-        assert allclose(angle.raaDeg, raaDegArray)
-        assert allclose(angle.iaaDeg, 0)
-        assert allclose(angle.vaaDeg, 0)
-        assert allclose(angle.alphaDeg, alphaDegArray)
-        assert allclose(angle.betaDeg, betaDegArray)
+        assert allclose(angles.izaDeg, izaDegArray)
+        assert allclose(angles.vzaDeg, vzaDegArray)
+        assert allclose(angles.raaDeg, raaDegArray)
+        assert allclose(angles.iaaDeg, 0)
+        assert allclose(angles.vaaDeg, 0)
+        assert allclose(angles.alphaDeg, alphaDegArray)
+        assert allclose(angles.betaDeg, betaDegArray)
 
-        assert allclose(angle.mui, mui)
-        assert allclose(angle.muv, muv)
-        assert allclose(angle.B, B)
-        assert allclose(angle.BDeg, BDeg)
+        assert allclose(angles.mui, mui)
+        assert allclose(angles.muv, muv)
+        assert allclose(angles.B, B)
+        assert allclose(angles.BDeg, BDeg)
 
-        assert allclose(angle.shape[1], izaDegArray.shape[0])
+        assert allclose(angles.shape[1], izaDegArray.shape[0])
+
+        for i in range(angles.shape[1]):
+            for j in range(angles.shape[0]):
+                item = angles.array[j, i]
+
+                assert item == angles.geometries[i][j]
+
+        for i in range(angles.shape[1]):
+            for j in range(angles.shape[0]):
+                item = angles.arrayDeg[j, i]
+
+                assert item == angles.geometriesDeg[i][j]
 
     def test_Rad2rad_iaa_vaa(self, izaRadArray, vzaRadArray, raaRadArray, iaaRadArray, vaaRadArray,
                              alphaRadArray, betaRadArray):
@@ -452,33 +520,44 @@ class TestAngleConversionArrayRad:
         B = 1 / mui + 1 / muv
         BDeg = 1 / np.cos(izaDegArray) + 1 / np.cos(vzaDegArray)
 
-        angle = Angles(iza=izaRadArray / 100., vza=vzaRadArray / 100., iaa=iaaRadArray / 100., vaa=vaaRadArray / 100.,
-                       alpha=alphaRadArray / 100.,
-                       beta=betaRadArray / 100., angle_unit='RAD')
+        angles = Angles(iza=izaRadArray / 100., vza=vzaRadArray / 100., iaa=iaaRadArray / 100., vaa=vaaRadArray / 100.,
+                        alpha=alphaRadArray / 100.,
+                        beta=betaRadArray / 100., angle_unit='RAD')
 
-        assert allclose(angle.iza, izaRadArray / 100)
-        assert allclose(angle.vza, vzaRadArray / 100)
-        assert allclose(angle.iaa, iaaRadArray / 100)
-        assert allclose(angle.vaa, vaaRadArray / 100)
-        assert allclose(angle.raa, iaaRadArray / 100 - vaaRadArray / 100)
-        assert allclose(angle.alpha, alphaRadArray / 100)
-        assert allclose(angle.beta, betaRadArray / 100)
+        assert allclose(angles.iza, izaRadArray / 100)
+        assert allclose(angles.vza, vzaRadArray / 100)
+        assert allclose(angles.iaa, iaaRadArray / 100)
+        assert allclose(angles.vaa, vaaRadArray / 100)
+        assert allclose(angles.raa, iaaRadArray / 100 - vaaRadArray / 100)
+        assert allclose(angles.alpha, alphaRadArray / 100)
+        assert allclose(angles.beta, betaRadArray / 100)
 
-        assert allclose(angle.izaDeg, izaDegArray)
-        assert allclose(angle.vzaDeg, vzaDegArray)
-        assert allclose(angle.iaaDeg, iaaDegArray)
-        assert allclose(angle.vaaDeg, vaaDegArray)
-        assert allclose(angle.raaDeg, iaaDegArray - vaaDegArray)
-        assert allclose(angle.alphaDeg, alphaDegArray)
-        assert allclose(angle.betaDeg, betaDegArray)
+        assert allclose(angles.izaDeg, izaDegArray)
+        assert allclose(angles.vzaDeg, vzaDegArray)
+        assert allclose(angles.iaaDeg, iaaDegArray)
+        assert allclose(angles.vaaDeg, vaaDegArray)
+        assert allclose(angles.raaDeg, iaaDegArray - vaaDegArray)
+        assert allclose(angles.alphaDeg, alphaDegArray)
+        assert allclose(angles.betaDeg, betaDegArray)
 
-        assert allclose(angle.mui, mui)
-        assert allclose(angle.muv, muv)
-        assert allclose(angle.B, B)
-        assert allclose(angle.BDeg, BDeg)
+        assert allclose(angles.mui, mui)
+        assert allclose(angles.muv, muv)
+        assert allclose(angles.B, B)
+        assert allclose(angles.BDeg, BDeg)
 
-        assert allclose(angle.shape[1], izaDegArray.shape[0])
+        assert allclose(angles.shape[1], izaDegArray.shape[0])
 
+        for i in range(angles.shape[1]):
+            for j in range(angles.shape[0]):
+                item = angles.array[j, i]
+
+                assert item == angles.geometries[i][j]
+
+        for i in range(angles.shape[1]):
+            for j in range(angles.shape[0]):
+                item = angles.arrayDeg[j, i]
+
+                assert item == angles.geometriesDeg[i][j]
 
 @pytest.mark.webtest
 @pytest.mark.parametrize(
@@ -512,57 +591,102 @@ class TestAlignDeg:
         B = 1 / mui + 1 / muv
         BDeg = 1 / np.cos(izaDegArray) + 1 / np.cos(vzaDegArray)
 
-        angle = Angles(iza=izaDegArray, vza=vzaDegArray, raa=raaDegArray, alpha=alphaDegArray, beta=betaDegArray)
+        angles = Angles(iza=izaDegArray, vza=vzaDegArray, raa=raaDegArray, alpha=alphaDegArray, beta=betaDegArray)
 
-        assert np.all(angle.iza == izaRadArray) == True
-        assert np.all(angle.vza == vzaRadArray) == True
-        assert np.all(angle.raa == raaRadArray) == True
-        assert np.all(angle.iaa == 0) == True
-        assert np.all(angle.vaa == 0) == True
-        assert np.all(angle.alpha == alphaRadArray) == True
-        assert np.all(angle.beta == betaRadArray) == True
+        assert np.all(angles.iza == izaRadArray) == True
+        assert np.all(angles.vza == vzaRadArray) == True
+        assert np.all(angles.raa == raaRadArray) == True
+        assert np.all(angles.iaa == 0) == True
+        assert np.all(angles.vaa == 0) == True
+        assert np.all(angles.alpha == alphaRadArray) == True
+        assert np.all(angles.beta == betaRadArray) == True
 
-        assert np.all(angle.izaDeg == izaDegArray) == True
-        assert np.all(angle.vzaDeg == vzaDegArray) == True
-        assert np.all(angle.raaDeg == raaDegArray) == True
-        assert np.all(angle.iaaDeg == 0) == True
-        assert np.all(angle.vaaDeg == 0) == True
-        assert np.all(angle.alphaDeg == alphaDegArray) == True
-        assert np.all(angle.betaDeg == betaDegArray) == True
+        assert np.all(angles.izaDeg == izaDegArray) == True
+        assert np.all(angles.vzaDeg == vzaDegArray) == True
+        assert np.all(angles.raaDeg == raaDegArray) == True
+        assert np.all(angles.iaaDeg == 0) == True
+        assert np.all(angles.vaaDeg == 0) == True
+        assert np.all(angles.alphaDeg == alphaDegArray) == True
+        assert np.all(angles.betaDeg == betaDegArray) == True
 
-        assert np.all(angle.mui == mui) == True
-        assert np.all(angle.muv == muv) == True
-        assert np.all(angle.B == B) == True
-        assert np.all(angle.BDeg == BDeg) == True
+        assert np.all(angles.mui == mui) == True
+        assert np.all(angles.muv == muv) == True
+        assert np.all(angles.B == B) == True
+        assert np.all(angles.BDeg == BDeg) == True
 
+        for i in range(angles.shape[1]):
+            for j in range(angles.shape[0]):
+                item = angles.array[j, i]
+
+                assert item == angles.geometries[i][j]
+
+        for i in range(angles.shape[1]):
+            for j in range(angles.shape[0]):
+                item = angles.arrayDeg[j, i]
+
+                assert item == angles.geometriesDeg[i][j]
 
 class TestDtypeConversion:
     def test_deg2rad_raa(self):
-        angle = Angles(iza=10, vza=10, raa=10, alpha=10, beta=10)
+        angles = Angles(iza=10, vza=10, raa=10, alpha=10, beta=10)
 
         for item in DTYPES:
-            angle.dtype = item
-            assert angle.dtype == item
-            assert angle.array.dtype == item
-            assert angle.arrayDeg.dtype == item
+            angles.dtype = item
+            assert angles.dtype == item
+            assert angles.array.dtype == item
+            assert angles.arrayDeg.dtype == item
 
+
+class TestAlignWith:
+    def test_align_with_align_angle(self):
+        angles = Angles(iza=10, vza=10, raa=10, alpha=10, beta=10)
+
+        assert angles.shape == (7, 1)
+
+        value = np.linspace(0, 10, 100)
+
+        value = angles.align_with(value)
+
+        assert angles.shape == (7, value.shape[0])
+
+    def test_align_with_value(self):
+        angles = Angles(iza=np.arange(0, 10, 1), vza=10, raa=10, alpha=10, beta=10)
+
+        assert angles.shape == (7, 10)
+
+        value = 2
+
+        value = angles.align_with(value)
+
+        assert angles.shape == (7, 10)
+        assert value.shape[0] == angles.shape[1]
 
 class TestNormalizeAndNbar:
     def test_normalize(self):
-        angle = Angles(iza=10, vza=10, raa=10, alpha=10, beta=10, normalize=True)
-        assert angle.shape == (7, 2)
+        angles = Angles(iza=10, vza=10, raa=10, alpha=10, beta=10, normalize=True)
+        assert angles.shape == (7, 2)
 
-        angle.normalize = False
-        assert angle.shape == (7, 1)
+        angles.normalize = False
+        assert angles.normalize == False
 
-        angle.normalize = False
-        assert angle.shape == (7, 1)
+        angles.normalize = 0
+        assert angles.normalize == False
+        assert angles.shape == (7, 1)
 
-        angle.normalize = True
-        assert angle.shape == (7, 2)
+        angles.normalize = False
+        assert angles.shape == (7, 1)
 
-        angle.normalize = True
-        assert angle.shape == (7, 2)
+        angles.normalize = True
+        assert angles.normalize == True
+
+        angles.normalize = 1
+        assert angles.normalize == True
+        assert angles.shape == (7, 2)
+
+        angles.normalize = True
+        assert angles.shape == (7, 2)
+
+
 
     def test_normalize_array(self):
         iza, vza, raa, iaa, vaa, alpha, beta = (
@@ -570,42 +694,42 @@ class TestNormalizeAndNbar:
             np.arange(40, 50, 1), np.arange(50, 51, 1), np.arange(60, 70, 1)
         )
 
-        angle = Angles(iza=iza, vza=vza, raa=raa, alpha=alpha, beta=beta, normalize=True)
-        assert angle.shape == (7, iza.shape[0] + 1)
+        angles = Angles(iza=iza, vza=vza, raa=raa, alpha=alpha, beta=beta, normalize=True)
+        assert angles.shape == (7, iza.shape[0] + 1)
 
-        angle.normalize = False
-        assert angle.shape == (7, iza.shape[0])
+        angles.normalize = False
+        assert angles.shape == (7, iza.shape[0])
 
-        angle.normalize = False
-        assert angle.shape == (7, iza.shape[0])
+        angles.normalize = False
+        assert angles.shape == (7, iza.shape[0])
 
-        angle.normalize = True
-        assert angle.shape == (7, iza.shape[0] + 1)
+        angles.normalize = True
+        assert angles.shape == (7, iza.shape[0] + 1)
 
-        angle.normalize = True
-        assert angle.shape == (7, iza.shape[0] + 1)
+        angles.normalize = True
+        assert angles.shape == (7, iza.shape[0] + 1)
 
     def test_nbar_DEG(self):
-        angle = Angles(iza=10, vza=10, raa=10, alpha=10, beta=10, normalize=True)
+        angles = Angles(iza=10, vza=10, raa=10, alpha=10, beta=10, normalize=True)
 
-        assert angle.nbar == angle.array[0][-1]
+        assert angles.nbar == angles.array[0][-1]
 
-        angle.nbarDeg = 10
+        angles.nbarDeg = 10
 
-        assert angle.nbar == angle.array[0][-1]
-        assert angle.nbarDeg == angle.arrayDeg[0][-1]
+        assert angles.nbar == angles.array[0][-1]
+        assert angles.nbarDeg == angles.arrayDeg[0][-1]
 
     def test_nbar_RAD(self):
-        angle = Angles(iza=1, vza=1, raa=1, alpha=1, beta=10, normalize=True, angle_unit='RAD')
+        angles = Angles(iza=1, vza=1, raa=1, alpha=1, beta=10, normalize=True, angle_unit='RAD')
 
-        assert angle.nbar == angle.array[0][-1]
+        assert angles.nbar == angles.array[0][-1]
 
-        angle.nbarDeg = 10
+        angles.nbarDeg = 10
 
-        assert angle.nbar == angle.array[0][-1]
-        assert angle.nbarDeg == angle.arrayDeg[0][-1]
+        assert angles.nbar == angles.array[0][-1]
+        assert angles.nbarDeg == angles.arrayDeg[0][-1]
 
-        angle.nbar = 1
+        angles.nbar = 1
 
-        assert angle.nbar == angle.array[0][-1]
-        assert angle.nbarDeg == angle.arrayDeg[0][-1]
+        assert angles.nbar == angles.array[0][-1]
+        assert angles.nbarDeg == angles.arrayDeg[0][-1]
