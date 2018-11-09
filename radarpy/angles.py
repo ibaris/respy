@@ -686,7 +686,14 @@ class Angles(object):
 
         Returns
         -------
-        None
+        value : array_like
+            Align value.
+
+        Note
+        ----
+        If len(value) > Angles.shape[1] then the angles inside Angles class will be aligned and it has no effect on
+        value. If len(value) < Angles.shape[1] the output of value will be have the same len as Angles and it has no
+        effect on the angles within the Angles class.
         """
         # RAD Angles
         data = [item for item in self.__array]
@@ -700,6 +707,8 @@ class Angles(object):
 
         self.__array = np.asarray(data[1:])
         self.__arrayDeg = np.asarray(dataDeg[1:])
+
+        return data[0]
 
     # ------------------------------------------------------------------------------------------------------------------
     # Private Methods
