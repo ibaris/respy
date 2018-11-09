@@ -465,13 +465,16 @@ class Angles(object):
 
     @property
     def phi(self):
-        try:
-            return np.abs((self.raa % (2. * PI)))
+        # Not sure if I need this:
+        # try:
+        #     return np.abs((self.raa % (2. * PI)))
+        #
+        # except TypeError:
+        #     warnings.warn("The parameter Phi could not be computed. It will be replaced by the relative azimuth anlge")
+        #
+        #     return self.raa
 
-        except TypeError:
-            warnings.warn("The parameter Phi could not be computed. It will be replaced by the relative azimuth anlge")
-
-            return self.raa
+        return np.abs((self.raa % (2. * PI)))
 
     @property
     def geometries(self):
