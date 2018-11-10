@@ -9,72 +9,72 @@ PI = 3.1415926535897932384626433832795028841971693993751058209749445923078164
 
 
 class Angles(object):
-    """ Angle Management System
-
-    Angle is a class that helps you unify the different angles of the scanning geometry.
-
-    Parameters
-    ----------
-    iza, vza, raa, iaa, vaa : int, float or array_like
-        Incidence (iza) and scattering (vza) zenith angle, relative azimuth (raa) angle, incidence and viewing
-        azimuth angle (ira, vra). If raa is defined, ira and vra are not mandatory.
-    alpha, beta: int, float or array_like
-        The Euler angles of the particle orientation (degrees).
-    normalize : boolean, optional
-        Set to 'True' to make kernels 0 at nadir view illumination. Since all implemented kernels are normalized
-        the default value is False.
-    nbar : float, optional
-        The sun or incidence zenith angle at which the isotropic term is set
-        to if normalize is True. The default value is 0.0.
-    angle_unit : {'DEG', 'RAD', 'deg', 'rad'}, optional
-        * 'DEG': All input angles (iza, vza, raa) are in [DEG] (default).
-        * 'RAD': All input angles (iza, vza, raa) are in [RAD].
-    align : boolean, optional
-         Expand all input values to the same length (default).
-    dtype : numpy.dtype
-        Desired data type of all values. Default is np.double.
-
-    Attributes
-    ----------
-    iza, vza, raa, iaa, vaa, alpha, beta: array_like
-        SIncidence (iza) and scattering (vza) zenith angle, relative azimuth (raa) angle, incidence and viewing
-        azimuth angle (ira, vra) in [RAD].
-    izaDeg, vzaDeg, raaDeg, iaaDeg, vaaDeg, alphaDeg, betaDeg: array_like
-        SIncidence (iza) and scattering (vza) zenith angle, relative azimuth (raa) angle, incidence and viewing
-        azimuth angle (ira, vra) in [DEG].
-    phi : array_like
-        Relative azimuth angle in a range between 0 and 2pi.
-    B, BDeg : array_like
-        The result of (1/cos(vza)+1/cos(iza)).
-    mui, muv : array_like
-        Cosine of iza and vza in [RAD].
-    geometries : tuple
-        If raa is defined it shows a tuple with (iza, vza, raa, alpha, beta) in [RAD]. If iaa and vaa is defined
-        the tuple will be (iza, vza, iaa, vaa, alpha, beta) in [RAD]
-    geometriesDeg : tuple
-        If raa is defined it shows a tuple with (iza, vza, raa, alpha, beta) in [DEG]. If iaa and vaa is defined
-        the tuple will be (iza, vza, iaa, vaa, alpha, beta) in [DEG]
-    nbar : float
-        The sun or incidence zenith angle at which the isotropic term is set
-        to if normalize is True. You can change this attribute within the class.
-    normlaize : bool
-        Set to 'True' to make kernels 0 at nadir view illumination. Since all implemented kernels are normalized
-        the default value is False.
-    dtype : numpy.dtype
-        Desired data type of all values. This attribute is changeable.
-
-    Methods
-    -------
-    align_with : Expand all input values to the same length depend on an external array.
-
-    Note
-    ----
-    Hot spot direction is vza == iza and raa = 0.0
-
-    """
 
     def __init__(self, iza, vza, raa=None, iaa=None, vaa=None, alpha=0.0, beta=0.0, normalize=False, nbar=0.0,
                  angle_unit='DEG', align=True, dtype=np.double):
+        """ Angle Management System
+
+        Angle is a class that helps you unify the different angles of the scanning geometry.
+
+        Parameters
+        ----------
+        iza, vza, raa, iaa, vaa : int, float or array_like
+            Incidence (iza) and scattering (vza) zenith angle, relative azimuth (raa) angle, incidence and viewing
+            azimuth angle (ira, vra). If raa is defined, ira and vra are not mandatory.
+        alpha, beta: int, float or array_like
+            The Euler angles of the particle orientation (degrees).
+        normalize : boolean, optional
+            Set to 'True' to make kernels 0 at nadir view illumination. Since all implemented kernels are normalized
+            the default value is False.
+        nbar : float, optional
+            The sun or incidence zenith angle at which the isotropic term is set
+            to if normalize is True. The default value is 0.0.
+        angle_unit : {'DEG', 'RAD', 'deg', 'rad'}, optional
+            * 'DEG': All input angles (iza, vza, raa) are in [DEG] (default).
+            * 'RAD': All input angles (iza, vza, raa) are in [RAD].
+        align : boolean, optional
+             Expand all input values to the same length (default).
+        dtype : numpy.dtype
+            Desired data type of all values. Default is np.double.
+
+        Attributes
+        ----------
+        iza, vza, raa, iaa, vaa, alpha, beta: array_like
+            SIncidence (iza) and scattering (vza) zenith angle, relative azimuth (raa) angle, incidence and viewing
+            azimuth angle (ira, vra) in [RAD].
+        izaDeg, vzaDeg, raaDeg, iaaDeg, vaaDeg, alphaDeg, betaDeg: array_like
+            SIncidence (iza) and scattering (vza) zenith angle, relative azimuth (raa) angle, incidence and viewing
+            azimuth angle (ira, vra) in [DEG].
+        phi : array_like
+            Relative azimuth angle in a range between 0 and 2pi.
+        B, BDeg : array_like
+            The result of (1/cos(vza)+1/cos(iza)).
+        mui, muv : array_like
+            Cosine of iza and vza in [RAD].
+        geometries : tuple
+            If raa is defined it shows a tuple with (iza, vza, raa, alpha, beta) in [RAD]. If iaa and vaa is defined
+            the tuple will be (iza, vza, iaa, vaa, alpha, beta) in [RAD]
+        geometriesDeg : tuple
+            If raa is defined it shows a tuple with (iza, vza, raa, alpha, beta) in [DEG]. If iaa and vaa is defined
+            the tuple will be (iza, vza, iaa, vaa, alpha, beta) in [DEG]
+        nbar : float
+            The sun or incidence zenith angle at which the isotropic term is set
+            to if normalize is True. You can change this attribute within the class.
+        normlaize : bool
+            Set to 'True' to make kernels 0 at nadir view illumination. Since all implemented kernels are normalized
+            the default value is False.
+        dtype : numpy.dtype
+            Desired data type of all values. This attribute is changeable.
+
+        Methods
+        -------
+        align_with : Expand all input values to the same length depend on an external array.
+
+        Note
+        ----
+        Hot spot direction is vza == iza and raa = 0.0
+
+        """
 
         # Prepare Input Data -------------------------------------------------------------------------------------------
         if raa is None and (iaa is None or vaa is None):
@@ -232,10 +232,24 @@ class Angles(object):
     # Access to Array Specific Attributes ------------------------------------------------------------------------------
     @property
     def len(self):
+        """
+        Length of array
+
+        Returns
+        -------
+        len : int
+        """
         return len(self.__array)
 
     @property
     def shape(self):
+        """
+        Shape of array
+
+        Returns
+        -------
+        shape : tuple
+        """
         return self.__array.shape
 
     # Access to Angles -------------------------------------------------------------------------------------------------
@@ -465,15 +479,13 @@ class Angles(object):
 
     @property
     def phi(self):
-        # Not sure if I need this:
-        # try:
-        #     return np.abs((self.raa % (2. * PI)))
-        #
-        # except TypeError:
-        #     warnings.warn("The parameter Phi could not be computed. It will be replaced by the relative azimuth anlge")
-        #
-        #     return self.raa
+        """
+        Relative azimuth angle normalized in a range of 2*PI
 
+        Returns
+        -------
+        phi : array_like
+        """
         return np.abs((self.raa % (2. * PI)))
 
     @property
