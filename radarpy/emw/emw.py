@@ -580,11 +580,3 @@ def which_region(input, unit='GHz'):
         region_list = region_list
 
     return region_list
-
-# def volume_eq_radius(h, d):
-#     n = 1 / 3
-#     ar = h / d  # axis ratio
-#     V = (4 / 3) * PI * h * d / 2  # volume of particle
-#     rv = ((6 / PI * V) ** n) / 2  # volume equivalent radius
-#
-#     return ar, rv

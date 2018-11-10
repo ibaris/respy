@@ -1,9 +1,8 @@
 from __future__ import division
-import warnings
 
-from numpy import cos, pi, log10, errstate, nan_to_num, arange, concatenate, argsort, ndarray
+from numpy import cos, log10, errstate, nan_to_num
 
-from radarpy.auxiliary import rad, check_unit_frequency, check_unit_wavelength, CONVERT_FREQ, CONVERT_WAVE
+from radarpy.auxiliary import rad
 
 C = 299792458
 PI = 3.14159265359
@@ -48,10 +47,10 @@ def BRDF(BSC, vza, angle_unit='RAD'):
 
     """
     if angle_unit == 'RAD':
-        return BSC / (cos(vza) * (4 * pi))
+        return BSC / (cos(vza) * (4 * PI))
 
     elif angle_unit == 'DEG':
-        return BSC / (cos(rad(vza)) * (4 * pi))
+        return BSC / (cos(rad(vza)) * (4 * PI))
     else:
         raise ValueError("angle_unit must be 'RAD' or 'DEG'")
 
@@ -74,7 +73,7 @@ def BRF(BRDF):
     BRF value : int, float or array_like
 
     """
-    return pi * BRDF
+    return PI * BRDF
 
 
 def BSC(BRDF, vza, angle_unit='RAD'):
@@ -101,9 +100,9 @@ def BSC(BRDF, vza, angle_unit='RAD'):
 
     """
     if angle_unit == 'RAD':
-        return BRDF * cos(vza) * 4 * pi
+        return BRDF * cos(vza) * 4 * PI
 
     elif angle_unit == 'DEG':
-        return BRDF * cos(rad(vza)) * (4 * pi)
+        return BRDF * cos(rad(vza)) * (4 * PI)
     else:
         raise ValueError("angle_unit must be 'RAD' or 'DEG'")
