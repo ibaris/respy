@@ -1,28 +1,11 @@
-from numpy import cos, tan, pi, asarray, pad, max, zeros, zeros_like
 import numpy as np
-
-CONVERT_FREQ = {'Hz': 1, 'MHz': 1e6, 'GHz': 1e9, 'THz': 1e12}
-CONVERT_WAVE = {'m': 1, 'cm': 100, 'nm': 1e+9}
+from numpy import cos, tan, pi, asarray, pad, max, zeros, zeros_like
 
 DTYPES = [np.bool, np.byte, np.ubyte, np.short, np.ushort, np.intc, np.uintc, np.int_, np.uint, np.longlong,
           np.ulonglong, np.half, np.float, np.float16, np.single, np.double, np.longdouble, np.csingle, np.cdouble,
           np.clongdouble, np.int, np.int8, np.int16, np.int32, np.int64, np.uint8, np.uint16, np.uint32, np.uint64,
           np.intp,
           np.uintp, np.float32, np.float64, np.complex, np.complex64, np.complex128, float, int, complex]
-
-
-def check_unit_frequency(unit):
-    if unit == "Hz" or unit == "MHz" or unit == "GHz" or unit == "THz":
-        return None
-    else:
-        raise ValueError("unit must be MHz, GHz or THz.")
-
-
-def check_unit_wavelength(unit):
-    if unit == "m" or unit == "cm" or unit == "nm":
-        return None
-    else:
-        raise ValueError("unit must be m, cm or nm.")
 
 
 def rad(angle):
@@ -66,6 +49,23 @@ def cot(x):
 
 
 def align_all(data, constant_values='default', dtype=np.double):
+    """
+    Align the lengths of arrays.
+
+    Parameters
+    ----------
+    data : tuple
+        A tuple with (mixed) array_like, int, float.
+    constant_values : int, float or 'default'
+        The value at which the smaller values are expand. If 'default' (default) the last value will be choosed.
+    dtype : np.dtype
+        Data type of output.
+
+    Returns
+    -------
+    aligned data : tuple
+        Aligned tuple with array_like.
+    """
     data = asarrays(data)
     max_len = max_length(data)
 
@@ -79,18 +79,57 @@ def align_all(data, constant_values='default', dtype=np.double):
 
 
 def max_length(data):
+    """
+    Find the maximum length of the longest object in a tuple.
+
+    Parameters
+    ----------
+    data : tuple
+        A tuple with (mixed) array_like, int, float.
+
+    Returns
+    -------
+    len : int
+    """
     return max([len(item) for item in data])
 
 
 def asarrays(data, dtype=None):
+    """
+    A wrapper of numpys asarrays for multiple data in a tuple.
+
+    Parameters
+    ----------
+    data : tuple
+        A tuple with (mixed) array_like, int, float.
+    dtype : np.dtype
+        Data type of output.
+
+    Returns
+    -------
+    arrays : tuple
+        A tuple with array_like.
+    """
     if dtype is None:
         return [asarray(item).flatten() for item in data]
     else:
         return [asarray(item).flatten().astype(dtype) for item in data]
 
 
-def same_len(args):
-    return all(len(item) == len(args[0]) for item in args)
+def same_len(data):
+    """
+    Determine if the items in a tuple has the same length.
+
+    Parameters
+    ----------
+    data : tuple
+        A tuple with (mixed) array_like, int, float.
+
+    Returns
+    -------
+    bool
+    """
+    return all(len(item) == len(data[0]) for item in data)
 
 
 def stacks(items):
@@ -153,13 +192,13 @@ def get_geometries(type='HB'):
 
     """
     if type is 'HB':
-        return (90.0, 90.0, 0.0, 180.0, 0.0, 0.0)
+        return 90.0, 90.0, 0.0, 180.0, 0.0, 0.0
     elif type is 'HF':
-        return (90.0, 90.0, 0.0, 0.0, 0.0, 0.0)
+        return 90.0, 90.0, 0.0, 0.0, 0.0, 0.0
     elif type is 'VB':
-        return (0.0, 180.0, 0.0, 0.0, 0.0, 0.0)
+        return 0.0, 180.0, 0.0, 0.0, 0.0, 0.0
     elif type is 'VF':
-        return (180.0, 180.0, 0.0, 0.0, 0.0, 0.0)
+        return 180.0, 180.0, 0.0, 0.0, 0.0, 0.0
     else:
         raise ValueError(
             "The parameter type should be 'HB', 'HF', 'VB', 'VF'. The actual parameter is: {0}".format(str(type)))
