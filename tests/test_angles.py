@@ -1,8 +1,16 @@
 from __future__ import division
-import pytest
-from numpy import radians, allclose, array
+
 import numpy as np
-from respy import Angles, DTYPES
+import pytest
+from numpy import allclose
+
+from respy import Angles
+
+DTYPES = [np.bool, np.byte, np.ubyte, np.short, np.ushort, np.intc, np.uintc, np.int_, np.uint, np.longlong,
+          np.ulonglong, np.half, np.float, np.float16, np.single, np.double, np.longdouble, np.csingle, np.cdouble,
+          np.clongdouble, np.int, np.int8, np.int16, np.int32, np.int64, np.uint8, np.uint16, np.uint32, np.uint64,
+          np.intp,
+          np.uintp, np.float32, np.float64, np.complex, np.complex64, np.complex128, float, int, complex]
 
 
 # Test Raise Exceptions ------------------------------------------------------------------------------------------------
@@ -42,6 +50,7 @@ class TestRaises:
         angles = Angles(iza=10, vza=10, raa=10, angle_unit='rad')
         angles = Angles(iza=10, vza=10, raa=10, angle_unit='DEG')
         angles = Angles(iza=10, vza=10, raa=10, angle_unit='deg')
+
 
 class TestSpecials:
     def test__str__(self):
@@ -98,6 +107,7 @@ class TestSpecials:
         ref = "Angles(iza=[10.], vza=[20.], raa=[18.], iaa=[30.], vaa=[12.], alpha=[45.], beta=[66.], normalize=False, nbar=0.0, angle_unit=DEG, align=True, dtype=<type 'numpy.float64'>)"
 
         assert angles.__repr__() == angles.__repr__()
+
 
 @pytest.mark.webtest
 @pytest.mark.parametrize(
@@ -314,8 +324,10 @@ class TestAngleConversionRAD:
 
 
 izaDegArray, vzaDegArray, raaDegArray, iaaDegArray, vaaDegArray, alphaDegArray, betaDegArray = (
-np.arange(0, 10, 1), np.arange(10, 20, 1), np.arange(20, 30, 1), np.arange(30, 40, 1), np.arange(40, 50, 1),
-np.arange(50, 60, 1), np.arange(60, 70, 1))
+    np.arange(0, 10, 1), np.arange(10, 20, 1), np.arange(20, 30, 1), np.arange(30, 40, 1), np.arange(40, 50, 1),
+    np.arange(50, 60, 1), np.arange(60, 70, 1))
+
+
 @pytest.mark.webtest
 @pytest.mark.parametrize(
     "izaDegArray, vzaDegArray, raaDegArray, iaaDegArray, vaaDegArray, alphaDegArray, betaDegArray", [
@@ -434,6 +446,7 @@ class TestAngleConversionArrayDEG:
                 item = angles.arrayDeg[j, i]
 
                 assert item == angles.geometriesDeg[i][j]
+
 
 @pytest.mark.webtest
 @pytest.mark.parametrize(
@@ -559,6 +572,7 @@ class TestAngleConversionArrayRad:
 
                 assert item == angles.geometriesDeg[i][j]
 
+
 @pytest.mark.webtest
 @pytest.mark.parametrize(
     "izaDegArray, vzaDegArray, raaDegArray, iaaDegArray, vaaDegArray, alphaDegArray, betaDegArray", [
@@ -626,6 +640,7 @@ class TestAlignDeg:
 
                 assert item == angles.geometriesDeg[i][j]
 
+
 class TestDtypeConversion:
     def test_deg2rad_raa(self):
         angles = Angles(iza=10, vza=10, raa=10, alpha=10, beta=10)
@@ -661,6 +676,7 @@ class TestAlignWith:
         assert angles.shape == (7, 10)
         assert value.shape[0] == angles.shape[1]
 
+
 class TestNormalizeAndNbar:
     def test_normalize(self):
         angles = Angles(iza=10, vza=10, raa=10, alpha=10, beta=10, normalize=True)
@@ -685,8 +701,6 @@ class TestNormalizeAndNbar:
 
         angles.normalize = True
         assert angles.shape == (7, 2)
-
-
 
     def test_normalize_array(self):
         iza, vza, raa, iaa, vaa, alpha, beta = (
