@@ -20,7 +20,7 @@ from setuptools.command.install import install
 def get_version():
     version = dict()
 
-    with open("radarpy/version.py") as fp:
+    with open("respy/version.py") as fp:
         exec (fp.read(), version)
 
     return version['__version__']
@@ -31,7 +31,7 @@ def get_packages():
     return find_packages()
 
 
-setup(name='radarpy',
+setup(name='respy',
 
       version=get_version(),
       description='Fundamental Formulas for Radar and Angle Management',
@@ -44,7 +44,7 @@ setup(name='radarpy',
 
       # ~ license='APACHE 2',
 
-      url='https://github.com/ibaris/radarpy',
+      url='https://github.com/ibaris/respy',
 
       long_description='Fundamental Formulas for Radar and Angle Management',
       # install_requires=install_requires,

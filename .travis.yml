@@ -19,7 +19,7 @@ install:
   - python setup.py install
 
 script:
-  - coverage run --source radarpy/ -m pytest
+  - coverage run --source respy/ -m pytest
 
 
 after_success:

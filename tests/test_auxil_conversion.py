@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from radarpy import (BRF, BSC, BRDF, dB, sec, cot, linear, rad, deg, align_all)
+from respy import (BRF, BSC, BRDF, dB, sec, cot, linear, rad, deg, align_all)
 
 
 @pytest.mark.webtest

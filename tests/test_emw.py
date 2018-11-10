@@ -5,7 +5,7 @@ import pytest
 from numpy import loadtxt
 from pytest import fixture
 import numpy as np
-import radarpy as respy
+import respy as respy
 
 FREQ_UNIT = ['Hz', 'daHz', 'hHz', 'kHz', 'MHz', 'GHz', 'THz', 'PHz']
 WAVE_UNIT = ['nm', 'um', 'mm', 'cm', 'dm', 'm', 'km']

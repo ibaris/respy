@@ -4,7 +4,7 @@ import warnings
 
 import numpy as np
 
-from radarpy.emw.auxiliary import check_unit_frequency, check_unit_wavelength, BANDS, CONVERT_FREQ, CONVERT_WAVE
+from respy.emw.auxiliary import check_unit_frequency, check_unit_wavelength, BANDS, CONVERT_FREQ, CONVERT_WAVE
 
 REGION = {"VIS": "OPTIC",
           "NIR": "OPTIC",
@@ -341,7 +341,7 @@ def select_band(band="L", output="GHz"):
 
     See Also
     --------
-    radarpy.emw.select_region
+    respy.emw.select_region
 
     """
     # ---- Optical Region ----

@@ -2,7 +2,7 @@ from __future__ import division
 import pytest
 from numpy import radians, allclose, array
 import numpy as np
-from radarpy import Angles, DTYPES
+from respy import Angles, DTYPES
 
 
 # Test Raise Exceptions ------------------------------------------------------------------------------------------------

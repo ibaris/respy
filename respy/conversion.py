@@ -2,7 +2,7 @@ from __future__ import division
 
 from numpy import cos, log10, errstate, nan_to_num
 
-from radarpy.auxiliary import rad
+from respy.auxiliary import rad
 
 C = 299792458
 PI = 3.14159265359
