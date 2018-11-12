@@ -5,6 +5,13 @@ import pytest
 from numpy import allclose
 
 from respy import Angles
+import sys
+# python 3.6 comparability
+if sys.version_info < (3, 0):
+   n = 12
+else:
+    n = 17
+
 
 DTYPES = [np.bool, np.byte, np.ubyte, np.short, np.ushort, np.intc, np.uintc, np.int_, np.uint, np.longlong,
           np.ulonglong, np.half, np.float, np.float16, np.single, np.double, np.longdouble, np.csingle, np.cdouble,
@@ -55,22 +62,23 @@ class TestRaises:
 class TestSpecials:
     def test__str__(self):
         angles = Angles(iza=10, vza=20, iaa=30, vaa=12, alpha=45, beta=66)
+        n = 17
 
         str_output = angles.__str__().split()
 
-        assert str_output[10][0:-1] == str(round(np.deg2rad(10), 12))
+        assert str_output[10][0:-1] == str(round(np.deg2rad(10), n))
         assert str_output[11] == str(10.0)
-        assert str_output[19][0:-1] == str(round(np.deg2rad(20), 12))
+        assert str_output[19][0:-1] == str(round(np.deg2rad(20), n))
         assert str_output[20] == str(20.0)
-        assert str_output[28][0:-1] == str(round(np.deg2rad(30 - 12), 12))
+        assert str_output[28][0:-1] == str(round(np.deg2rad(30 - 12), n))
         assert str_output[29] == str(30.0 - 12.0)
-        assert str_output[37][0:-1] == str(round(np.deg2rad(30), 12))
+        assert str_output[37][0:-1] == str(round(np.deg2rad(30), n))
         assert str_output[38] == str(30.0)
-        assert str_output[46][0:-1] == str(round(np.deg2rad(12), 12))
+        assert str_output[46][0:-1] == str(round(np.deg2rad(12), n))
         assert str_output[47] == str(12.0)
-        assert str_output[54][0:-1] == str(round(np.deg2rad(45), 12))
+        assert str_output[54][0:-1] == str(round(np.deg2rad(45), n))
         assert str_output[55] == str(45.0)
-        assert str_output[62][0:-1] == str(round(np.deg2rad(66), 12))
+        assert str_output[62][0:-1] == str(round(np.deg2rad(66), n))
         assert str_output[63] == str(66.0)
         assert str_output[69][0:-1] == str(round(angles.B[0], 11))
         assert str_output[70] == str(round(angles.BDeg[0], 11))
@@ -79,19 +87,19 @@ class TestSpecials:
 
         str_output = angles.__str__().split()
 
-        assert str_output[10][0:-1] == str(round(np.deg2rad(10), 12))
+        assert str_output[10][0:-1] == str(round(np.deg2rad(10), n))
         assert str_output[11] == str(10.0)
-        assert str_output[19][0:-1] == str(round(np.deg2rad(20), 12))
+        assert str_output[19][0:-1] == str(round(np.deg2rad(20), n))
         assert str_output[20] == str(20.0)
-        assert str_output[28][0:-1] == str(round(np.deg2rad(30 - 12), 12))
+        assert str_output[28][0:-1] == str(round(np.deg2rad(30 - 12), n))
         assert str_output[29] == str(30.0 - 12.0)
-        assert str_output[37][0:-1] == str(round(np.deg2rad(30), 12))
+        assert str_output[37][0:-1] == str(round(np.deg2rad(30), n))
         assert str_output[38] == str(30.0)
-        assert str_output[46][0:-1] == str(round(np.deg2rad(12), 12))
+        assert str_output[46][0:-1] == str(round(np.deg2rad(12), n))
         assert str_output[47] == str(12.0)
-        assert str_output[54][0:-1] == str(round(np.deg2rad(45), 12))
+        assert str_output[54][0:-1] == str(round(np.deg2rad(45), n))
         assert str_output[55] == str(45.0)
-        assert str_output[62][0:-1] == str(round(np.deg2rad(66), 12))
+        assert str_output[62][0:-1] == str(round(np.deg2rad(66), n))
         assert str_output[63] == str(66.0)
         assert str_output[69][0:-1] == str(round(angles.B[0], 11))
         assert str_output[70] == str(round(angles.BDeg[0], 11))

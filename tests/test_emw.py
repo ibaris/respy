@@ -1,11 +1,12 @@
 import os
+import sys
 from distutils import dir_util
 
+import numpy as np
 import pytest
+import respy as respy
 from numpy import loadtxt
 from pytest import fixture
-import numpy as np
-import respy as respy
 
 FREQ_UNIT = ['Hz', 'daHz', 'hHz', 'kHz', 'MHz', 'GHz', 'THz', 'PHz']
 WAVE_UNIT = ['nm', 'um', 'mm', 'cm', 'dm', 'm', 'km']
@@ -95,7 +96,10 @@ class TestConversion:
         DATA_GHz = zip(GHz, km)
 
         DATA_REF = (DATA_HZ, DATA_Khz, DATA_MHz, DATA_GHz)
-        n = len(DATA_HZ)
+        if sys.version_info < (3, 0):
+            n = len(DATA_HZ)
+        else:
+            n = 4
 
         for i in range(len(DATA_REF)):
             for j in range(n):
