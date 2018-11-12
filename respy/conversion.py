@@ -2,10 +2,98 @@ from __future__ import division
 
 from numpy import cos, log10, errstate, nan_to_num
 
-from respy.auxiliary import rad
+from respy.auxiliary import rad, PI
 
-C = 299792458
-PI = 3.14159265359
+
+class Conversion(object):
+    def __init__(self, value, vza, value_unit="BRDF", angle_unit='RAD'):
+        """
+        Conversion of BRDF, BRF, BSC and BSC in dB.
+
+        Parameters
+        ----------
+        value : float, array_like
+            Input value in BRDF, BRF, BSC or BSCdB. See parameter value_unit.
+        vza : int, float, array_like
+            Viewing zenith angle in DEG or RAD. See parameter angle_unit.
+        value_unit : {'BRDF', 'BRF', 'BSC', 'BSCdB'}
+            The unit of input value:
+            * BRDF : Bidirectional Reflectance Distribution Function (Intensity) (default).
+            * BRF : Bidirectional Reflectance Factor.
+            * BSC : Back Scattering Coefficient (no unit).
+            *BSCdB : Back Scattering Coefficient in dB.
+        angle_unit : {'DEG', 'RAD', 'deg', 'rad'}, optional
+            * 'DEG': Input angle in [DEG].
+            * 'RAD': Input angle  in [RAD] (default).
+
+        Attributes
+        ----------
+        Conversion.BRDF : array_like
+            BRDF value.
+        Conversion.BRF : array_like
+            BRF value.
+        Conversion.BSC : array_like
+            BSC value.
+        Conversion.BSCdB : array_like
+            BSC value in dB.
+
+        Methods
+        -------
+        Conversion.dB : Convert linear to dB
+        Conversion.linear : Convert dB to linear.
+
+        See Also
+        --------
+        respy.dB
+        respy.linear
+        respy.BRDF
+        respy.BRF
+        respy.BSC
+        """
+        self.value_unit = value_unit
+
+        if angle_unit is "rad":
+            angle_unit = "RAD"
+        elif angle_unit is "deg":
+            angle_unit = "DEG"
+
+        self.angle_unit = angle_unit
+
+        if self.value_unit is "BRDF":
+            self.BRDF = value
+            self.BSC = BSC(value, vza, self.angle_unit)
+            self.BSCdB = dB(BSC(value, vza, self.angle_unit))
+            self.BRF = BRF(value)
+
+        elif self.value_unit is "BSC":
+            self.BSC = value
+            self.BRDF = BRDF(value, vza, self.angle_unit)
+            self.BRF = BRF(self.BRDF)
+            self.BSCdB = dB(value)
+
+        elif self.value_unit is "BSCdB":
+            self.BSCdB = value
+            self.BSC = linear(value)
+            self.BRDF = BRDF(self.BSC, vza, self.angle_unit)
+            self.BRF = BRF(self.BRDF)
+
+        elif self.value_unit is "BRF":
+            self.BRF = value
+            self.BRDF = value / PI
+            self.BSC = BSC(self.BRDF, vza, self.angle_unit)
+            self.BSCdB = dB(BSC(self.BRDF, vza, self.angle_unit))
+
+        else:
+            raise ValueError("the unit of value must be 'BRDF', 'BRF', 'BSC' or 'BSCdB'")
+
+
+    @staticmethod
+    def dB(x):
+        return dB(x)
+
+    @staticmethod
+    def linear(x):
+        return linear(x)
 
 
 def dB(x):
