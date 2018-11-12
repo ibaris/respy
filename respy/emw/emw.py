@@ -5,7 +5,7 @@ import warnings
 import numpy as np
 
 from respy.emw.auxiliary import check_unit_frequency, check_unit_wavelength, BANDS, CONVERT_FREQ, CONVERT_WAVE
-from respy.auxiliary import align_all
+from respy.auxiliary import align_all, PI, C
 
 REGION = {"GAMMA": "GAMMA",
           "XRAY": "XRAY",
@@ -34,9 +34,6 @@ REGION = {"GAMMA": "GAMMA",
           "VHF": "RADIO",
           "UHF": "RADIO"}
 
-C = 299792458
-PI = 3.14159265359
-
 
 class EMW(object):
     def __init__(self, input, unit='GHz', output='cm'):
@@ -47,9 +44,9 @@ class EMW(object):
         ----------
         input : int, float or array_like
             Frequency or wavelength
-        unit : {'Hz', 'PHz', 'kHz', 'daHz', 'MHz', 'THz', 'hHz', 'GHz'} or {'dm', 'nm', 'cm', 'mm', 'm', 'km', 'um'}
+        unit : {'Hz', 'PHz', 'kHz', 'daHz', 'MHz', 'THz', 'hHz', 'GHz'} or {'nm', 'um', 'cm', 'dm', 'mm', 'm', 'km'}
             Unit of input. Default is 'GHz'.
-        output : {'Hz', 'PHz', 'kHz', 'daHz', 'MHz', 'THz', 'hHz', 'GHz'} or {'dm', 'nm', 'cm', 'mm', 'm', 'km', 'um'}
+        output : {'Hz', 'PHz', 'kHz', 'daHz', 'MHz', 'THz', 'hHz', 'GHz'} or {'nm', 'um', 'cm', 'dm', 'mm', 'm', 'km'}
             Unit of output. Default is 'cm'.
 
         Attributes
