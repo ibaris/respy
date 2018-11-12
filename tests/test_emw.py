@@ -131,7 +131,7 @@ class TestRaises:
         (65, 'V'),
         (100, 'W'),
         (150, 'D'),
-        (15000, None)
+        (15000, 'NONE')
     ])
 class TestSelectionRADAR:
     def test_which_band(self, frequency, band):

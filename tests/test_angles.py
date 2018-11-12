@@ -662,7 +662,7 @@ class TestAlignWith:
 
         value = angles.align_with(value)
 
-        assert angles.shape == (7, value.shape[0])
+        assert angles.shape == (7, value.shape[1])
 
     def test_align_with_value(self):
         angles = Angles(iza=np.arange(0, 10, 1), vza=10, raa=10, alpha=10, beta=10)
@@ -674,7 +674,7 @@ class TestAlignWith:
         value = angles.align_with(value)
 
         assert angles.shape == (7, 10)
-        assert value.shape[0] == angles.shape[1]
+        assert value.shape[1] == angles.shape[1]
 
 
 class TestNormalizeAndNbar:
