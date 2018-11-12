@@ -3,7 +3,7 @@ import sys
 import warnings
 
 import numpy as np
-from respy.auxiliary import (sec, align_all, asarrays, DTYPES)
+from respy.auxiliary import (sec, align_all, asarrays, DTYPES, PI)
 
 # python 3.6 comparability
 if sys.version_info < (3, 0):
@@ -11,7 +11,6 @@ if sys.version_info < (3, 0):
 else:
     srange = range
 
-PI = 3.1415926535897932384626433832795028841971693993751058209749445923078164
 
 
 class Angles(object):
