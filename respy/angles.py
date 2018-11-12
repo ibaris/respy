@@ -1,9 +1,15 @@
 # -*- coding: utf-8 -*-
+import sys
 import warnings
 
 import numpy as np
-
 from respy.auxiliary import (sec, align_all, asarrays, DTYPES)
+
+# python 3.6 comparability
+if sys.version_info < (3, 0):
+    srange = xrange
+else:
+    srange = range
 
 PI = 3.1415926535897932384626433832795028841971693993751058209749445923078164
 
@@ -497,7 +503,7 @@ class Angles(object):
         -------
         geometries : tuple
         """
-        geometries = [tuple(self.__array[:, i]) for i in range(self.shape[1])]
+        geometries = [tuple(self.__array[:, i]) for i in srange(self.shape[1])]
 
         return tuple(geometries)
 
@@ -511,7 +517,7 @@ class Angles(object):
         geometriesDeg : tuple
         """
 
-        geometriesDeg = [tuple(self.__arrayDeg[:, i]) for i in range(self.shape[1])]
+        geometriesDeg = [tuple(self.__arrayDeg[:, i]) for i in srange(self.shape[1])]
 
         return tuple(geometriesDeg)
 
@@ -711,7 +717,7 @@ class Angles(object):
         data = [item for item in self.__array]
 
         if isinstance(value, tuple) or isinstance(value, list):
-            data = tuple(value) +  tuple(data, )
+            data = tuple(value) + tuple(data, )
         else:
             data = (value,) + tuple(data, )
 
@@ -721,7 +727,7 @@ class Angles(object):
         dataDeg = [item for item in self.__array]
 
         if isinstance(value, tuple):
-            dataDeg = value +  tuple(dataDeg, )
+            dataDeg = value + tuple(dataDeg, )
         else:
             dataDeg = (value,) + tuple(dataDeg, )
 
