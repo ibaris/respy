@@ -5,6 +5,7 @@ import warnings
 import numpy as np
 
 from respy.emw.auxiliary import check_unit_frequency, check_unit_wavelength, BANDS, CONVERT_FREQ, CONVERT_WAVE
+from respy.auxiliary import align_all
 
 REGION = {"VIS": "OPTIC",
           "NIR": "OPTIC",
@@ -97,9 +98,58 @@ class EMW(object):
         self.k0 = self.__compute_wavenumver()
         self.__region = which_region(self.__frequency, self.__frequency_unit)
         self.__band = which_band(self.__frequency, self.__frequency_unit)
+        self.__array = np.asarray([self.__frequency, self.__wavelength, self.k0])
+        self.array = self.__array
+
+    # ------------------------------------------------------------------------------------------------------------------
+    # Magic Methods
+    # ------------------------------------------------------------------------------------------------------------------
+    def __str__(self):
+        vals = dict()
+        vals['frequency'], vals['frequency_unit'] = self.iza.mean(), self.izaDeg.mean()
+        vals['wavelength'], vals['wavelength_unit'] = self.vza.mean(), self.vzaDeg.mean()
+        vals['wavenumber']  = self.raa.mean()
+        vals['region'], vals['band'] = self.iaa.mean(), self.iaaDeg.mean()
+
+        info = 'Class               : EMW\n' \
+               'Mean frequency      : {frequency} {frequency_unit}\n' \
+               'Mean wavelength     : {wavelength} {wavelength_unit}\n' \
+               'Mean wavenumber     : {wavenumber} \n' \
+               'Frequency is in {region} region at band {band}'.format(**vals)
+
+        return info
+
+    def __len__(self):
+        return len(self.__frequency)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Property Access
+    # ------------------------------------------------------------------------------------------------------------------
+    # Access to Array Specific Attributes ------------------------------------------------------------------------------
+    @property
+    def len(self):
+        """
+        Length of array
+
+        Returns
+        -------
+        len : int
+        """
+        return len(self.__frequency)
+
+    @property
+    def shape(self):
+        """
+        Shape of array
+
+        Returns
+        -------
+        shape : tuple
+        """
+        return self.__frequency.shape
+
+    # ------------------------------------------------------------------------------------------------------------------
+    # Property with Setter
     # ------------------------------------------------------------------------------------------------------------------
     @property
     def band(self):
@@ -157,6 +207,42 @@ class EMW(object):
 
         else:
             raise ValueError("When entering a wavelength, unit must be equal to {0}.".format(str(CONVERT_WAVE.keys())))
+
+    # ------------------------------------------------------------------------------------------------------------------
+    # Public Methods
+    # ------------------------------------------------------------------------------------------------------------------
+    def align_with(self, value):
+        """
+        Align all angles with another array.
+
+        Parameters
+        ----------
+        value : array_like
+
+        Returns
+        -------
+        value : array_like
+            Align value.
+
+        Note
+        ----
+        If len(value) > EMW.shape[1] then the angles inside Angles class will be aligned and it has no effect on
+        value. If len(value) < EMW.shape[1] the output of value will be have the same len as Angles and it has no
+        effect on the angles within the Angles class.
+        """
+        # RAD Angles
+        data = [item for item in self.__array]
+
+        if isinstance(value, tuple) or isinstance(value, list):
+            data = tuple(value) +  tuple(data, )
+        else:
+            data = (value,) + tuple(data, )
+
+        data = align_all(data)
+
+        self.__frequency, self.__wavelength, self.k0 = np.asarray(data[-3:])
+
+        return data[0:-3]
 
     # ------------------------------------------------------------------------------------------------------------------
     # Private Methods
@@ -565,7 +651,10 @@ def which_region(input, unit='GHz'):
 
         region_list = list()
         for item in band_list:
-            region_list.append(REGION[item])
+            if item is not None:
+                region_list.append(REGION[item])
+            else:
+                region_list.append(None)
 
             region_list = list(set(region_list))
 
@@ -576,7 +665,9 @@ def which_region(input, unit='GHz'):
 
     else:
         band = which_band(input, unit)
-        region_list = REGION[band]
-        region_list = region_list
+        if band is not None:
+            region_list = REGION[band]
+        else:
+            region_list = None
 
     return region_list

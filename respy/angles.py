@@ -710,16 +710,21 @@ class Angles(object):
         # RAD Angles
         data = [item for item in self.__array]
 
-        if isinstance(value, tuple):
-            data = value +  tuple(data, )
+        if isinstance(value, tuple) or isinstance(value, list):
+            data = tuple(value) +  tuple(data, )
         else:
             data = (value,) + tuple(data, )
 
         data = align_all(data)
 
         # DEG Angles
-        dataDeg = [item for item in self.__arrayDeg]
-        dataDeg = (value,) + tuple(dataDeg, )
+        dataDeg = [item for item in self.__array]
+
+        if isinstance(value, tuple):
+            dataDeg = value +  tuple(dataDeg, )
+        else:
+            dataDeg = (value,) + tuple(dataDeg, )
+
         dataDeg = align_all(dataDeg)
 
         self.__array = np.asarray(data[-7:])
