@@ -15,7 +15,32 @@ CONVERT_WAVE = {'nm': 1e9,
                 'm': 1,
                 'km': 1e-3}
 
-BANDS = ["VIS", "NIR", "SWIR", "MWIR", "LWIR", "L", "S", "C", "X", "Ku", "K", "Ka", "V", "W", "D"]
+BANDS = ["GAMMA",
+         "XRAY",
+         "UV",
+         "VIS",
+         "NIR",
+         "SWIR",
+         "MWIR",
+         "LWIR",
+         "D",
+         "W",
+         "V",
+         "Ka",
+         "K",
+         "Ku",
+         "X",
+         "C",
+         "S",
+         "L",
+         "ELF",
+         "ULF",
+         "VLF",
+         "LF",
+         "MF",
+         "HF",
+         "VHF",
+         "UHF"]
 
 
 def check_unit_frequency(unit):

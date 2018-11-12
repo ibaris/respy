@@ -7,7 +7,10 @@ import numpy as np
 from respy.emw.auxiliary import check_unit_frequency, check_unit_wavelength, BANDS, CONVERT_FREQ, CONVERT_WAVE
 from respy.auxiliary import align_all
 
-REGION = {"VIS": "OPTIC",
+REGION = {"GAMMA": "GAMMA",
+          "XRAY": "XRAY",
+          "UV": "UV",
+          "VIS": "OPTIC",
           "NIR": "OPTIC",
           "SWIR": "OPTIC",
           "MWIR": "THERMAL",
@@ -21,7 +24,15 @@ REGION = {"VIS": "OPTIC",
           "Ka": "MICROWAVE",
           "V": "MICROWAVE",
           "W": "MICROWAVE",
-          "D": "MICROWAVE"}
+          "D": "MICROWAVE",
+          "ELF": "RADIO",
+          "ULF": "RADIO",
+          "VLF": "RADIO",
+          "LF": "RADIO",
+          "MF": "RADIO",
+          "HF": "RADIO",
+          "VHF": "RADIO",
+          "UHF": "RADIO"}
 
 C = 299792458
 PI = 3.14159265359
@@ -108,7 +119,7 @@ class EMW(object):
         vals = dict()
         vals['frequency'], vals['frequency_unit'] = self.iza.mean(), self.izaDeg.mean()
         vals['wavelength'], vals['wavelength_unit'] = self.vza.mean(), self.vzaDeg.mean()
-        vals['wavenumber']  = self.raa.mean()
+        vals['wavenumber'] = self.raa.mean()
         vals['region'], vals['band'] = self.iaa.mean(), self.iaaDeg.mean()
 
         info = 'Class               : EMW\n' \
@@ -234,7 +245,7 @@ class EMW(object):
         data = [item for item in self.__array]
 
         if isinstance(value, tuple) or isinstance(value, list):
-            data = tuple(value) +  tuple(data, )
+            data = tuple(value) + tuple(data, )
         else:
             data = (value,) + tuple(data, )
 
@@ -430,8 +441,20 @@ def select_band(band="L", output="GHz"):
     respy.emw.select_region
 
     """
+    # ---- Other Regions ----
+    if band is "GAMMA":
+        GAMMA = np.arange(0, 1.1, 0.1)
+        GAMMA[0] = 0.0000001
+        return compute_frequency(GAMMA[np.argsort(-GAMMA)], 'nm', output)
+    elif band is "XRAY":
+        XRAY = np.arange(1.1, 10.1, 0.1)
+        return compute_frequency(XRAY[np.argsort(-XRAY)], 'nm', output)
+    elif band is "UV":
+        UV = np.arange(10.1, 400, 0.1)
+        return compute_frequency(UV[np.argsort(-UV)], 'nm', output)
+
     # ---- Optical Region ----
-    if band is "VIS":
+    elif band is "VIS":
         VIS = np.arange(400., 751., 1)
         return compute_frequency(VIS[np.argsort(-VIS)], 'nm', output)
     elif band is "NIR":
@@ -469,11 +492,33 @@ def select_band(band="L", output="GHz"):
     elif band is "D":
         return (np.arange(110.1, 170.1, 0.1) * CONVERT_FREQ['GHz']) / CONVERT_FREQ[output]
 
+    # ---- Radio Region ----
+    elif band is "ELF":
+        return (np.arange(3, 30.1, 0.1) * CONVERT_FREQ['Hz']) / CONVERT_FREQ[output]
+    elif band is "SLF":
+        return (np.arange(30.1, 300.1, 0.1) * CONVERT_FREQ['Hz']) / CONVERT_FREQ[output]
+    elif band is "ULF":
+        return (np.arange(300.1, 3000.1, 0.1) * CONVERT_FREQ['Hz']) / CONVERT_FREQ[output]
+    elif band is "VLF":
+        return (np.arange(3.1, 30.1, 0.1) * CONVERT_FREQ['kHz']) / CONVERT_FREQ[output]
+    elif band is "LF":
+        return (np.arange(30.1, 300.1, 0.1) * CONVERT_FREQ['kHz']) / CONVERT_FREQ[output]
+    elif band is "MF":
+        return (np.arange(300.1, 3000.1, 0.1) * CONVERT_FREQ['kHz']) / CONVERT_FREQ[output]
+    elif band is "HF":
+        return (np.arange(3.1, 30.1, 0.1) * CONVERT_FREQ['MHz']) / CONVERT_FREQ[output]
+    elif band is "VHF":
+        return (np.arange(30.1, 300.1, 0.1) * CONVERT_FREQ['MHz']) / CONVERT_FREQ[output]
+    elif band is "UHF":
+        return (np.arange(300.1, 1000, 0.1) * CONVERT_FREQ['MHz']) / CONVERT_FREQ[output]
     else:
         raise ValueError("Supported regions are  {0}.".format(str(BANDS)))
 
 
-EMS = {"VIS": select_band("VIS"),
+EMS = {"GAMMA": select_band("GAMMA"),
+       "XRAY": select_band("XRAY"),
+       "UV": select_band("UV"),
+       "VIS": select_band("VIS"),
        "NIR": select_band("NIR"),
        "SWIR": select_band("SWIR"),
        "MWIR": select_band("MWIR"),
@@ -487,7 +532,15 @@ EMS = {"VIS": select_band("VIS"),
        "Ka": select_band("Ka"),
        "V": select_band("V"),
        "W": select_band("W"),
-       "D": select_band("D")}
+       "D": select_band("D"),
+       "ELF": select_band("ELF"),
+       "ULF": select_band("ULF"),
+       "VLF": select_band("VLF"),
+       "LF": select_band("LF"),
+       "MF": select_band("MF"),
+       "HF": select_band("HF"),
+       "VHF": select_band("VHF"),
+       "UHF": select_band("UHF")}
 
 
 def select_region(region, output="GHz"):
@@ -529,6 +582,18 @@ def select_region(region, output="GHz"):
         LWIR = EMS["LWIR"]
         output_region = np.concatenate((LWIR, MWIR))
 
+    elif region is "RADIO":
+        ELF = EMS["ELF"]
+        ULF = EMS["ULF"]
+        VLF = EMS["VLF"]
+        LF = EMS["LF"]
+        MF = EMS["MF"]
+        HF = EMS["HF"]
+        VHF = EMS["VHF"]
+        UHF = EMS["UHF"]
+
+        output_region = np.concatenate((ELF, ULF, VLF, LF, MF, HF, VHF, UHF))
+
     elif isinstance(region, list):
         output_list = list()
 
@@ -537,9 +602,8 @@ def select_region(region, output="GHz"):
                 output_list.append(select_band(band=item, output='GHz'))
 
             except ValueError:
-                raise ValueError("The input region is not valid. It must be 'RADAR', 'OPTIC', 'THERMAL', the RADAR "
-                                 "bans ('L' - 'D'), 'VIS', 'NIR', 'SWIR', 'MWIR', 'LWIR' or a list with regions."
-                                 "The actual region is {0}".format(str(region)))
+                raise ValueError("The input region is not valid. It must be 'RADAR', 'OPTIC', 'THERMAL', 'RADIO', "
+                                 "or {1}. The actual region is {0}".format(str(region), str(BANDS)))
 
         output_list = tuple(output_list)
         output_region = np.concatenate(output_list)
@@ -548,9 +612,8 @@ def select_region(region, output="GHz"):
         try:
             output_region = EMS[region]
         except KeyError:
-            raise ValueError("The input region is not valid. It must be 'RADAR', 'OPTIC', 'THERMAL', the RADAR "
-                             "bans ('L' - 'D') or 'VIS', 'NIR', 'SWIR', 'MWIR' and 'LWIR'."
-                             "The actual region is {0}".format(str(region)))
+            raise ValueError("The input region is not valid. It must be 'RADAR', 'OPTIC', 'THERMAL', 'RADIO', "
+                             "or {1}. The actual region is {0}".format(str(region), str(BANDS)))
 
     if output in CONVERT_WAVE.keys():
         output_region = compute_wavelength(output_region, unit="GHz", output=output)
@@ -617,8 +680,8 @@ def which_band(input, unit='GHz'):
         item_list = list(set(item_list))
 
     if len(item_list) == 0:
-        warnings.warn("Input region not supported. Returning None.")
-        return None
+        # warnings.warn("Input region not supported. Returning None.")
+        return "NONE"
 
     elif len(item_list) == 1:
         return item_list[0]
@@ -668,6 +731,6 @@ def which_region(input, unit='GHz'):
         if band is not None:
             region_list = REGION[band]
         else:
-            region_list = None
+            region_list = "NONE"
 
     return region_list
