@@ -1,11 +1,9 @@
 from __future__ import division
 
-import warnings
-
 import numpy as np
 
-from respy.emw.auxiliary import check_unit_frequency, check_unit_wavelength, BANDS, CONVERT_FREQ, CONVERT_WAVE
 from respy.auxiliary import align_all, PI, C
+from respy.emw.auxiliary import check_unit_frequency, check_unit_wavelength, BANDS, CONVERT_FREQ, CONVERT_WAVE
 
 REGION = {"GAMMA": "GAMMA",
           "XRAY": "XRAY",
@@ -71,9 +69,13 @@ class EMW(object):
         """
 
         # Prepare Input Data and set values ----------------------------------------------------------------------------
+        input = np.asarray(input).flatten()
+
+        # Self Definitions ---------------------------------------------------------------------------------------------
         self.__unit = unit
         self.__output = output
 
+        # Assign Input Parameter ---------------------------------------------------------------------------------------
         if unit in CONVERT_FREQ.keys() and output in CONVERT_WAVE.keys():
             self.__frequency_unit = unit
             self.__wavelength_unit = output
