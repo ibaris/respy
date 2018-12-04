@@ -10,6 +10,9 @@ DTYPES = [np.bool, np.byte, np.ubyte, np.short, np.ushort, np.intc, np.uintc, np
 PI = 3.1415926535897932384626433832795028841971693993751058209749445923078164
 C = 299792458
 
+RAD_TO_DEG = 180.0 / PI
+DEG_TO_RAD = PI / 180.0
+
 def rad(angle):
     """
     Convert degrees to radians.
