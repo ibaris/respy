@@ -105,7 +105,7 @@ class EMW(object):
                                                                                              str(CONVERT_WAVE.keys())))
 
         # Additional Calculation ---------------------------------------------------------------------------------------
-        self.k0 = self.__compute_wavenumver()
+        self.__k0 = self.__compute_wavenumver()
         self.__region = which_region(self.__frequency, self.__frequency_unit)
         self.__band = which_band(self.__frequency, self.__frequency_unit)
         self.__array = np.asarray([self.__frequency, self.__wavelength, self.k0])
@@ -217,6 +217,10 @@ class EMW(object):
 
         else:
             raise ValueError("When entering a wavelength, unit must be equal to {0}.".format(str(CONVERT_WAVE.keys())))
+
+    @property
+    def k0(self):
+        return self.__k0
 
     # ------------------------------------------------------------------------------------------------------------------
     # Public Methods

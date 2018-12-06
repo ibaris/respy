@@ -4,7 +4,7 @@ from distutils import dir_util
 
 import numpy as np
 import pytest
-import respy as respy
+import respy
 from numpy import loadtxt
 from pytest import fixture
 
@@ -225,3 +225,29 @@ class TestSelectionOPTIC:
 class TestSelectBand:
     BANDS = ["VIS", "NIR", "SWIR", "MWIR", "LWIR", "L", "S", "C", "X", "Ku", "K", "Ka", "V", "W", "D"]
     pass
+
+
+@pytest.mark.webtest
+@pytest.mark.parametrize(
+    "freq", [
+        (1.1),
+        (2.5),
+        (4.5),
+        (7.8),
+        (12.1),
+        (101.5),
+        (0.25),
+        (3.6),
+        (5.8)
+    ])
+class TestEMW:
+    def test_k0(self, freq):
+        emw = respy.EMW(freq)
+        k0_true = respy.compute_wavenumber(freq, 'GHz', 'cm')
+
+        assert np.allclose(emw.k0, k0_true)
+
+        emw.frequency = 11.5
+        k0_true = respy.compute_wavenumber(11.5, 'GHz', 'cm')
+
+        assert np.allclose(emw.k0, k0_true)
