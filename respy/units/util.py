@@ -58,6 +58,9 @@ def def_unit(unit):
         return unit
 
 
+deg = degree = degrees = sympy_units.degree
+rad = radian = radians = sympy_units.radian
+
 decibel = dB = Quantity("decibel", abbrev="dB")
 dB.set_dimension(One)
 dB.set_scale_factor(One)
@@ -126,7 +129,12 @@ __SELECT_UNIT__ = {"-": None,
 
                    "decibel": decibel,
                    "dB": dB,
-
+                    "deg": deg,
+                   "degree": degree,
+                   "degrees": degrees,
+                   "rad": rad,
+                   "radian": radian,
+                   "radians": radians,
                    "millihertz": millihertz,
                    "mhz": mhz,
                    "mHz": mHz,
