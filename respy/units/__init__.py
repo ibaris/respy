@@ -1,4 +1,5 @@
 from util import (def_unit,
+                  deg, degrees, degree, rad, radian, radians,
                   nm, um, mm, cm, dm, m, km,
 
                   decibel, dB, millihertz, mhz, mHz, centihertz, chz, cHz, decihertz, dhz, dHz, hertz, hz, Hz,

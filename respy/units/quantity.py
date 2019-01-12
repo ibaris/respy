@@ -135,8 +135,9 @@ class Quantity(np.ndarray):
         else:
             obj = self.value * other
             unit = self.unit
+            name = self.__select_name(self._name, None, self._constant, False, 'mul')
 
-            return self.__create_new_instance(obj, unit, self._name)
+            return self.__create_new_instance(obj, unit, name)
 
     def __rmul__(self, other):
         if isinstance(other, tuple(sympy.core.all_classes)):
@@ -157,8 +158,9 @@ class Quantity(np.ndarray):
         else:
             obj = self.value * other
             unit = self.unit
+            name = self.__select_name(self._name, None, self._constant, False, 'rmul')
 
-            return self.__create_new_instance(obj, unit, self._name)
+            return self.__create_new_instance(obj, unit, name)
 
     def __div__(self, other):
         if isinstance(other, tuple(sympy.core.all_classes)):
@@ -179,8 +181,9 @@ class Quantity(np.ndarray):
         else:
             obj = self.value / other
             unit = self.unit
+            name = self.__select_name(self._name, None, self._constant, False, 'div')
 
-            return self.__create_new_instance(obj, unit, self._name)
+            return self.__create_new_instance(obj, unit, name)
 
     def __rdiv__(self, other):
         if isinstance(other, tuple(sympy.core.all_classes)):
@@ -201,8 +204,9 @@ class Quantity(np.ndarray):
         else:
             obj = other.value / self.value
             unit = self.unit
+            name = self.__select_name(self._name, None, self._constant, False, 'rdiv')
 
-            return self.__create_new_instance(obj, unit, self._name)
+            return self.__create_new_instance(obj, unit, name)
 
     def __add__(self, other):
         if isinstance(other, tuple(sympy.core.all_classes)):
@@ -223,8 +227,9 @@ class Quantity(np.ndarray):
         else:
             obj = self.value + other
             unit = self.unit
+            name = self.__select_name(self._name, None, self._constant, False, 'add')
 
-            return self.__create_new_instance(obj, unit, self._name)
+            return self.__create_new_instance(obj, unit, name)
 
     def __radd__(self, other):
         if isinstance(other, tuple(sympy.core.all_classes)):
@@ -245,8 +250,9 @@ class Quantity(np.ndarray):
         else:
             obj = self.value + other
             unit = self.unit
+            name = self.__select_name(self._name, None, self._constant, False, 'radd')
 
-            return self.__create_new_instance(obj, unit, self._name)
+            return self.__create_new_instance(obj, unit, name)
 
     def __sub__(self, other):
         if isinstance(other, tuple(sympy.core.all_classes)):
@@ -267,8 +273,9 @@ class Quantity(np.ndarray):
         else:
             obj = self.value - other
             unit = self.unit
+            name = self.__select_name(self._name, None, self._constant, False, 'sub')
 
-            return self.__create_new_instance(obj, unit, self._name)
+            return self.__create_new_instance(obj, unit, name)
 
     def __rsub__(self, other):
         if isinstance(other, tuple(sympy.core.all_classes)):
@@ -289,9 +296,32 @@ class Quantity(np.ndarray):
         else:
             obj = other.value - self.value
             unit = self.unit
+            name = self.__select_name(self._name, None, self._constant, False, 'rsub')
 
-            return self.__create_new_instance(obj, unit, self._name)
+            return self.__create_new_instance(obj, unit, name)
 
+    def __pow__(self, other):
+        if isinstance(other, tuple(sympy.core.all_classes)):
+            value, unit = self.__check_sympy_expr(other)
+            obj = self.value**value
+            unit = self.unit
+            name = self.__select_name(self._name, None, self._constant, None, 'pow')
+
+            return self.__create_new_instance(obj, unit, name)
+
+        elif isinstance(other, Quantity):
+            obj = self.value**other.value
+            unit = self.unit
+            name = self.__select_name(self._name, other._name, self._constant, other._constant, 'pow')
+
+            return self.__create_new_instance(obj, unit, name)
+
+        else:
+            obj = self.value**other
+            unit = self.unit
+            name = self.__select_name(self._name, None, self._constant, False, 'pow')
+
+            return self.__create_new_instance(obj, unit, name)
     # --------------------------------------------------------------------------------------------------------
     # Properties
     # --------------------------------------------------------------------------------------------------------
@@ -379,7 +409,8 @@ class Quantity(np.ndarray):
         unit = util.def_unit(unit)
 
         if len(self._value) == 1:
-            value = convert_to(self.expr[0], unit).n()
+            arg = convert_to(self.expr[0], unit).n()
+            value = arg.args[0]
 
         else:
             value = np.zeros_like(self._value, dtype=np.float)
@@ -460,97 +491,73 @@ class Quantity(np.ndarray):
         elif name1 is not None and name2 is not None:
 
             if operator == 'mul':
-                if constant1:
-                    name = name2
-                elif constant2:
-                    name = name1
-                elif constant1 and constant2:
-                    name = None
+                if constant1 or constant2:
+                    name = self.__select_name_by_constant(name1, name2, constant1, constant2)
                 else:
                     name = self.__operator_name(name1, name2, ' * ')
 
             elif operator == 'rmul':
-                if constant1:
-                    name = name2
-                elif constant2:
-                    name = name1
-                elif constant1 and constant2:
-                    name = None
+                if constant1 or constant2:
+                    name = self.__select_name_by_constant(name1, name2, constant1, constant2)
                 else:
                     name = self.__operator_name(name1, name2, ' * ', True)
 
             elif operator == 'div':
-                if constant1:
-                    name = name2
-                elif constant2:
-                    name = name1
-                elif constant1 and constant2:
-                    name = None
+                if constant1 or constant2:
+                    name = self.__select_name_by_constant(name1, name2, constant1, constant2)
                 else:
                     name = self.__operator_name(name1, name2, ' / ')
 
             elif operator == 'rdiv':
-                if constant1:
-                    name = name2
-                elif constant2:
-                    name = name1
-                elif constant1 and constant2:
-                    name = None
+                if constant1 or constant2:
+                    name = self.__select_name_by_constant(name1, name2, constant1, constant2)
                 else:
                     name = self.__operator_name(name1, name2, ' / ', True)
 
             elif operator == 'add':
-                if constant1:
-                    name = name2
-                elif constant2:
-                    name = name1
-                elif constant1 and constant2:
-                    name = None
+                if constant1 or constant2:
+                    name = self.__select_name_by_constant(name1, name2, constant1, constant2)
                 else:
                     name = self.__operator_name(name1, name2, ' + ')
 
             elif operator == 'radd':
-                if constant1:
-                    name = name2
-                elif constant2:
-                    name = name1
-                elif constant1 and constant2:
-                    name = None
+                if constant1 or constant2:
+                    name = self.__select_name_by_constant(name1, name2, constant1, constant2)
                 else:
                     name = self.__operator_name(name1, name2, ' + ', True)
 
             elif operator == 'sub':
-                if constant1:
-                    name = name2
-                elif constant2:
-                    name = name1
-                elif constant1 and constant2:
-                    name = None
+                if constant1 or constant2:
+                    name = self.__select_name_by_constant(name1, name2, constant1, constant2)
                 else:
                     name = self.__operator_name(name1, name2, ' - ')
 
             elif operator == 'rsub':
-                if constant1:
-                    name = name2
-                elif constant2:
-                    name = name1
-                elif constant1 and constant2:
-                    name = None
+                if constant1 or constant2:
+                    name = self.__select_name_by_constant(name1, name2, constant1, constant2)
                 else:
                     name = self.__operator_name(name1, name2, ' - ', True)
 
             elif operator == 'pow':
-                if constant1:
-                    name = name2
-                elif constant2:
-                    name = name1
-                elif constant1 and constant2:
-                    name = None
+                if constant1 or constant2:
+                    name = self.__select_name_by_constant(name1, name2, constant1, constant2)
                 else:
                     name = self.__operator_name(name1, name2, ' ** ')
 
             else:
                 name = None
+        else:
+            name = None
+
+        return name
+
+    def __select_name_by_constant(self, name1, name2, constant1, constant2):
+        if constant1 and not constant2:
+            name = name2
+        elif constant2 and not constant1:
+            name = name1
+        elif constant1 and constant2:
+            name = None
         else:
             name = None
 
