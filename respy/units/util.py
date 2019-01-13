@@ -10,6 +10,10 @@ __OPERAND__ = ['*', '/', '+', '-']
 One = S.One
 
 
+class UnitError(Exception):
+    pass
+
+
 def def_unit(unit):
     if not isinstance(unit, tuple(sympy.core.all_classes)):
 
@@ -29,10 +33,15 @@ def def_unit(unit):
                         operand_list.append(item)
                     else:
                         try:
-                            unit_list.append(__SELECT_UNIT__[item])
+                            item = int(item)
+                            unit_list.append(item)
 
-                        except KeyError:
-                            raise AttributeError("{} is not a valid unit.".format(str(item)))
+                        except ValueError:
+                            try:
+                                unit_list.append(__UNITS__[item])
+
+                            except KeyError:
+                                raise AttributeError("{} is not a valid unit.".format(str(item)))
 
                 unit = unit_list[0]
 
@@ -125,88 +134,88 @@ K = kelvins = kelvin = sympy_units.K
 
 J = joules = joule = sympy_units.J
 
-__SELECT_UNIT__ = {"-": None,
+__UNITS__ = {"-": None,
 
-                   "decibel": decibel,
-                   "dB": dB,
-                    "deg": deg,
-                   "degree": degree,
-                   "degrees": degrees,
-                   "rad": rad,
-                   "radian": radian,
-                   "radians": radians,
-                   "millihertz": millihertz,
-                   "mhz": mhz,
-                   "mHz": mHz,
-                   "centihertz": centihertz,
-                   "chz": chz,
-                   "cHz": cHz,
-                   "decihertz": decihertz,
-                   "dhz": dhz,
-                   "dHz": dHz,
-                   "hertz": hertz,
-                   "hz": hz,
-                   "Hz": Hz,
-                   "decahertz": decahertz,
-                   "dahz": dahz,
-                   "daHz": daHz,
-                   "hectohertz": hectohertz,
-                   "hhz": hhz,
-                   "hHz": hHz,
-                   "kilohertz": kilohertz,
-                   "khz": khz,
-                   "kHz": kHz,
-                   "megahertz": megahertz,
-                   "MHz": MHz,
-                   "gigahertz": gigahertz,
-                   "ghz": ghz,
-                   "GHz": GHz,
-                   "terahertz": terahertz,
-                   "thz": thz,
-                   "THz": THz,
-                   "petahertz": petahertz,
-                   "phz": phz,
-                   "PHz": PHz,
+             "decibel": decibel,
+             "dB": dB,
+             "deg": deg,
+             "degree": degree,
+             "degrees": degrees,
+             "rad": rad,
+             "radian": radian,
+             "radians": radians,
+             "millihertz": millihertz,
+             "mhz": mhz,
+             "mHz": mHz,
+             "centihertz": centihertz,
+             "chz": chz,
+             "cHz": cHz,
+             "decihertz": decihertz,
+             "dhz": dhz,
+             "dHz": dHz,
+             "hertz": hertz,
+             "hz": hz,
+             "Hz": Hz,
+             "decahertz": decahertz,
+             "dahz": dahz,
+             "daHz": daHz,
+             "hectohertz": hectohertz,
+             "hhz": hhz,
+             "hHz": hHz,
+             "kilohertz": kilohertz,
+             "khz": khz,
+             "kHz": kHz,
+             "megahertz": megahertz,
+             "MHz": MHz,
+             "gigahertz": gigahertz,
+             "ghz": ghz,
+             "GHz": GHz,
+             "terahertz": terahertz,
+             "thz": thz,
+             "THz": THz,
+             "petahertz": petahertz,
+             "phz": phz,
+             "PHz": PHz,
 
-                   "nm": nm,
-                   "um": um,
-                   "mm": mm,
-                   "cm": cm,
-                   "dm": dm,
-                   "m": m,
-                   "km": km,
+             "nm": nm,
+             "um": um,
+             "mm": mm,
+             "cm": cm,
+             "dm": dm,
+             "m": m,
+             "km": km,
 
-                   "nanometers": nanometers,
-                   "micrometers": micrometers,
-                   "millimeters": millimeters,
-                   "centimeter": centimeter,
-                   "decimeters": decimeters,
-                   "meters": meters,
-                   "kilometers": kilometers,
+             "nanometers": nanometers,
+             "micrometers": micrometers,
+             "millimeters": millimeters,
+             "centimeter": centimeter,
+             "decimeters": decimeters,
+             "meters": meters,
+             "kilometers": kilometers,
 
-                   "nanometer": nanometer,
-                   "micrometer": micrometer,
-                   "millimeter": millimeter,
-                   "centimeters": centimeters,
-                   "decimeter": decimeter,
-                   "meter": meter,
-                   "kilometer": kilometer,
+             "nanometer": nanometer,
+             "micrometer": micrometer,
+             "millimeter": millimeter,
+             "centimeters": centimeters,
+             "decimeter": decimeter,
+             "meter": meter,
+             "kilometer": kilometer,
 
-                   "second": second,
-                   "minute": minute,
-                   "hour": hour,
+             "second": second,
+             "minute": minute,
+             "hour": hour,
 
-                   "seconds": seconds,
-                   "minutes": minutes,
-                   "hours": hours,
+             "seconds": seconds,
+             "minutes": minutes,
+             "hours": hours,
 
-                   "s": s,
-                   "h": h,
+             "s": s,
+             "h": h,
 
-                   "K": K,
-                   "kelvin": kelvin,
-                   "kelvins": kelvins,
+             "K": K,
+             "kelvin": kelvin,
+             "kelvins": kelvins,
 
-                   "J": J,
-                   "joule": joule,
-                   "joules": joules}
+             "J": J,
+             "joule": joule,
+             "joules": joules}

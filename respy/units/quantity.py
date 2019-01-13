@@ -4,10 +4,12 @@ from respy.units import util as util
 import respy
 import sympy
 from sympy.physics.units import convert_to
-import sys
 
 __STR_OPERAND__ = {'mul': ' * ',
                    'div': ' / ',
+                   'floordiv': ' // ',
+                   'mod': ' % ',
+                   'divmod': ' /% ',
                    'add': ' + ',
                    'sub': ' - ',
                    'pow': ' ** '}
@@ -89,7 +91,7 @@ class Quantity(np.ndarray):
         obj.name = name
         obj.constant = constant
 
-        obj.dtype = dtype
+        obj._dtype = dtype
         obj.copy = copy
         obj.order = order
         obj.subok = subok
@@ -104,7 +106,7 @@ class Quantity(np.ndarray):
         if self.name is None:
             prefix = '<{0} '.format(self.__class__.__name__)
             sep = ','
-            arrstr = np.array2string(self.value,
+            arrstr = np.array2string(self,
                                      separator=sep,
                                      prefix=prefix)
 
@@ -113,7 +115,7 @@ class Quantity(np.ndarray):
         else:
             prefix = '<{0} '.format(self.__class__.__name__)
             sep = ','
-            arrstr = np.array2string(self.value,
+            arrstr = np.array2string(self,
                                      separator=sep,
                                      prefix=prefix)
 
@@ -128,21 +130,32 @@ class Quantity(np.ndarray):
             self.value = getattr(obj, 'value', None)
             self.name = getattr(obj, 'name', None)
             self.constant = getattr(obj, 'constant', None)
-            self.dtype = getattr(obj, 'dtype', None)
+            # self.dtype = getattr(obj, 'dtype', None)
+            self._dtype = getattr(obj, '_dtype', None)
             self.copy = getattr(obj, 'copy', None)
             self.order = getattr(obj, 'order', None)
             self.subok = getattr(obj, 'subok', None)
             self.ndmin = getattr(obj, 'ndmin', None)
 
+    def __array_wrap__(self, out_arr, context=None):
+        return np.ndarray.__array_wrap__(self, out_arr, context)
+
     # --------------------------------------------------------------------------------------------------------
     # Operator
     # --------------------------------------------------------------------------------------------------------
+    # Attribute Operations -------------------------------------------------------------------------------
+    def __getitem__(self, item):
+        value = self.value[item]
+        return self.__create_new_instance(value, self.unit, self.name)
+
+    # Mathematical Operations ----------------------------------------------------------------------------
+    # Left Operations --------------------------------------------------------------------------------
     def __mul__(self, other):
         operator = 'mul'
         if isinstance(other, (self.__class__, respy.units.quantity.Quantity, np.ndarray)):
             unit = self.__get_unit(other, operator)
             value = self.__get_value(other, operator)
-            name = self.__get_name(other, operator)
+            name = self.__get_name(other)
 
             return self.__create_new_instance(value, unit, name)
 
@@ -161,14 +174,12 @@ class Quantity(np.ndarray):
 
             return self.__create_new_instance(value, unit, name)
 
-    __rmul__ = __imul__ = __mul__
-
     def __truediv__(self, other):
         operator = 'div'
         if isinstance(other, (self.__class__, respy.units.quantity.Quantity, np.ndarray)):
             unit = self.__get_unit(other, operator)
             value = self.__get_value(other, operator)
-            name = self.__get_name(other, operator)
+            name = self.__get_name(other)
 
             return self.__create_new_instance(value, unit, name)
 
@@ -187,39 +198,86 @@ class Quantity(np.ndarray):
 
             return self.__create_new_instance(value, unit, name)
 
-    def __rtruediv__(self, other):
-        operator = 'rdiv'
+    def __floordiv__(self, other):
+        operator = "div"
         if isinstance(other, (self.__class__, respy.units.quantity.Quantity, np.ndarray)):
             unit = self.__get_unit(other, operator)
-            value = self.__get_value(other, operator)
-            name = self.__get_name(other, operator)
+            value = self.value // other.value
+            name = self.__get_name(other)
 
             return self.__create_new_instance(value, unit, name)
 
         elif isinstance(other, tuple(sympy.core.all_classes)):
             other_value, other_unit = Quantity.extract_from_expr(other)
-            value = other_value / self.value
+            value = self.value // other_value
             unit = self.__compute_unit(self.unit, other_unit, operator)
             name = self.name if not self.constant else None
 
             return self.__create_new_instance(value, unit, name)
 
         else:
-            value = other / self.value
+            value = self.value // other
             unit = self.unit
             name = self.name if not self.constant else None
 
             return self.__create_new_instance(value, unit, name)
 
-    __div__ = __idiv__ = __itruediv__ = __truediv__
-    __rdiv__ = __rtruediv__
+    def __mod__(self, other):
+        operator = "div"
+        if isinstance(other, (self.__class__, respy.units.quantity.Quantity, np.ndarray)):
+            unit = self.__get_unit(other, operator)
+            value = self.value % other.value
+            name = self.__get_name(other)
+
+            return self.__create_new_instance(value, unit, name)
+
+        elif isinstance(other, tuple(sympy.core.all_classes)):
+            other_value, other_unit = Quantity.extract_from_expr(other)
+            value = self.value % other_value
+            unit = self.__compute_unit(self.unit, other_unit, operator)
+            name = self.name if not self.constant else None
+
+            return self.__create_new_instance(value, unit, name)
+
+        else:
+            value = self.value % other
+            unit = self.unit
+            name = self.name if not self.constant else None
+
+            return self.__create_new_instance(value, unit, name)
+
+    def __divmod__(self, other):
+        operator = "div"
+        if isinstance(other, (self.__class__, respy.units.quantity.Quantity, np.ndarray)):
+            unit = self.__get_unit(other, operator)
+            value = divmod(self.value, other.value)
+            name = self.__get_name(other)
+
+            return self.__create_new_instance(value, unit, name)
+
+        elif isinstance(other, tuple(sympy.core.all_classes)):
+            other_value, other_unit = Quantity.extract_from_expr(other)
+            value = divmod(self.value, other_value)
+            unit = self.__compute_unit(self.unit, other_unit, operator)
+            name = self.name if not self.constant else None
+
+            return self.__create_new_instance(value, unit, name)
+
+        else:
+            value = divmod(self.value, other)
+            unit = self.unit
+            name = self.name if not self.constant else None
+
+            return self.__create_new_instance(value, unit, name)
+
+    __div__ = __truediv__
 
     def __add__(self, other):
         operator = 'add'
         if isinstance(other, (self.__class__, respy.units.quantity.Quantity, np.ndarray)):
             unit = self.__get_unit(other, operator)
             value = self.__get_value(other, operator)
-            name = self.__get_name(other, operator)
+            name = self.__get_name(other)
 
             return self.__create_new_instance(value, unit, name)
 
@@ -238,14 +296,12 @@ class Quantity(np.ndarray):
 
             return self.__create_new_instance(value, unit, name)
 
-    __radd__ = __add__
-
     def __sub__(self, other):
         operator = 'sub'
         if isinstance(other, (self.__class__, respy.units.quantity.Quantity, np.ndarray)):
             unit = self.__get_unit(other, operator)
             value = self.__get_value(other, operator)
-            name = self.__get_name(other, operator)
+            name = self.__get_name(other)
 
             return self.__create_new_instance(value, unit, name)
 
@@ -264,36 +320,12 @@ class Quantity(np.ndarray):
 
             return self.__create_new_instance(value, unit, name)
 
-    def __rsub__(self, other):
-        operator = 'sub'
-        if isinstance(other, (self.__class__, respy.units.quantity.Quantity, np.ndarray)):
-            unit = self.__get_unit(other, operator)
-            value = self.__get_value(other, operator)
-            name = self.__get_name(other, operator)
-
-            return self.__create_new_instance(value, unit, name)
-
-        elif isinstance(other, tuple(sympy.core.all_classes)):
-            other_value, other_unit = Quantity.extract_from_expr(other)
-            value = other_value - self.value
-            unit = self.__compute_unit(self.unit, other_unit, operator)
-            name = self.name if not self.constant else None
-
-            return self.__create_new_instance(value, unit, name)
-
-        else:
-            value = other - self.value
-            unit = self.unit
-            name = self.name if not self.constant else None
-
-            return self.__create_new_instance(value, unit, name)
-
     def __pow__(self, other):
         operator = 'pow'
         if isinstance(other, (self.__class__, respy.units.quantity.Quantity, np.ndarray)):
             unit = self.__get_unit(other, operator)
             value = self.__get_value(other, operator)
-            name = self.__get_name(other, operator)
+            name = self.__get_name(other)
 
             return self.__create_new_instance(value, unit, name)
 
@@ -312,6 +344,548 @@ class Quantity(np.ndarray):
 
             return self.__create_new_instance(value, unit, name)
 
+    def __lshift__(self, other):
+        operator = 'mul'
+        if isinstance(other, (self.__class__, respy.units.quantity.Quantity, np.ndarray)):
+            unit = self.__get_unit(other, operator)
+            value = self.value << other.value
+            name = self.__get_name(other)
+
+            return self.__create_new_instance(value, unit, name)
+
+        elif isinstance(other, tuple(sympy.core.all_classes)):
+            other_value, other_unit = Quantity.extract_from_expr(other)
+            value = self.value << other_value
+            unit = self.__compute_unit(self.unit, other_unit, operator)
+            name = self.name if not self.constant else None
+
+            return self.__create_new_instance(value, unit, name)
+
+        else:
+            value = self.value << other
+            unit = self.unit
+            name = self.name if not self.constant else None
+
+            return self.__create_new_instance(value, unit, name)
+
+    def __rshift__(self, other):
+        operator = 'div'
+        if isinstance(other, (self.__class__, respy.units.quantity.Quantity, np.ndarray)):
+            unit = self.__get_unit(other, operator)
+            value = self.value >> other.value
+            name = self.__get_name(other)
+
+            return self.__create_new_instance(value, unit, name)
+
+        elif isinstance(other, tuple(sympy.core.all_classes)):
+            other_value, other_unit = Quantity.extract_from_expr(other)
+            value = self.value >> other_value
+            unit = self.__compute_unit(self.unit, other_unit, operator)
+            name = self.name if not self.constant else None
+
+            return self.__create_new_instance(value, unit, name)
+
+        else:
+            value = self.value >> other
+            unit = self.unit
+            name = self.name if not self.constant else None
+
+            return self.__create_new_instance(value, unit, name)
+
+    def __and__(self, other):
+        if isinstance(other, (self.__class__, respy.units.quantity.Quantity, np.ndarray)):
+            unit = None
+            value = self.value & other.value
+            name = self.__get_name(other)
+
+            return self.__create_new_instance(value, unit, name)
+
+        elif isinstance(other, tuple(sympy.core.all_classes)):
+            other_value, other_unit = Quantity.extract_from_expr(other)
+            value = self.value & other_value
+            unit = None
+            name = self.name if not self.constant else None
+
+            return self.__create_new_instance(value, unit, name)
+
+        else:
+            value = self.value & other
+            unit = None
+            name = self.name if not self.constant else None
+
+            return self.__create_new_instance(value, unit, name)
+
+    def __or__(self, other):
+        if isinstance(other, (self.__class__, respy.units.quantity.Quantity, np.ndarray)):
+            unit = None
+            value = self.value | other.value
+            name = self.__get_name(other)
+
+            return self.__create_new_instance(value, unit, name)
+
+        elif isinstance(other, tuple(sympy.core.all_classes)):
+            other_value, other_unit = Quantity.extract_from_expr(other)
+            value = self.value | other_value
+            unit = None
+            name = self.name if not self.constant else None
+
+            return self.__create_new_instance(value, unit, name)
+
+        else:
+            value = self.value | other
+            unit = None
+            name = self.name if not self.constant else None
+
+            return self.__create_new_instance(value, unit, name)
+
+    def __xor__(self, other):
+        if isinstance(other, (self.__class__, respy.units.quantity.Quantity, np.ndarray)):
+            unit = None
+            value = self.value ^ other.value
+            name = self.__get_name(other)
+
+            return self.__create_new_instance(value, unit, name)
+
+        elif isinstance(other, tuple(sympy.core.all_classes)):
+            other_value, other_unit = Quantity.extract_from_expr(other)
+            value = self.value ^ other_value
+            unit = None
+            name = self.name if not self.constant else None
+
+            return self.__create_new_instance(value, unit, name)
+
+        else:
+            value = self.value ^ other
+            unit = None
+            name = self.name if not self.constant else None
+
+            return self.__create_new_instance(value, unit, name)
+
+    # Right Operations --------------------------------------------------------------------------------
+    __rmul__ = __mul__
+    __radd__ = __add__
+
+    def __rtruediv__(self, other):
+        operator = 'rdiv'
+        if isinstance(other, (self.__class__, respy.units.quantity.Quantity, np.ndarray)):
+            unit = self.__get_unit(other, operator)
+            value = self.__get_value(other, operator)
+            name = self.__get_name(other)
+
+            return self.__create_new_instance(value, unit, name)
+
+        elif isinstance(other, tuple(sympy.core.all_classes)):
+            other_value, other_unit = Quantity.extract_from_expr(other)
+            value = other_value / self.value
+            unit = self.__compute_unit(self.unit, other_unit, operator)
+            name = self.name if not self.constant else None
+
+            return self.__create_new_instance(value, unit, name)
+
+        else:
+            value = other / self.value
+            unit = self.unit
+            name = self.name if not self.constant else None
+
+            return self.__create_new_instance(value, unit, name)
+
+    __rdiv__ = __rtruediv__
+
+    def __rsub__(self, other):
+        operator = 'sub'
+        if isinstance(other, (self.__class__, respy.units.quantity.Quantity, np.ndarray)):
+            unit = self.__get_unit(other, operator)
+            value = self.__get_value(other, operator)
+            name = self.__get_name(other)
+
+            return self.__create_new_instance(value, unit, name)
+
+        elif isinstance(other, tuple(sympy.core.all_classes)):
+            other_value, other_unit = Quantity.extract_from_expr(other)
+            value = other_value - self.value
+            unit = self.__compute_unit(self.unit, other_unit, operator)
+            name = self.name if not self.constant else None
+
+            return self.__create_new_instance(value, unit, name)
+
+        else:
+            value = other - self.value
+            unit = self.unit
+            name = self.name if not self.constant else None
+
+            return self.__create_new_instance(value, unit, name)
+
+    def __rlshift__(self, other):
+        operator = 'mul'
+        if isinstance(other, (self.__class__, respy.units.quantity.Quantity, np.ndarray)):
+            unit = self.__get_unit(other, operator)
+            value = other.value << self.value
+            name = self.__get_name(other)
+
+            return self.__create_new_instance(value, unit, name)
+
+        elif isinstance(other, tuple(sympy.core.all_classes)):
+            other_value, other_unit = Quantity.extract_from_expr(other)
+            value = other_value << self.value
+            unit = self.__compute_unit(self.unit, other_unit, operator)
+            name = self.name if not self.constant else None
+
+            return self.__create_new_instance(value, unit, name)
+
+        else:
+            value = other << self.value
+            unit = self.unit
+            name = self.name if not self.constant else None
+
+            return self.__create_new_instance(value, unit, name)
+
+    def __rrshift__(self, other):
+        operator = 'rdiv'
+        if isinstance(other, (self.__class__, respy.units.quantity.Quantity, np.ndarray)):
+            unit = self.__get_unit(other, operator)
+            value = other.value >> self.value
+            name = self.__get_name(other)
+
+            return self.__create_new_instance(value, unit, name)
+
+        elif isinstance(other, tuple(sympy.core.all_classes)):
+            other_value, other_unit = Quantity.extract_from_expr(other)
+            value = other_value >> self.value
+            unit = self.__compute_unit(self.unit, other_unit, operator)
+            name = self.name if not self.constant else None
+
+            return self.__create_new_instance(value, unit, name)
+
+        else:
+            value = other >> self.value
+            unit = self.unit
+            name = self.name if not self.constant else None
+
+            return self.__create_new_instance(value, unit, name)
+
+    def __rfloordiv__(self, other):
+        operator = "rdiv"
+        if isinstance(other, (self.__class__, respy.units.quantity.Quantity, np.ndarray)):
+            unit = self.__get_unit(other, operator)
+            value = other.value // self.value
+            name = self.__get_name(other)
+
+            return self.__create_new_instance(value, unit, name)
+
+        elif isinstance(other, tuple(sympy.core.all_classes)):
+            other_value, other_unit = Quantity.extract_from_expr(other)
+            value = other_value // self.value
+            unit = self.__compute_unit(self.unit, other_unit, operator)
+            name = self.name if not self.constant else None
+
+            return self.__create_new_instance(value, unit, name)
+
+        else:
+            value = other // self.value
+            unit = self.unit
+            name = self.name if not self.constant else None
+
+            return self.__create_new_instance(value, unit, name)
+
+    def __rmod__(self, other):
+        operator = "rdiv"
+        if isinstance(other, (self.__class__, respy.units.quantity.Quantity, np.ndarray)):
+            unit = self.__get_unit(other, operator)
+            value = other.value % self.value
+            name = self.__get_name(other)
+
+            return self.__create_new_instance(value, unit, name)
+
+        elif isinstance(other, tuple(sympy.core.all_classes)):
+            other_value, other_unit = Quantity.extract_from_expr(other)
+            value = other_value % self.value
+            unit = self.__compute_unit(self.unit, other_unit, operator)
+            name = self.name if not self.constant else None
+
+            return self.__create_new_instance(value, unit, name)
+
+        else:
+            value = other % self.value
+            unit = self.unit
+            name = self.name if not self.constant else None
+
+            return self.__create_new_instance(value, unit, name)
+
+    def __rdivmod__(self, other):
+        operator = "rdiv"
+        if isinstance(other, (self.__class__, respy.units.quantity.Quantity, np.ndarray)):
+            unit = self.__get_unit(other, operator)
+            value = divmod(other.value, self.value)
+            name = self.__get_name(other)
+
+            return self.__create_new_instance(value, unit, name)
+
+        elif isinstance(other, tuple(sympy.core.all_classes)):
+            other_value, other_unit = Quantity.extract_from_expr(other)
+            value = divmod(other_value, self.value)
+            unit = self.__compute_unit(self.unit, other_unit, operator)
+            name = self.name if not self.constant else None
+
+            return self.__create_new_instance(value, unit, name)
+
+        else:
+            value = divmod(other, self.value)
+            unit = self.unit
+            name = self.name if not self.constant else None
+
+            return self.__create_new_instance(value, unit, name)
+
+    def __rpow__(self, other):
+        operator = 'rpow'
+        if isinstance(other, (self.__class__, respy.units.quantity.Quantity, np.ndarray)):
+            unit = self.__get_unit(other, operator)
+            value = self.__get_value(other, operator)
+            name = self.__get_name(other)
+
+            return self.__create_new_instance(value, unit, name)
+
+        elif isinstance(other, tuple(sympy.core.all_classes)):
+            other_value, other_unit = Quantity.extract_from_expr(other)
+            value = other_value ** self.value
+            unit = self.__compute_unit(self.unit, other_unit, operator)
+            name = self.name if not self.constant else None
+
+            return self.__create_new_instance(value, unit, name)
+
+        else:
+            value = other ** self.value
+            unit = self.unit
+            name = self.name if not self.constant else None
+
+            return self.__create_new_instance(value, unit, name)
+
+    def __rand__(self, other):
+        if isinstance(other, (self.__class__, respy.units.quantity.Quantity, np.ndarray)):
+            unit = None
+            value = other.value & self.value
+            name = self.__get_name(other)
+
+            return self.__create_new_instance(value, unit, name)
+
+        elif isinstance(other, tuple(sympy.core.all_classes)):
+            other_value, other_unit = Quantity.extract_from_expr(other)
+            value = other_value & self.value
+            unit = None
+            name = self.name if not self.constant else None
+
+            return self.__create_new_instance(value, unit, name)
+
+        else:
+            value = other & self.value
+            unit = None
+            name = self.name if not self.constant else None
+
+            return self.__create_new_instance(value, unit, name)
+
+    def __ror__(self, other):
+        if isinstance(other, (self.__class__, respy.units.quantity.Quantity, np.ndarray)):
+            unit = None
+            value = other.value | self.value
+            name = self.__get_name(other)
+
+            return self.__create_new_instance(value, unit, name)
+
+        elif isinstance(other, tuple(sympy.core.all_classes)):
+            other_value, other_unit = Quantity.extract_from_expr(other)
+            value = other_value | self.value
+            unit = None
+            name = self.name if not self.constant else None
+
+            return self.__create_new_instance(value, unit, name)
+
+        else:
+            value = other | self.value
+            unit = None
+            name = self.name if not self.constant else None
+
+            return self.__create_new_instance(value, unit, name)
+
+    def __rxor__(self, other):
+        if isinstance(other, (self.__class__, respy.units.quantity.Quantity, np.ndarray)):
+            unit = None
+            value = other.value ^ self.value
+            name = self.__get_name(other)
+
+            return self.__create_new_instance(value, unit, name)
+
+        elif isinstance(other, tuple(sympy.core.all_classes)):
+            other_value, other_unit = Quantity.extract_from_expr(other)
+            value = other_value ^ self.value
+            unit = None
+            name = self.name if not self.constant else None
+
+            return self.__create_new_instance(value, unit, name)
+
+        else:
+            value = other ^ self.value
+            unit = None
+            name = self.name if not self.constant else None
+
+            return self.__create_new_instance(value, unit, name)
+
+    # Augmented Assignment -------------------------------------------------------------------------------
+    __iadd__ = __add__
+    __isub__ = __sub__
+    __imul__ = __mul__
+    __ifloordiv__ = __floordiv__
+    __idiv__ = __div__
+    __itruediv__ = __truediv__
+    __imod__ = __mod__
+    __ipow__ = __pow__
+    __ilshift__ = __lshift__
+    __irshift__ = __rshift__
+    __iand__ = __and__
+    __ior__ = __or__
+    __ixor__ = __xor__
+
+    # --------------------------------------------------------------------------------------------------------
+    #  Comparison
+    # --------------------------------------------------------------------------------------------------------
+    def __eq__(self, other):
+        if isinstance(other, (self.__class__, respy.units.quantity.Quantity, np.ndarray)):
+            if hasattr(other, 'unit'):
+                if self.unit != other.unit:
+                    raise util.UnitError("The units of the values are not equal")
+                else:
+                    return self.value == other.value
+            else:
+                return self.value == other
+
+        elif isinstance(other, tuple(sympy.core.all_classes)):
+            other_value, other_unit = Quantity.extract_from_expr(other)
+            if self.unit != other_unit:
+                raise util.UnitError("The units of the values are not equal")
+            else:
+                return self.value == other_value
+        else:
+            return self.value == other
+
+    def __ne__(self, other):
+        if isinstance(other, (self.__class__, respy.units.quantity.Quantity, np.ndarray)):
+            if hasattr(other, 'unit'):
+                if self.unit != other.unit:
+                    raise util.UnitError("The units of the values are not equal")
+                else:
+                    return self.value != other.value
+            else:
+                return self.value != other
+
+        elif isinstance(other, tuple(sympy.core.all_classes)):
+            other_value, other_unit = Quantity.extract_from_expr(other)
+            if self.unit != other_unit:
+                raise util.UnitError("The units of the values are not equal")
+            else:
+                return self.value != other_value
+        else:
+            return self.value != other
+
+    def __lt__(self, other):
+        if isinstance(other, (self.__class__, respy.units.quantity.Quantity, np.ndarray)):
+            if hasattr(other, 'unit'):
+                if self.unit != other.unit:
+                    raise util.UnitError("The units of the values are not equal")
+                else:
+                    return self.value < other.value
+            else:
+                return self.value != other
+
+        elif isinstance(other, tuple(sympy.core.all_classes)):
+            other_value, other_unit = Quantity.extract_from_expr(other)
+            if self.unit != other_unit:
+                raise util.UnitError("The units of the values are not equal")
+            else:
+                return self.value < other_value
+        else:
+            return self.value < other
+
+    def __gt__(self, other):
+        if isinstance(other, (self.__class__, respy.units.quantity.Quantity, np.ndarray)):
+            if hasattr(other, 'unit'):
+                if self.unit != other.unit:
+                    raise util.UnitError("The units of the values are not equal")
+                else:
+                    return self.value > other.value
+            else:
+                return self.value != other
+
+        elif isinstance(other, tuple(sympy.core.all_classes)):
+            other_value, other_unit = Quantity.extract_from_expr(other)
+            if self.unit != other_unit:
+                raise util.UnitError("The units of the values are not equal")
+            else:
+                return self.value > other_value
+        else:
+            return self.value > other
+
+    def __le__(self, other):
+        if isinstance(other, (self.__class__, respy.units.quantity.Quantity, np.ndarray)):
+            if hasattr(other, 'unit'):
+                if self.unit != other.unit:
+                    raise util.UnitError("The units of the values are not equal")
+                else:
+                    return self.value <= other.value
+            else:
+                return self.value != other
+
+        elif isinstance(other, tuple(sympy.core.all_classes)):
+            other_value, other_unit = Quantity.extract_from_expr(other)
+            if self.unit != other_unit:
+                raise util.UnitError("The units of the values are not equal")
+            else:
+                return self.value <= other_value
+        else:
+            return self.value <= other
+
+    def __ge__(self, other):
+        if isinstance(other, (self.__class__, respy.units.quantity.Quantity, np.ndarray)):
+            if hasattr(other, 'unit'):
+                if self.unit != other.unit:
+                    raise util.UnitError("The units of the values are not equal")
+                else:
+                    return self.value >= other.value
+            else:
+                return self.value != other
+
+        elif isinstance(other, tuple(sympy.core.all_classes)):
+            other_value, other_unit = Quantity.extract_from_expr(other)
+            if self.unit != other_unit:
+                raise util.UnitError("The units of the values are not equal")
+            else:
+                return self.value >= other_value
+        else:
+            return self.value >= other
+
+    # --------------------------------------------------------------------------------------------------------
+    # Numeric Magic Methods
+    # --------------------------------------------------------------------------------------------------------
+    def __pos__(self):
+        value = +self.value
+        return self.__create_new_instance(value, self.unit, self.name)
+
+    def __neg__(self):
+        value = -self.value
+        return self.__create_new_instance(value, self.unit, self.name)
+
+    def __abs__(self):
+        value = np.abs(self.value)
+        return self.__create_new_instance(value, self.unit, self.name)
+
+    def __invert__(self):
+        value = ~self.value
+        return self.__create_new_instance(value, self.unit, self.name)
+
+    def __iter__(self):
+        def iter_over_value(unit, name):
+            for item in self.value:
+                yield self.__create_new_instance(item, unit, name)
+
+        return iter_over_value(self.unit, self.name)
+
     # --------------------------------------------------------------------------------------------------------
     # Properties
     # --------------------------------------------------------------------------------------------------------
@@ -327,6 +901,8 @@ class Quantity(np.ndarray):
 
         if self.unit is None:
             return '-'
+        elif self.unit is 1 or self.unit is '1':
+            return '-'
         else:
             return str(self.unit)
 
@@ -341,11 +917,44 @@ class Quantity(np.ndarray):
         """
         return self.value * self.unit
 
+    @property
+    def tolist(self):
+        """
+        Convert values and units to list.
+
+        Returns
+        -------
+        tuple with two lists ([values], [units])
+        """
+        return self.value.tolist(), [self.unit]
+
     # --------------------------------------------------------------------------------------------------------
     # Callable Methods
     # --------------------------------------------------------------------------------------------------------
+    def decompose(self):
+        """
+        Decompose values and units.
+
+        Returns
+        -------
+        tuple with values and units.
+        """
+        return self.value, self.unit
+
     @staticmethod
     def extract_from_expr(expr):
+        """
+        Extract value and unit from an sympy expression.
+
+        Parameters
+        ----------
+        expr :sympy.core.mul.Mul
+            Sympy expression
+
+        Returns
+        -------
+        tuple with (values, units)
+        """
         copy_value = expr
         value = copy_value.args[0]
 
@@ -391,7 +1000,7 @@ class Quantity(np.ndarray):
 
         """
         unit = util.def_unit(unit)
-        value = np.zeros_like(self.value, dtype=self.dtype)
+        value = np.zeros_like(self.value, dtype=self._dtype)
 
         if len(self.value) == 1:
             arg = convert_to(self.expr[0], unit).n()
@@ -399,7 +1008,7 @@ class Quantity(np.ndarray):
             value = value.flatten()
 
         else:
-            value = np.zeros_like(self.value, dtype=self.dtype)
+            value = np.zeros_like(self.value, dtype=self._dtype)
             shape = value.shape
 
             value = value.flatten()
@@ -412,16 +1021,16 @@ class Quantity(np.ndarray):
             value = value.reshape(shape)
 
         if inplace:
-            self.__set_attributes(unit, value, self.dtype, self.copy, self.order, self.subok, False, self.ndmin)
+            self.__set_attributes(unit, value, self._dtype, self.copy, self.order, self.subok, False, self.ndmin)
         else:
             return self.__create_new_instance(value, unit, self.name)
 
     # --------------------------------------------------------------------------------------------------------
     # Private Methods
     # --------------------------------------------------------------------------------------------------------
-    def __get_name(self, other, operator):
+    def __get_name(self, other):
         if hasattr(other, 'name'):
-            name = self.__compute_name(self.name, other.name, self.constant, other.constant, operator)
+            name = self.__compute_name(self.name, other.name, self.constant, other.constant)
         else:
             name = self.name if not self.constant else None
 
@@ -457,6 +1066,8 @@ class Quantity(np.ndarray):
             result = other_value - value
         elif operator == "pow":
             result = value ** other_value
+        elif operator == "rpow":
+            result = other_value ** value
         else:
             raise NotImplementedError("Operation {0} is not implemented.".format(operator))
 
@@ -492,7 +1103,7 @@ class Quantity(np.ndarray):
 
         return unit
 
-    def __compute_name(self, name1, name2, const1, const2, operator):
+    def __compute_name(self, name1, name2, const1, const2):
         if name1 is None and name2 is None:
             name = None
 
@@ -509,14 +1120,15 @@ class Quantity(np.ndarray):
                 name = name1
 
         elif name1 is not None and name2 is not None:
-            if const1 and const2:
-                name = None
-            elif const1:
-                name = name2
-            elif const2:
-                name = name1
-            else:
-                name = name1 + __STR_OPERAND__[operator] + name2
+            name = None
+            # if const1 and const2:
+            #     name = None
+            # elif const1:
+            #     name = name2
+            # elif const2:
+            #     name = name1
+            # else:
+            #     name = name1 + __STR_OPERAND__[operator] + name2
         else:
             raise RuntimeError("Could not calculate name")
 
@@ -525,7 +1137,7 @@ class Quantity(np.ndarray):
     def __set_attributes(self, unit, value, dtype, copy, order, subok, constant, ndmin):
         self.unit = util.def_unit(unit)
         self.value = value
-        self.dtype = dtype
+        self._dtype = dtype
         self.copy = copy
         self.order = order
         self.subok = subok
@@ -539,45 +1151,11 @@ class Quantity(np.ndarray):
         if unit is None:
             unit = "-"
 
-        if self.ndmin is None:
-            ndmin = 0
-        else:
-            ndmin = self.ndmin
-
-        value = np.array(value, dtype=self.dtype, copy=False, order=self.order,
+        value = np.array(value, dtype=self._dtype, copy=False, order=self.order,
                          subok=self.subok)
-
+        value = np.atleast_1d(value)
         view = value.view(quantity_subclass)
-        view.__set_attributes(unit, value, self.dtype, self.copy, self.order, self.subok, False, self.ndmin)
+        view.__set_attributes(unit, value, self._dtype, self.copy, self.order, self.subok, False, self.ndmin)
         view.set_name(name)
 
         return view
-
-# #
-import respy.constants as const
-
-F = Quantity(1.26, unit="GHz")
-# fh = F.convert_to('1 / s')
-#
-# w = const.c / fh
-# w.convert_to('cm')
-
-# a = 2345 * 1/util.s
-#
-# a = const.c * F
-# a.unit
-# unit = "joule / kelvin * meter / seconds"
-
-# array = np.array([[2, 2, 3, 4], [5, 6, 7, 8]])
-#
-# q = Quantity(array, name='q', unit="meter / second")
-# u = Quantity(0.25, name='u', unit='seconds')
-#
-# v = Quantity(array, name='BSC')
-# x = Quantity(array, name='BRDF', constant=True)
-#
-# t = Quantity(30, unit='meter')
-# a = 2 * util.cm * 5 * util.m / util.K * 45 * util.J
-# # z = Quantity(a)
-
-# f = Quantity(array, unit='GHz')

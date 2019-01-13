@@ -21,7 +21,8 @@ from .util import (def_unit,
                    s, h,
                    second, minute, hour,
                    seconds, minutes, hours,
-                   __UNITS__)
+                   __UNITS__,
+                   UnitError)
 
 import util
 
