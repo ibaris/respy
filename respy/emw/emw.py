@@ -5,6 +5,11 @@ import numpy as np
 from respy.auxiliary import align_all, PI, C
 from respy.emw.auxiliary import check_unit_frequency, check_unit_wavelength, BANDS, CONVERT_FREQ, CONVERT_WAVE
 
+from respy.emw.util import __FREQUENCY__, __WAVELENGTH__
+from respy.units import Quantity
+
+import respy.constants as const
+
 REGION = {"GAMMA": "GAMMA",
           "XRAY": "XRAY",
           "UV": "UV",
@@ -33,7 +38,7 @@ REGION = {"GAMMA": "GAMMA",
           "UHF": "RADIO"}
 
 
-class EMW(object):
+class EM(object):
     def __init__(self, input, unit='GHz', output='cm'):
         """
         A class to describe electromagnetic waves.
@@ -76,18 +81,19 @@ class EMW(object):
         self.__output = output
 
         # Assign Input Parameter ---------------------------------------------------------------------------------------
-        if unit in CONVERT_FREQ.keys() and output in CONVERT_WAVE.keys():
+        if unit in __FREQUENCY__ and output in __WAVELENGTH__:
             self.__frequency_unit = unit
             self.__wavelength_unit = output
 
             if isinstance(input, str):
-                self.__frequency = select_region(region=input, output=unit)
+                region = select_region(region=input, output=unit)
+                self.__frequency = Quantity(region, unit=self.__frequency_unit)
             else:
-                self.__frequency = input
+                self.__frequency = Quantity(input, unit=self.__frequency_unit)
 
             self.__wavelength = self.__compute_wavelength()
 
-        elif unit in CONVERT_WAVE.keys() and output in CONVERT_FREQ.keys():
+        elif unit in __WAVELENGTH__ and output in __FREQUENCY__:
             self.__frequency_unit = output
             self.__wavelength_unit = unit
 
@@ -100,34 +106,38 @@ class EMW(object):
 
         else:
             raise ValueError("Input must be a frequency or a wavelength. "
-                             "If input is a frequency, unit must be equal to {0}. "
-                             "When entering a wavelength, unit must be equal to {1}.".format(str(CONVERT_FREQ.keys()),
-                                                                                             str(CONVERT_WAVE.keys())))
+                             "If input is a frequency, unit must be {0}. "
+                             "When entering a wavelength, unit must be {1}.".format(str(__FREQUENCY__),
+                                                                                    str(__WAVELENGTH__)))
 
         # Additional Calculation ---------------------------------------------------------------------------------------
-        self.__k0 = self.__compute_wavenumver()
-        self.__region = which_region(self.__frequency, self.__frequency_unit)
-        self.__band = which_band(self.__frequency, self.__frequency_unit)
-        self.__array = np.asarray([self.__frequency, self.__wavelength, self.k0])
+        self.__wavenumber = self.__compute_wavenumver()
+        self.__region = which_region(self.__frequency.value, str(self.__frequency_unit))
+        self.__band = which_band(self.__frequency.value, str(self.__frequency_unit))
+        self.__array = np.asarray([self.__frequency, self.__wavelength, self.wavenumber])
         self.array = self.__array
 
     # ------------------------------------------------------------------------------------------------------------------
     # Magic Methods
     # ------------------------------------------------------------------------------------------------------------------
-    def __str__(self):
-        vals = dict()
-        vals['frequency'], vals['frequency_unit'] = self.iza.mean(), self.izaDeg.mean()
-        vals['wavelength'], vals['wavelength_unit'] = self.vza.mean(), self.vzaDeg.mean()
-        vals['wavenumber'] = self.raa.mean()
-        vals['region'], vals['band'] = self.iaa.mean(), self.iaaDeg.mean()
+    def __repr__(self):
+        prefix = '<{0} '.format(self.__class__.__name__)
+        sep = ','
+        arrstr = np.array2string(self.frequency.value,
+                                 separator=sep,
+                                 prefix=prefix)
 
-        info = 'Class               : EMW\n' \
-               'Mean frequency      : {frequency} {frequency_unit}\n' \
-               'Mean wavelength     : {wavelength} {wavelength_unit}\n' \
-               'Mean wavenumber     : {wavenumber} \n' \
-               'Frequency is in {region} region at band {band}'.format(**vals)
+        freq = '{0}{1} Frequency in [{2}]>'.format(prefix, arrstr, self.__frequency.unitstr)
 
-        return info
+        prefix = '<{0} '.format(self.__class__.__name__)
+        sep = ','
+        arrstr = np.array2string(self.wavelength.value,
+                                 separator=sep,
+                                 prefix=prefix)
+
+        wave = '{0}{1} Wavelength in [{2}]>'.format(prefix, arrstr, self.__wavelength.unitstr)
+
+        return freq + '\n' + wave
 
     def __len__(self):
         return len(self.__frequency)
@@ -173,54 +183,13 @@ class EMW(object):
     def frequency(self):
         return self.__frequency
 
-    @frequency.setter
-    def frequency(self, value):
-        self.__frequency = value
-        self.__wavelength = self.__compute_wavelength()
-        self.__k0 = self.__compute_wavenumver()
-        self.__region = which_region(self.__frequency, self.__frequency_unit)
-        self.__band = which_band(self.__frequency, self.__frequency_unit)
-
     @property
     def wavelength(self):
         return self.__wavelength
 
-    @wavelength.setter
-    def wavelength(self, value):
-        self.__wavelength = value
-        self.__frequency = self.__compute_frequency()
-        self.__k0 = self.__compute_wavenumver()
-        self.__region = which_region(self.__frequency, self.__frequency_unit)
-        self.__band = which_band(self.__frequency, self.__frequency_unit)
-
     @property
-    def frequency_unit(self):
-        return self.__frequency_unit
-
-    @frequency_unit.setter
-    def frequency_unit(self, value):
-        if value in CONVERT_FREQ.keys():
-            self.__frequency = self.__convert_frequency(value)
-            self.__frequency_unit = value
-        else:
-            raise ValueError("If input is a frequency, unit must be equal to {0}. ".format(str(CONVERT_FREQ.keys())))
-
-    @property
-    def wavelength_unit(self):
-        return self.__wavelength_unit
-
-    @wavelength_unit.setter
-    def wavelength_unit(self, value):
-        if value in CONVERT_WAVE.keys():
-            self.__wavelength = self.__convert_wavelength(value)
-            self.__wavelength_unit = value
-
-        else:
-            raise ValueError("When entering a wavelength, unit must be equal to {0}.".format(str(CONVERT_WAVE.keys())))
-
-    @property
-    def k0(self):
-        return self.__k0
+    def wavenumber(self):
+        return self.__wavenumber
 
     # ------------------------------------------------------------------------------------------------------------------
     # Public Methods
@@ -254,33 +223,31 @@ class EMW(object):
 
         data = align_all(data)
 
-        self.__frequency, self.__wavelength, self.k0 = np.asarray(data[-3:])
+        wn = self.wavelength.unit
+        wns = '1 / ' + str(wn)
+
+        self.__frequency = Quantity(data[-3], self.frequency.unit)
+        self.__wavelength = Quantity(data[-2], self.wavelength.unit)
+        self.__wavenumber = Quantity(data[-1], wns)
+
+        # self.__frequency, self.__wavelength, self.__wavenumber = np.asarray(data[-3:])
 
         return data[0:-3]
 
     # ------------------------------------------------------------------------------------------------------------------
     # Private Methods
     # ------------------------------------------------------------------------------------------------------------------
-    def __convert_frequency(self, value):
-        return convert_frequency(frequency=self.__frequency, unit=self.__frequency_unit, output=value)
-
-    def __convert_wavelength(self, value):
-        return convert_wavelength(wavelength=self.__wavelength, unit=self.__wavelength_unit, output=value)
-
-    def __update_variables(self):
-        self.__frequency = self.__compute_frequency()
-        self.__wavelength = self.__compute_wavelength()
-        self.__k0 = self.__compute_wavenumver()
-
     def __compute_wavelength(self):
-        return compute_wavelength(frequency=self.__frequency, unit=self.__frequency_unit, output=self.__wavelength_unit)
+        w = const.c / self.__frequency.convert_to('1 / s')
+        return w.convert_to(self.__wavelength_unit)
 
     def __compute_frequency(self):
-        return compute_frequency(wavelength=self.__wavelength, unit=self.__wavelength_unit,
-                                 output=self.__frequency_unit)
+        f = const.c / self.__wavelength.convert_to('m')
+
+        return f.convert_to(self.__frequency_unit)
 
     def __compute_wavenumver(self):
-        return compute_wavenumber(frequency=self.__frequency, unit=self.__frequency_unit, output=self.__wavelength_unit)
+        return (2 * const.pi) / self.__wavelength
 
 
 def compute_wavelength(frequency, unit='GHz', output="cm"):
@@ -737,3 +704,8 @@ def which_region(input, unit='GHz'):
             region_list = "NONE"
 
     return region_list
+
+
+value = 1.26
+unit = 'GHz'
+f = EM(value, unit)
