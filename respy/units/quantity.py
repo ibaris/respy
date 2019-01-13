@@ -484,7 +484,7 @@ class Quantity(np.ndarray):
 
         else:
             value = other / self.value
-            unit = self.unit
+            unit = 1 / self.unit
             name = self.name if not self.constant else None
 
             return self.__create_new_instance(value, unit, name)
@@ -558,7 +558,7 @@ class Quantity(np.ndarray):
 
         else:
             value = other >> self.value
-            unit = self.unit
+            unit = 1 / self.unit
             name = self.name if not self.constant else None
 
             return self.__create_new_instance(value, unit, name)
@@ -582,7 +582,7 @@ class Quantity(np.ndarray):
 
         else:
             value = other // self.value
-            unit = self.unit
+            unit = 1 / self.unit
             name = self.name if not self.constant else None
 
             return self.__create_new_instance(value, unit, name)
@@ -606,7 +606,7 @@ class Quantity(np.ndarray):
 
         else:
             value = other % self.value
-            unit = self.unit
+            unit = 1 / self.unit
             name = self.name if not self.constant else None
 
             return self.__create_new_instance(value, unit, name)
@@ -630,7 +630,7 @@ class Quantity(np.ndarray):
 
         else:
             value = divmod(other, self.value)
-            unit = self.unit
+            unit = 1 / self.unit
             name = self.name if not self.constant else None
 
             return self.__create_new_instance(value, unit, name)
