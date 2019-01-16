@@ -4,18 +4,23 @@
 (c) 2017- Ismail Baris
 For COPYING and LICENSE details, please refer to the LICENSE file
 """
+try:
+    from Cython.Distutils import build_ext
+except ImportError:
+    use_cython = False
+
+else:
+    use_cython = True
 
 try:
-    from pip import main as pipmain
-
+    from setuptools import setup
+    from setuptools import Extension
 except ImportError:
-    from pip._internal import main as pipmain
+    from distutils.core import setup
+    from distutils.extension import Extension
 
-import pip
 from setuptools import find_packages
-from setuptools import setup
-from setuptools.command.install import install
-
+import numpy
 
 def get_version():
     version = dict()
@@ -31,6 +36,30 @@ def get_packages():
     return find_packages()
 
 
+# with open('requirements.txt') as f:
+#     required = f.read().splitlines()
+
+cmdclass = {}
+ext_modules = []
+
+if use_cython:
+    print ('******** Compiling with CYTHON accomplished ******')
+
+    ext_modules += [
+        Extension("respy.base.unit_base",
+                  ["respy/base/unit_base.pyx"], include_dirs=['.'])
+    ]
+
+    cmdclass.update({'build_ext': build_ext})
+
+else:
+    print ('******** CYTHON Not Found. Use distributed .c files *******')
+
+    ext_modules += [
+        Extension("respy.base.unit_base",
+                  ["respy/base/unit_base.c"], include_dirs=['.'])
+    ]
+
 setup(name='respy',
 
       version=get_version(),
@@ -38,6 +67,11 @@ setup(name='respy',
       packages=get_packages(),
       # package_dir={'dir': 'dir', 'dir': 'dir',
       #              'dir': 'dir', 'dir': 'dir'},
+
+      cmdclass=cmdclass,
+
+      include_dirs=[numpy.get_include()],
+      ext_modules=ext_modules,
 
       author="Ismail Baris",
       maintainer='Ismail Baris',
