@@ -3,7 +3,7 @@ from __future__ import division
 import numpy as np
 
 import respy.constants as const
-from respy.auxiliary import align_all, PI
+from respy.util import align_all
 from respy.units import Quantity
 from respy.units import Units
 from respy.units.util import def_unit, DimensionError
@@ -300,7 +300,7 @@ class EM(object):
         -------
         wavenumber: float, np.ndarray or respy.units.quantity.Quantity
         """
-        return 2 * PI / EM.compute_wavelength(frequency, unit=unit, output=output, quantity=quantity)
+        return 2 * const.pi / EM.compute_wavelength(frequency, unit=unit, output=output, quantity=quantity)
 
 
 class Bands(object):
