@@ -60,9 +60,58 @@ class Quantity(np.ndarray):
             should have.  Ones will be pre-pended to the shape as needed to meet
             this requirement.  This parameter is ignored if the input is a
             `Quantity` and ``copy=False``.
+        name : str
+            A name for the created Quantity.
+        constant : bool
+            If True and the constant has a name the name will be replaced after a operation.
 
-        Returns
+        Attributes
+        ----------
+        value : np.ndarray
+            The numerical value of this quantity in the units given by unit.
+        unit : sympy.physics.units.quantities.Quantity
+            An object that represents the unit associated with the input value.
+        dtype : type
+            The data type of the value
+        copy: bool
+            The entered copy bool value.
+        order : str
+            Order of the array.
+        subok : bool
+            The entered subok value.
+        ndmin : int
+            Minimum number of dimensions
+        name : str
+            Name of the Quantity
+        constant : bool
+            Information about if the Quantity is an constant or not.
+
+        unitstr : str
+            Parameter unit as str.
+        expr : np.ndarray
+            The whole expression (value * unit) as sympy.core.mul.Mul.
+        tolist : list
+            Value and unit as a list.
+
+        Methods
         -------
+        decompose()
+            Return value as np.ndarray and unit as sympy.physics.units.quantities.Quantity object.
+        extract_from_expr(expr)
+            Extract value and unit from a sympy.core.mul.Mul object.
+        set_name(name)
+            Set a name for the current Quantity.
+        convert_to(unit, inplace=True)
+            Convert unit to another units.
+
+        Raises
+        ------
+        UnitError
+        DimensionError
+
+        See Also
+        --------
+        respry.units.util.Units
 
         """
 
