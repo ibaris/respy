@@ -1,9 +1,11 @@
 from __future__ import division
 import numpy as np
-from respy.units import util as util
+import util as util
+# from respy.units import util as util
 import respy
 import sympy
 from sympy.physics.units import convert_to
+from respy.base import unit_base
 
 __STR_OPERAND__ = {'mul': ' * ',
                    'div': ' / ',
@@ -31,7 +33,7 @@ class Quantity(np.ndarray):
             Must be an `sympy.physics.units.quantities.Quantity` object or a string parsable by
             the :mod:`~respy.units` package.
 
-        dtype : numpy.dtype, optional
+        dtype : numpy.dtype, type, int, float, double, optional
             The dtype of the resulting Numpy array or scalar that will
             hold the value.  If not provided, it is determined from the input,
             except that any input that cannot represent float (integer and bool)
@@ -80,23 +82,33 @@ class Quantity(np.ndarray):
         x = np.array(value, dtype=dtype, copy=copy, order=order, subok=subok, ndmin=ndmin)
         x = np.atleast_1d(x)
 
+        if x.dtype == int:
+            dtype = np.double
+            x = x.astype(dtype)
+        else:
+            pass
+
         obj = x.view(type=cls)
 
         if unit is None:
             obj.unit = None
+            obj.dimension = None
         else:
             obj.unit = util.def_unit(unit)
+            try:
+                obj.dimension = obj.unit.dimension.name
+            except AttributeError:
+                obj.dimension = None
 
         obj.value = x
+        obj._dtype = x.dtype
         obj.name = name
         obj.constant = constant
 
-        obj._dtype = dtype
         obj.copy = copy
         obj.order = order
         obj.subok = subok
         obj.ndmin = ndmin
-
         return obj
 
     # --------------------------------------------------------------------------------------------------------
@@ -105,7 +117,7 @@ class Quantity(np.ndarray):
     def __repr__(self):
         if self.name is None:
             prefix = '<{0} '.format(self.__class__.__name__)
-            sep = ','
+            sep = ', '
             arrstr = np.array2string(self,
                                      separator=sep,
                                      prefix=prefix)
@@ -114,7 +126,7 @@ class Quantity(np.ndarray):
 
         else:
             prefix = '<{0} '.format(self.__class__.__name__)
-            sep = ','
+            sep = ', '
             arrstr = np.array2string(self,
                                      separator=sep,
                                      prefix=prefix)
@@ -136,6 +148,7 @@ class Quantity(np.ndarray):
             self.order = getattr(obj, 'order', None)
             self.subok = getattr(obj, 'subok', None)
             self.ndmin = getattr(obj, 'ndmin', None)
+            self.dimension = getattr(obj, 'dimension', None)
 
     def __array_wrap__(self, out_arr, context=None):
         return np.ndarray.__array_wrap__(self, out_arr, context)
@@ -339,7 +352,7 @@ class Quantity(np.ndarray):
 
         else:
             value = self.value ** other
-            unit = self.unit
+            unit = self.unit ** other
             name = self.name if not self.constant else None
 
             return self.__create_new_instance(value, unit, name)
@@ -654,7 +667,7 @@ class Quantity(np.ndarray):
 
         else:
             value = other ** self.value
-            unit = self.unit
+            unit = other ** self.unit
             name = self.name if not self.constant else None
 
             return self.__create_new_instance(value, unit, name)
@@ -748,11 +761,15 @@ class Quantity(np.ndarray):
     # --------------------------------------------------------------------------------------------------------
     def __eq__(self, other):
         if isinstance(other, (self.__class__, respy.units.quantity.Quantity, np.ndarray)):
-            if hasattr(other, 'unit'):
-                if self.unit != other.unit:
+            if hasattr(other, 'dimension'):
+                if self.dimension != other.dimension:
                     raise util.UnitError("The units of the values are not equal")
                 else:
-                    return self.value == other.value
+                    if hasattr(other, 'unit'):
+                        if self.unit != other.unit:
+                            other = other.convert_to(self.unit)
+                        else:
+                            return self.value == other.value
             else:
                 return self.value == other
 
@@ -767,11 +784,15 @@ class Quantity(np.ndarray):
 
     def __ne__(self, other):
         if isinstance(other, (self.__class__, respy.units.quantity.Quantity, np.ndarray)):
-            if hasattr(other, 'unit'):
-                if self.unit != other.unit:
+            if hasattr(other, 'dimension'):
+                if self.dimension != other.dimension:
                     raise util.UnitError("The units of the values are not equal")
                 else:
-                    return self.value != other.value
+                    if hasattr(other, 'unit'):
+                        if self.unit != other.unit:
+                            other = other.convert_to(self.unit)
+                        else:
+                            return self.value != other.value
             else:
                 return self.value != other
 
@@ -786,13 +807,17 @@ class Quantity(np.ndarray):
 
     def __lt__(self, other):
         if isinstance(other, (self.__class__, respy.units.quantity.Quantity, np.ndarray)):
-            if hasattr(other, 'unit'):
-                if self.unit != other.unit:
+            if hasattr(other, 'dimension'):
+                if self.dimension != other.dimension:
                     raise util.UnitError("The units of the values are not equal")
                 else:
-                    return self.value < other.value
+                    if hasattr(other, 'unit'):
+                        if self.unit != other.unit:
+                            other = other.convert_to(self.unit)
+                        else:
+                            return self.value < other.value
             else:
-                return self.value != other
+                return self.value < other
 
         elif isinstance(other, tuple(sympy.core.all_classes)):
             other_value, other_unit = Quantity.extract_from_expr(other)
@@ -805,13 +830,17 @@ class Quantity(np.ndarray):
 
     def __gt__(self, other):
         if isinstance(other, (self.__class__, respy.units.quantity.Quantity, np.ndarray)):
-            if hasattr(other, 'unit'):
-                if self.unit != other.unit:
+            if hasattr(other, 'dimension'):
+                if self.dimension != other.dimension:
                     raise util.UnitError("The units of the values are not equal")
                 else:
-                    return self.value > other.value
+                    if hasattr(other, 'unit'):
+                        if self.unit != other.unit:
+                            other = other.convert_to(self.unit)
+                        else:
+                            return self.value > other.value
             else:
-                return self.value != other
+                return self.value > other
 
         elif isinstance(other, tuple(sympy.core.all_classes)):
             other_value, other_unit = Quantity.extract_from_expr(other)
@@ -824,13 +853,17 @@ class Quantity(np.ndarray):
 
     def __le__(self, other):
         if isinstance(other, (self.__class__, respy.units.quantity.Quantity, np.ndarray)):
-            if hasattr(other, 'unit'):
-                if self.unit != other.unit:
+            if hasattr(other, 'dimension'):
+                if self.dimension != other.dimension:
                     raise util.UnitError("The units of the values are not equal")
                 else:
-                    return self.value <= other.value
+                    if hasattr(other, 'unit'):
+                        if self.unit != other.unit:
+                            other = other.convert_to(self.unit)
+                        else:
+                            return self.value <= other.value
             else:
-                return self.value != other
+                return self.value <= other
 
         elif isinstance(other, tuple(sympy.core.all_classes)):
             other_value, other_unit = Quantity.extract_from_expr(other)
@@ -843,13 +876,17 @@ class Quantity(np.ndarray):
 
     def __ge__(self, other):
         if isinstance(other, (self.__class__, respy.units.quantity.Quantity, np.ndarray)):
-            if hasattr(other, 'unit'):
-                if self.unit != other.unit:
+            if hasattr(other, 'dimension'):
+                if self.dimension != other.dimension:
                     raise util.UnitError("The units of the values are not equal")
                 else:
-                    return self.value >= other.value
+                    if hasattr(other, 'unit'):
+                        if self.unit != other.unit:
+                            other = other.convert_to(self.unit)
+                        else:
+                            return self.value >= other.value
             else:
-                return self.value != other
+                return self.value >= other
 
         elif isinstance(other, tuple(sympy.core.all_classes)):
             other_value, other_unit = Quantity.extract_from_expr(other)
@@ -1000,28 +1037,49 @@ class Quantity(np.ndarray):
 
         """
         unit = util.def_unit(unit)
-        value = np.zeros_like(self.value, dtype=self._dtype)
 
-        if len(self.value) == 1:
-            arg = convert_to(self.expr[0], unit).n()
-            value[0] = arg.args[0]
-            value = value.flatten()
+        try:
+            dimension = unit.dimension.name
 
-        else:
+            if dimension == self.dimension:
+                scaled_value = self.value.astype(self._dtype) * util.Units[str(dimension)][str(self.unit)].scale_factor
+                value = scaled_value / util.Units[str(dimension)][str(unit)].scale_factor
+
+            else:
+                value = np.zeros_like(self.value, dtype=self._dtype)
+
+                if len(self.value) == 1:
+                    arg = unit_base.convert_to_unit(self.expr, unit)
+                    value[0] = arg.base
+                    value = value.flatten()
+
+                else:
+                    shape = self.value.shape
+                    expr = self.expr.flatten()
+                    value = unit_base.convert_to_unit(expr, unit)
+
+                    value = value.base
+                    value = value.reshape(shape)
+
+        except AttributeError:
             value = np.zeros_like(self.value, dtype=self._dtype)
-            shape = value.shape
 
-            value = value.flatten()
-            expr = self.expr.flatten()
+            if len(self.value) == 1:
+                arg = unit_base.convert_to_unit(self.expr, unit)
+                value[0] = arg.base
+                value = value.flatten()
 
-            for i, item in enumerate(value):
-                arg = convert_to(expr[i], unit).n()
-                value[i] = arg.args[0]
+            else:
+                shape = self.value.shape
+                expr = self.expr.flatten()
+                value = unit_base.convert_to_unit(expr, unit)
 
-            value = value.reshape(shape)
+                value = value.base
+                value = value.reshape(shape)
 
         if inplace:
-            self.__set_attributes(unit, value, self._dtype, self.copy, self.order, self.subok, False, self.ndmin)
+            self.__set_attributes(unit, value, self._dtype, self.copy, self.order, self.subok, False,
+                                  self.ndmin, self.dimension)
         else:
             return self.__create_new_instance(value, unit, self.name)
 
@@ -1095,7 +1153,7 @@ class Quantity(np.ndarray):
             elif operator == "rsub":
                 unit = unit2 - unit1
             elif operator == "pow":
-                unit = pow(unit1, unit2)
+                unit = unit1 ** unit2
             else:
                 raise NotImplementedError("Operation {0} is not implemented.".format(operator))
         else:
@@ -1121,20 +1179,12 @@ class Quantity(np.ndarray):
 
         elif name1 is not None and name2 is not None:
             name = None
-            # if const1 and const2:
-            #     name = None
-            # elif const1:
-            #     name = name2
-            # elif const2:
-            #     name = name1
-            # else:
-            #     name = name1 + __STR_OPERAND__[operator] + name2
         else:
             raise RuntimeError("Could not calculate name")
 
         return name
 
-    def __set_attributes(self, unit, value, dtype, copy, order, subok, constant, ndmin):
+    def __set_attributes(self, unit, value, dtype, copy, order, subok, constant, ndmin, dimension):
         self.unit = util.def_unit(unit)
         self.value = value
         self._dtype = dtype
@@ -1143,6 +1193,11 @@ class Quantity(np.ndarray):
         self.subok = subok
         self.constant = constant
         self.ndmin = ndmin
+
+        try:
+            self.dimension = self.unit.dimension.name
+        except AttributeError:
+            self.dimension = None
 
     def __create_new_instance(self, value, unit=None, name=None):
 
@@ -1153,9 +1208,18 @@ class Quantity(np.ndarray):
 
         value = np.array(value, dtype=self._dtype, copy=False, order=self.order,
                          subok=self.subok)
+
         value = np.atleast_1d(value)
         view = value.view(quantity_subclass)
-        view.__set_attributes(unit, value, self._dtype, self.copy, self.order, self.subok, False, self.ndmin)
+        view.__set_attributes(unit, value, self._dtype, self.copy, self.order, self.subok, False, self.ndmin,
+                              self.dimension)
         view.set_name(name)
 
         return view
+
+#
+# import numpy as np
+#
+# array = np.zeros(5) + 3
+# q = Quantity(array, 'GHz')
+# q.convert_to('cm ** 2')

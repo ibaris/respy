@@ -1,3 +1,4 @@
+from quantity import Quantity
 from .util import (def_unit,
                    deg, degrees, degree, rad, radian, radians,
                    nm, um, mm, cm, dm, m, km,
@@ -22,8 +23,4 @@ from .util import (def_unit,
                    second, minute, hour,
                    seconds, minutes, hours,
                    __UNITS__,
-                   UnitError)
-
-import util
-
-from .quantity import Quantity
+                   UnitError, Units)
