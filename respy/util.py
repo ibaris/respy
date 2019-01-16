@@ -7,11 +7,8 @@ DTYPES = [np.bool, np.byte, np.ubyte, np.short, np.ushort, np.intc, np.uintc, np
           np.intp,
           np.uintp, np.float32, np.float64, np.complex, np.complex64, np.complex128, float, int, complex]
 
-PI = 3.1415926535897932384626433832795028841971693993751058209749445923078164
-C = 299792458
-
-RAD_TO_DEG = 180.0 / PI
-DEG_TO_RAD = PI / 180.0
+__ANGLE_UNIT_RAD__ = ['RAD', 'rad', 'radian', 'radians']
+__ANGLE_UNIT_DEG__ = ['DEG', 'deg', 'degree', 'degrees']
 
 def rad(angle):
     """
