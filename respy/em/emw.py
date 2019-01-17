@@ -8,6 +8,7 @@ from respy.units import Quantity
 from respy.units import Units
 from respy.units.util import def_unit, DimensionError
 from respy.em.util import __REGION__, __BANDS__, __WHICH__BAND__, __WHICH__REGION__
+from respy.units.util import DimensionError, UnitError
 
 
 class EM(object):
@@ -17,11 +18,11 @@ class EM(object):
 
         Parameters
         ----------
-        input : int, float or np.ndarray
-            Frequency or wavelength
-        unit : {'Hz', 'PHz', 'kHz', 'daHz', 'MHz', 'THz', 'hHz', 'GHz'} or {'nm', 'um', 'cm', 'dm', 'mm', 'm', 'km'}
+        input : int, float, np.ndarray, respy.units.quantity.Quantity
+            Frequency or wavelength.
+        unit : str, respy.units.Units, sympy.physics.units.quantities.Quantity
             Unit of input. Default is 'GHz'.
-        output : {'Hz', 'PHz', 'kHz', 'daHz', 'MHz', 'THz', 'hHz', 'GHz'} or {'nm', 'um', 'cm', 'dm', 'mm', 'm', 'km'}
+        output : str, respy.units.Units, sympy.physics.units.quantities.Quantity
             Unit of output. Default is 'cm'.
 
         Attributes
@@ -30,14 +31,17 @@ class EM(object):
             Shows the band that the input belongs to.
         region : str
             Shows the region that the input belongs to.
-        frequency : array_like
+        frequency : respy.units.quantity.Quantity
             Frequency.
-        frequency_unit : str
-            Unit of frequency.
-        wavelength : array_like
+        wavelength : respy.units.quantity.Quantity
             Wavelength.
-        wavelength_unit : str
-            Unit of wavelength.
+        len : int
+            Length of array.
+        shape : tuple
+            Shape of array.
+
+        Methods
+        -------
 
         Note
         ----
@@ -53,12 +57,25 @@ class EM(object):
         self.__output = output
 
         # Assign Input Parameter ---------------------------------------------------------------------------------------
-        if unit in Units.frequency.keys() and output in Units.length.keys():
+        if input.__class__.__name__ is 'Quantity':
+            if str(input.dimension) == 'frequency':
+                self.__frequency_unit = input.unit
+
+                if output in Units.length.keys():
+                    self.__wavelength_unit = output
+                else:
+                    raise UnitError("Output unit {} is not a valid unit if input is a frequency.".format(str(output)))
+
+                self.__frequency = input
+                self.__wavelength = EM.compute_wavelength(self.__frequency, self.__frequency_unit,
+                                                          output=self.__wavelength_unit)
+
+        elif unit in Units.frequency.keys() and output in Units.length.keys():
             self.__frequency_unit = unit
             self.__wavelength_unit = output
 
             self.__frequency = Quantity(input, unit=self.__frequency_unit)
-            self.__wavelength = EM.compute_wavelength(self.__frequency, output=self.__wavelength_unit)
+            self.__wavelength = EM.compute_wavelength(self.__frequency, self.__frequency_unit, output=self.__wavelength_unit)
 
         elif unit in Units.length.keys() and output in Units.frequency.keys():
             self.__frequency_unit = output
@@ -69,10 +86,10 @@ class EM(object):
                                                     output=self.__frequency_unit)
 
         else:
-            raise ValueError("Input must be a frequency or a wavelength. "
-                             "If input is a frequency, unit must be {0}. "
-                             "When entering a wavelength, unit must be {1}.".format(str(Units.frequency.keys()),
-                                                                                    str(Units.length.keys())))
+            raise UnitError("Input must be a frequency or a wavelength. "
+                            "If input is a frequency, unit must be {0}. "
+                            "When entering a wavelength, unit must be {1}.".format(str(Units.frequency.keys()),
+                                                                                   str(Units.length.keys())))
 
         # Additional Calculation ---------------------------------------------------------------------------------------
         self.__wavenumber = EM.compute_wavenumber(self.__frequency, output=self.__wavelength_unit)
@@ -205,7 +222,7 @@ class EM(object):
         return data[0:-3]
 
     @staticmethod
-    def compute_frequency(wavelength, unit='cm', output="GHz", quantity=True):
+    def compute_frequency(wavelength, unit, output, quantity=True):
         """
         Convert wavelengths in frequencies.
 
@@ -213,10 +230,10 @@ class EM(object):
         ----------
         wavelength : int, float, np.ndarray, respy.units.quantity.Quantity
             Wavelength.
-        unit : str or respy.units.quantity.Quantity
+        unit : str, respy.units.Units, sympy.physics.units.quantities.Quantity
             Unit of the wavelength. See respy.units.Units.length.keys() for available units. This is optional
             if the input is an respy.units.quantity.Quantity instance.
-        output : str or respy.units.quantity.Quantity
+        output : str, respy.units.Units, sympy.physics.units.quantities.Quantity
             Unit of entered frequency. See respy.units.Units.frequency.keys() for available units.
         quantity : bool, optional
             If True the output is an respy.units.quantity.Quantity object. If False the output is an array.
@@ -242,7 +259,7 @@ class EM(object):
             return f.value
 
     @staticmethod
-    def compute_wavelength(frequency, unit='GHz', output="cm", quantity=True):
+    def compute_wavelength(frequency, unit, output, quantity=True):
         """
         Convert frequencies in wavelength.
 
@@ -250,10 +267,10 @@ class EM(object):
         ----------
         frequency : int, float, np.ndarray, respy.units.quantity.Quantity
             Frequency.
-        unit : str or respy.units.quantity.Quantity
+        unit : str, respy.units.Units, sympy.physics.units.quantities.Quantity
             Unit of entered frequency. See respy.units.Units.frequency.keys() for available units. This is optional
             if the input is an respy.units.quantity.Quantity instance.
-        output : str or respy.units.quantity.Quantity
+        output : str, respy.units.Units, sympy.physics.units.quantities.Quantity
             Unit of the wavelength. See respy.units.Units.length.keys() for available units.
         quantity : bool, optional
             If True the output is an respy.units.quantity.Quantity object. If False the output is an array.
@@ -280,7 +297,7 @@ class EM(object):
             return w.value
 
     @staticmethod
-    def compute_wavenumber(frequency, unit='GHz', output='cm', quantity=True):
+    def compute_wavenumber(frequency, unit, output, quantity=True):
         """
         Convert frequencies in free space wavenumbers.
 
@@ -288,10 +305,10 @@ class EM(object):
         ----------
         frequency : int, float, np.ndarray, respy.units.quantity.Quantity
             Frequency.
-        unit : str or respy.units.quantity.Quantity
+        unit : str, respy.units.Units, sympy.physics.units.quantities.Quantity
             Unit of entered frequency. See respy.units.Units.frequency.keys() for available units. This is optional
             if the input is an respy.units.quantity.Quantity instance.
-        output : str or respy.units.quantity.Quantity
+        output : str, respy.units.Units, sympy.physics.units.quantities.Quantity
             Unit of the wavelength. See respy.units.Units.length.keys() for available units.
         quantity : bool, optional
             If True the output is an respy.units.quantity.Quantity object. If False the output is an array.
