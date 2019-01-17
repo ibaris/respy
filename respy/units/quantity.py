@@ -25,7 +25,7 @@ class Quantity(np.ndarray):
 
         Parameters
         ----------
-        value : float, int, numpy.ndarray, str, sympy.core.mul.Mul
+        value : float, int, numpy.ndarray, str, sympy.core.mul.Mul, sympy.physics.units.quantities.Quantity
             The numerical value of this quantity in the units given by unit.
 
         unit : sympy.physics.units.quantities.Quantity, str
@@ -85,7 +85,6 @@ class Quantity(np.ndarray):
             Name of the Quantity
         constant : bool
             Information about if the Quantity is an constant or not.
-
         unitstr : str
             Parameter unit as str.
         expr : np.ndarray
@@ -146,6 +145,10 @@ class Quantity(np.ndarray):
             obj.unit = util.def_unit(unit)
             try:
                 obj.dimension = obj.unit.dimension.name
+
+                if obj.dimension == 1:
+                    obj.dimension = None
+
             except AttributeError:
                 obj.dimension = None
 
@@ -1079,10 +1082,12 @@ class Quantity(np.ndarray):
             An object that represents the unit associated with the input value.
             Must be an `sympy.physics.units.quantities.Quantity` object or a string parsable by
             the :mod:`~respy.units` package.
+        inplace : bool
+            If True the values of the actual class will be overwritten.
 
         Returns
         -------
-        respy.units.Quantity
+        respy.units.Quantity or None
 
         """
         unit = util.def_unit(unit)
@@ -1227,7 +1232,10 @@ class Quantity(np.ndarray):
                 name = name1
 
         elif name1 is not None and name2 is not None:
-            name = None
+            if name1 == name2:
+                name = name1
+            else:
+                name = None
         else:
             raise RuntimeError("Could not calculate name")
 
@@ -1265,10 +1273,3 @@ class Quantity(np.ndarray):
         view.set_name(name)
 
         return view
-
-#
-# import numpy as np
-#
-# array = np.zeros(5) + 3
-# q = Quantity(array, 'GHz')
-# q.convert_to('cm ** 2')
