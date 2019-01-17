@@ -3,14 +3,15 @@ import sys
 import warnings
 
 import numpy as np
-from respy.auxiliary import (sec, align_all, asarrays, DTYPES, PI)
+
+import respy.constants as const
+from respy.util import (sec, align_all, asarrays, DTYPES, __ANGLE_UNIT_DEG__, __ANGLE_UNIT_RAD__)
 
 # python 3.6 comparability
 if sys.version_info < (3, 0):
     srange = xrange
 else:
     srange = range
-
 
 
 class Angles(object):
@@ -85,15 +86,18 @@ class Angles(object):
         if raa is None and (iaa is None or vaa is None):
             raise ValueError("If raa is not defined iaa AND vaa must be defined.")
 
-        if (angle_unit is 'DEG' or angle_unit is 'deg') or (angle_unit is 'RAD' or angle_unit is 'rad'):
+        if (angle_unit in __ANGLE_UNIT_RAD__ or angle_unit in __ANGLE_UNIT_DEG__):
             pass
         else:
-            raise ValueError("angle_unit must be 'DEG' or 'RAD', but angle_unit is: {}".format(str(angle_unit)))
+            raise ValueError("angle_unit must be {0} or {1}, "
+                             "but the actual angle_unit is: {2}".format(str(__ANGLE_UNIT_RAD__),
+                                                                        str(__ANGLE_UNIT_DEG__),
+                                                                        str(angle_unit)))
 
         if dtype in DTYPES:
             pass
         else:
-            raise TypeError("dtype must be a numpy.dtype object. The dtype is {0}".format(str(dtype)))
+            raise TypeError("dtype must be a numpy.dtype object. The actual dtype is {0}".format(str(dtype)))
 
         # Assign relative azimuth angle flag
         if raa is not None and iaa is not None and vaa is not None:
@@ -129,14 +133,14 @@ class Angles(object):
         # Convert Angles depending on Angle Unit -----------------------------------------------------------------------
         self.__normalize = normalize
 
-        if angle_unit is 'DEG' or angle_unit is 'deg':
+        if angle_unit in __ANGLE_UNIT_DEG__:
             self.__array = np.deg2rad(temporal_array)
             self.__nbar = np.deg2rad(nbar)
 
             self.__arrayDeg = temporal_array
             self.__nbarDeg = nbar
 
-        elif angle_unit is 'RAD' or angle_unit is 'rad':
+        elif angle_unit in __ANGLE_UNIT_RAD__:
             self.__array = temporal_array
             self.__nbar = nbar
 
@@ -155,12 +159,12 @@ class Angles(object):
         self.__array[1][vza_mask] = np.abs(self.__array[1][vza_mask])
 
         for item in self.__array[2:-2]:
-            item[iza_mask] += PI
-            item[vza_mask] += PI
+            item[iza_mask] += const.pi
+            item[vza_mask] += const.pi
 
         for itemDeg in self.__arrayDeg[2:-2]:
-            itemDeg[iza_mask] += PI
-            itemDeg[vza_mask] += PI
+            itemDeg[iza_mask] += const.pi
+            itemDeg[vza_mask] += const.pi
 
         # Set Attributes -----------------------------------------------------------------------------------------------
         self.__norm = None
@@ -485,13 +489,13 @@ class Angles(object):
     @property
     def phi(self):
         """
-        Relative azimuth angle normalized in a range of 2*PI
+        Relative azimuth angle normalized in a range of 2*pi
 
         Returns
         -------
         phi : array_like
         """
-        return np.abs((self.raa % (2. * PI)))
+        return np.abs((self.raa % (2. * const.pi)))
 
     @property
     def geometries(self):
@@ -559,12 +563,12 @@ class Angles(object):
         if value in DTYPES:
             pass
         else:
-            raise TypeError("dtype must be a numpy.dtype object. The dtype is {0}".format(str(value)))
+            raise TypeError("dtype must be a numpy.dtype object. The actual dtype is {0}".format(str(value)))
 
         self.__dtype = value
 
         if self.__dtype == np.int:
-            warnings.warn("The dtype is {0}. This could cause errors in radians.")
+            warnings.warn("The dtype is np.int. This could lead to errors in unit radians.")
 
         self.__array = self.__change_dtype(self.__array, self.__nbar, self.__dtype)
         self.__arrayDeg = self.__change_dtype(self.__arrayDeg, self.__nbarDeg, self.__dtype)
