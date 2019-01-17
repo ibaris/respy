@@ -39,13 +39,19 @@ class EM(object):
             Length of array.
         shape : tuple
             Shape of array.
+        value : np.ndarray
+            An array with the values of frequency, wavelength and wavenumber.
 
         Methods
         -------
-
-        Note
-        ----
-        Frequency, wavelength, frequency_unit and wavelength_unit can be changed.
+        align_with(value)
+            Expand all input values to the same length depend on an external array.
+        compute_frequency(wavelength, unit, output, quantity=True)
+            Static method to convert wavelengths in frequencies.
+        compute_wavelength(frequency, unit, output, quantity=True)
+            Static method to convert frequencies in wavelengths.
+        compute_wavenumber(frequency, unit, output, quantity=True)
+            Static method to convert frequencies in free space wavenumbers.
         
         """
 
@@ -75,7 +81,8 @@ class EM(object):
             self.__wavelength_unit = output
 
             self.__frequency = Quantity(input, unit=self.__frequency_unit)
-            self.__wavelength = EM.compute_wavelength(self.__frequency, self.__frequency_unit, output=self.__wavelength_unit)
+            self.__wavelength = EM.compute_wavelength(self.__frequency, self.__frequency_unit,
+                                                      output=self.__wavelength_unit)
 
         elif unit in Units.length.keys() and output in Units.frequency.keys():
             self.__frequency_unit = output
@@ -92,11 +99,11 @@ class EM(object):
                                                                                    str(Units.length.keys())))
 
         # Additional Calculation ---------------------------------------------------------------------------------------
-        self.__wavenumber = EM.compute_wavenumber(self.__frequency, output=self.__wavelength_unit)
+        self.__wavenumber = EM.compute_wavenumber(self.__frequency, self.__frequency_unit,
+                                                  output=self.__wavelength_unit)
         self.__region = Bands.which_region(self.__frequency.value, str(self.__frequency_unit))
         self.__band = Bands.which_band(self.__frequency.value, str(self.__frequency_unit))
-        self.__array = np.asarray([self.__frequency, self.__wavelength, self.wavenumber])
-        self.array = self.__array
+        self.__value = np.array([self.__frequency, self.__wavelength, self.__wavenumber])
 
     # ------------------------------------------------------------------------------------------------------------------
     # Magic Methods
@@ -112,6 +119,13 @@ class EM(object):
                                       separator=sep,
                                       prefix=prefix)
 
+        arrstr_wavenumber = np.array2string(self.wavenumber.value,
+                                            separator=sep,
+                                            prefix=prefix)
+
+        wavenumber = '{0}{1} Wavenumber in free space [{2}]>'.format(prefix, arrstr_wavenumber,
+                                                                     self.__wavenumber.unitstr)
+
         if self.__band is None:
             freq = '{0}{1} Frequency in region {2} in [{3}]>'.format(prefix, arrstr_freq, self.__region,
                                                                      self.__frequency.unitstr)
@@ -126,10 +140,14 @@ class EM(object):
                                                                                  self.__band,
                                                                                  self.__wavelength.unitstr)
 
-        return freq + '\n' + wave
+        return freq + '\n' + wave + '\n' + wavenumber
 
     def __len__(self):
         return len(self.__frequency)
+
+    def __getitem__(self, item):
+        value = self.value[item]
+        return value
 
     # ------------------------------------------------------------------------------------------------------------------
     # Property Access
@@ -144,7 +162,7 @@ class EM(object):
         -------
         len : int
         """
-        return len(self.__frequency)
+        return len(self.value)
 
     @property
     def shape(self):
@@ -155,11 +173,11 @@ class EM(object):
         -------
         shape : tuple
         """
-        return self.__frequency.shape
+        return self.value.shape
 
-    # ------------------------------------------------------------------------------------------------------------------
-    # Property with Setter
-    # ------------------------------------------------------------------------------------------------------------------
+    # --------------------------------------------------------------------------------------------------------
+    # Properties
+    # --------------------------------------------------------------------------------------------------------
     @property
     def band(self):
         return self.__band
@@ -180,9 +198,13 @@ class EM(object):
     def wavenumber(self):
         return self.__wavenumber
 
-    # ------------------------------------------------------------------------------------------------------------------
-    # Public Methods
-    # ------------------------------------------------------------------------------------------------------------------
+    @property
+    def value(self):
+        return self.__value
+
+    # --------------------------------------------------------------------------------------------------------
+    # Callable Methods
+    # --------------------------------------------------------------------------------------------------------
     def align_with(self, value):
         """
         Align all angles with another array.
@@ -203,7 +225,7 @@ class EM(object):
         effect on the angles within the Angles class.
         """
         # RAD Angles
-        data = [item for item in self.__array]
+        data = [item for item in self.value]
 
         if isinstance(value, tuple) or isinstance(value, list):
             data = tuple(value) + tuple(data, )
@@ -321,7 +343,42 @@ class EM(object):
 
 
 class Bands(object):
-    def __init__(self, output='GHz', dtype=np.double):
+    def __init__(self, output, dtype=np.double):
+        """
+        Select bands and regions from EM spectrum.
+
+        Parameters
+        ----------
+        output : str, str, respy.units.Units, sympy.physics.units.quantities.Quantity
+            Output unit of returned spectrum. This can be a dimension type of frequency or length.
+        dtype: type, optional
+            Data type of the output. Default is numpy.double.
+
+        Attributes
+        ----------
+        output : sympy.physics.units.quantities.Quantity
+            Output as sympy.physics.units.quantities.Quantity.
+        dimension : sympy.physics.units.quantities.Quantity
+            Dimension of the output. This is frequency or length.
+        dtype : type
+            Data type of the output.
+        bands : list
+            Available bands.
+        region : list
+            Available regions.
+
+        Methods
+        -------
+        get_bands(bands, quantity=True)
+            Get a range of a specific band.
+        get_region(region, quantity=True)
+             Get bands of a specific region.
+        which_band(value, unit)
+            Static method to get the corresponding band of a frequency or a wavelength.
+        which_region(value, unit)
+            Static method to get the corresponding region of a frequency or a wavelength.
+
+        """
         self.output = def_unit(output)
         self.dimension = self.output.dimension.name
         self.dtype = dtype
@@ -329,7 +386,30 @@ class Bands(object):
         if str(self.dimension) != 'frequency' and str(self.dimension) != 'length':
             raise DimensionError("The output unit must be a dimension of frequency or length.")
 
+        self.bands = __BANDS__
+        self.region = __REGION__
+
     def get_bands(self, bands, quantity=True):
+        """
+        Get a range of a specific band.
+
+        Parameters
+        ----------
+        bands : str
+            Name of the band.
+        quantity : bool, optional
+            If True the output is an respy.units.quantity.Quantity object. If False the output is an array.
+            Default is True.
+
+        Returns
+        -------
+        np.ndarray
+
+        Notes
+        -----
+        See attribute `bands` for available bands.
+
+        """
         bands = bands.split()
 
         band_list = list()
@@ -358,6 +438,26 @@ class Bands(object):
             return conc_list
 
     def get_region(self, region, quantity=True):
+        """
+        Get bands of a specific region.
+
+        Parameters
+        ----------
+        region : str
+            Name of the region.
+        quantity : bool, optional
+            If True the output is an respy.units.quantity.Quantity object. If False the output is an array.
+            Default is True.
+
+        Returns
+        -------
+        np.ndarray
+
+        Notes
+        -----
+        See attribute `region` for available region.
+
+        """
 
         if region == "RADAR" or region == "RADAR".lower():
             return self.get_bands("L S C X", quantity)
@@ -374,6 +474,27 @@ class Bands(object):
 
     @staticmethod
     def which_band(value, unit):
+        """
+        Get the corresponding band of a frequency or a wavelength.
+
+        Parameters
+        ----------
+        value : float, int, numpy.ndarray, str, sympy.core.mul.Mul, sympy.physics.units.quantities.Quantity
+            The numerical value of a frequency or wavelength.
+        unit : str, respy.units.Units, sympy.physics.units.quantities.Quantity
+            Unit of the value. See respy.units.Units.length.keys() or respy.units.Units.frequency.keys() for
+            available units. This is optional.
+
+        Returns
+        -------
+        np.ndarray
+
+        Notes
+        -----
+        See attribute `bands` for available bands.
+
+        """
+
         value = Quantity(value, unit)
 
         for item in __WHICH__BAND__.keys():
@@ -401,6 +522,26 @@ class Bands(object):
 
     @staticmethod
     def which_region(value, unit):
+        """
+        Get the corresponding region of a frequency or a wavelength.
+
+        Parameters
+        ----------
+        value : float, int, numpy.ndarray, str, sympy.core.mul.Mul, sympy.physics.units.quantities.Quantity
+            The numerical value of a frequency or wavelength.
+        unit : str, respy.units.Units, sympy.physics.units.quantities.Quantity
+            Unit of the value. See respy.units.Units.length.keys() or respy.units.Units.frequency.keys() for
+            available units. This is optional.
+
+        Returns
+        -------
+        np.ndarray
+
+        Notes
+        -----
+        See attribute `region` for available region.
+
+        """
         value = Quantity(value, unit)
 
         for item in __WHICH__REGION__.keys():
