@@ -1,13 +1,14 @@
 from __future__ import division
 
 from numpy import cos, log10, errstate, nan_to_num
-
+import numpy as np
 import respy.constants as const
 from respy.util import rad, __ANGLE_UNIT_DEG__, __ANGLE_UNIT_RAD__
+from respy.units import Quantity
 
 
 class Conversion(object):
-    def __init__(self, value, vza, value_unit="BRDF", angle_unit='RAD'):
+    def __init__(self, value, vza, value_unit="BRDF", angle_unit='RAD', quantity=True):
         """
         Conversion of BRDF, BRF, BSC and BSC in dB.
 
@@ -17,26 +18,28 @@ class Conversion(object):
             Input value in BRDF, BRF, BSC or BSCdB. See parameter value_unit.
         vza : int, float, array_like
             Viewing zenith angle in DEG or RAD. See parameter angle_unit.
-        value_unit : {'BRDF', 'BRF', 'BSC', 'BSCdB'}
+        value_unit : {'I', 'BRDF', 'BRF', 'BSC', 'BSCdB', 'BSCdb', 'brdf', 'brf', 'bsc', 'bscdb'}
             The unit of input value:
-            * BRDF : Bidirectional Reflectance Distribution Function (Intensity) (default).
+            * I or BRDF : Bidirectional Reflectance Distribution Function (Intensity) (default).
             * BRF : Bidirectional Reflectance Factor.
             * BSC : Back Scattering Coefficient (no unit).
-            *BSCdB : Back Scattering Coefficient in dB.
+            * BSCdB : Back Scattering Coefficient in dB.
         angle_unit : {'DEG', 'RAD', 'deg', 'rad'}, optional
             * 'DEG': Input angle in [DEG].
             * 'RAD': Input angle  in [RAD] (default).
 
         Attributes
         ----------
-        Conversion.BRDF : array_like
-            BRDF value.
-        Conversion.BRF : array_like
+        I : array_like or respy.unit.quantity.Quantity
+            Intensity (BRDF) value.
+        BRF : array_like or respy.unit.quantity.Quantity
             BRF value.
-        Conversion.BSC : array_like
+        BSC : array_like or respy.unit.quantity.Quantity
             BSC value.
-        Conversion.BSCdB : array_like
+        BSCdB : array_like or respy.unit.quantity.Quantity
             BSC value in dB.
+        value : array_like
+            All values in an array of type np.array([I, BRF, BSC, BSCdB])
 
         Methods
         -------
@@ -52,6 +55,7 @@ class Conversion(object):
         respy.BSC
         """
         self.value_unit = value_unit
+        self.quantity = quantity
 
         if angle_unit is "rad":
             angle_unit = "RAD"
@@ -61,31 +65,98 @@ class Conversion(object):
         self.angle_unit = angle_unit
 
         if self.value_unit is "BRDF":
-            self.BRDF = value
-            self.BSC = Conversion.BSC(value, vza, self.angle_unit)
-            self.BSCdB = Conversion.dB(Conversion.BSC(value, vza, self.angle_unit))
-            self.BRF = Conversion.BRF(value)
+            self.I = value
+            self.BSC = Conversion.BRDF_to_BSC(value, vza, self.angle_unit)
+            self.BSCdB = Conversion.dB(Conversion.BRDF_to_BSC(value, vza, self.angle_unit))
+            self.BRF = Conversion.BRDF_to_BRF(value)
 
         elif self.value_unit is "BSC":
             self.BSC = value
-            self.BRDF = Conversion.BRDF(value, vza, self.angle_unit)
-            self.BRF = Conversion.BRF(self.BRDF)
+            self.I = Conversion.BSC_to_BRDF(value, vza, self.angle_unit)
+            self.BRF = Conversion.BRDF_to_BRF(self.I)
             self.BSCdB = Conversion.dB(value)
 
         elif self.value_unit is "BSCdB":
             self.BSCdB = value
             self.BSC = Conversion.linear(value)
-            self.BRDF = Conversion.BRDF(self.BSC, vza, self.angle_unit)
-            self.BRF = Conversion.BRF(self.BRDF)
+            self.I = Conversion.BSC_to_BRDF(self.BSC, vza, self.angle_unit)
+            self.BRF = Conversion.BRDF_to_BRF(self.I)
 
         elif self.value_unit is "BRF":
             self.BRF = value
-            self.BRDF = value / const.pi
-            self.BSC = Conversion.BSC(self.BRDF, vza, self.angle_unit)
-            self.BSCdB = Conversion.dB(Conversion.BSC(self.BRDF, vza, self.angle_unit))
+            self.I = value / const.pi
+            self.BSC = Conversion.BRDF_to_BSC(self.I, vza, self.angle_unit)
+            self.BSCdB = Conversion.dB(Conversion.BRDF_to_BSC(self.I, vza, self.angle_unit))
 
         else:
             raise ValueError("the unit of value must be 'BRDF', 'BRF', 'BSC' or 'BSCdB'")
+
+        if quantity:
+            self.BSC = Quantity(self.BSC, name='Backscattering Coefficient')
+            self.BSCdB = Quantity(self.BSC, unit='dB', name='Backscattering Coefficient')
+            self.I = Quantity(self.I, name='Intensity')
+            self.BRF = Quantity(self.BRF, name='Bidirectional Reflectance Factor')
+        else:
+            pass
+
+        self.value = np.array([self.I, self.BRF, self.BSC, self.BSCdB])
+
+    # --------------------------------------------------------------------------------------------------------
+    # Magic Methods
+    # --------------------------------------------------------------------------------------------------------
+    def __repr__(self):
+        prefix = '<{0} '.format(self.__class__.__name__)
+        sep = ','
+
+        if self.quantity:
+            arrstr_bsc = np.array2string(self.BSC.value,
+                                         separator=sep,
+                                         prefix=prefix)
+
+            arrstr_dB = np.array2string(self.BSCdB.value,
+                                        separator=sep,
+                                        prefix=prefix)
+
+            arrstr_I = np.array2string(self.I.value,
+                                       separator=sep,
+                                       prefix=prefix)
+
+            arrstr_BRF = np.array2string(self.BRF.value,
+                                         separator=sep,
+                                         prefix=prefix)
+
+            bsc = '{0}{1} Backscattering Coefficient in [{2}]>'.format(prefix, arrstr_bsc, self.BSC.unitstr)
+            bscdb = '{0}{1} Backscattering Coefficient in [{2}]>'.format(prefix, arrstr_dB, self.BSCdB.unitstr)
+            I = '{0}{1} Intensity in [{2}]>'.format(prefix, arrstr_I, self.I.unitstr)
+            BRF = '{0}{1} Bidirectional Reflectance Factor in [{2}]>'.format(prefix, arrstr_BRF, self.BRF.unitstr)
+
+
+        else:
+            arrstr_bsc = np.array2string(self.BSC,
+                                         separator=sep,
+                                         prefix=prefix)
+
+            arrstr_dB = np.array2string(self.BSCdB,
+                                        separator=sep,
+                                        prefix=prefix)
+
+            arrstr_I = np.array2string(self.I,
+                                       separator=sep,
+                                       prefix=prefix)
+
+            arrstr_BRF = np.array2string(self.BRF,
+                                         separator=sep,
+                                         prefix=prefix)
+
+            bsc = '{0}{1} Backscattering Coefficient in [{2}]>'.format(prefix, arrstr_bsc, '[-]')
+            bscdb = '{0}{1} Backscattering Coefficient in [{2}]>'.format(prefix, arrstr_dB, '[dB]')
+            I = '{0}{1} Intensity in [{2}]>'.format(prefix, arrstr_I, '[-]')
+            BRF = '{0}{1} Bidirectional Reflectance Factor in [{2}]>'.format(prefix, arrstr_BRF, '[-]')
+
+        return I + '\n' + BRF + '\n' + bsc + '\n' + bscdb
+
+    def __getitem__(self, item):
+        return self.value[item]
 
     @staticmethod
     def dB(x):
@@ -103,7 +174,7 @@ class Conversion(object):
         return 10 ** (x / 10)
 
     @staticmethod
-    def BRDF(BSC, vza, angle_unit='RAD'):
+    def BSC_to_BRDF(BSC, vza, angle_unit='RAD'):
         """
         Convert a Radar Backscatter Coefficient (BSC) into a BRDF.
 
@@ -135,7 +206,7 @@ class Conversion(object):
             raise ValueError("angle_unit must be 'RAD' or 'DEG'")
 
     @staticmethod
-    def BRF(BRDF):
+    def BRDF_to_BRF(BRDF):
         """
         Convert a BRDF into a BRF.
 
@@ -156,7 +227,7 @@ class Conversion(object):
         return const.pi * BRDF
 
     @staticmethod
-    def BSC(BRDF, vza, angle_unit='RAD'):
+    def BRDF_to_BSC(BRDF, vza, angle_unit='RAD'):
         """
         Convert a BRDF in to a Radar Backscatter Coefficient (BSC).
 
