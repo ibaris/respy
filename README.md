@@ -28,8 +28,6 @@
 <p align="center">
   <a href="https://travis-ci.org/ibaris/respy"><img src="https://travis-ci.org/ibaris/respy.svg?branch=master"></a>
   <a href='https://coveralls.io/github/ibaris/respy?branch=master'><img src='https://coveralls.io/repos/github/ibaris/respy/badge.svg?branch=master' alt='Coverage Status' /></a>
-  <a href='http://pyrism.readthedocs.io/en/latest/?badge=latest'>
-    <img src='https://readthedocs.org/projects/pyrism/badge/?version=latest' alt='Documentation Status' /></a>
   <a href="https://www.codefactor.io/repository/github/ibaris/respy"><img src="https://www.codefactor.io/repository/github/ibaris/respy/badge" alt="CodeFactor" /></a>
 </p>
 
@@ -62,5 +60,5 @@
 
 > ResearchGate [@Ismail_Baris](https://www.researchgate.net/profile/Ismail_Baris) &nbsp;&middot;&nbsp;
 > GitHub [@ibaris](https://github.com/ibaris) &nbsp;&middot;&nbsp;
-> Instagram [@ism.baris](https://www.instagram.com/ism.baris/)
+> Instagram [@ism.baris](https://www.instagram.com/ism.baris/) &nbsp;&middot;&nbsp;
 > Code:Stats [@ibaris](https://codestats.net/users/ibaris)
