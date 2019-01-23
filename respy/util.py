@@ -60,7 +60,7 @@ def align_all(data, constant_values='default', dtype=np.double):
         A tuple with (mixed) array_like, int, float.
     constant_values : int, float or 'default'
         The value at which the smaller values are expand. If 'default' (default) the last value will be choosed.
-    dtype : np.dtype
+    dtype : type
         Data type of output.
 
     Returns
