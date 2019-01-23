@@ -221,7 +221,8 @@ class Quantity(np.ndarray):
             value = self.__get_value(other, operator)
             name = self.__get_name(other)
 
-            return self.__create_new_instance(value, unit, name)
+            dtype = value.dtype
+            return self.__create_new_instance(value, unit, name, dtype)
 
         elif isinstance(other, tuple(sympy.core.all_classes)):
             other_value, other_unit = Quantity.extract_from_expr(other)
@@ -229,14 +230,16 @@ class Quantity(np.ndarray):
             unit = self.__compute_unit(self.unit, other_unit, operator)
             name = self.name if not self.constant else None
 
-            return self.__create_new_instance(value, unit, name)
+            dtype = value.dtype
+            return self.__create_new_instance(value, unit, name, dtype)
 
         else:
             value = self.value * other
             unit = self.unit
             name = self.name if not self.constant else None
 
-            return self.__create_new_instance(value, unit, name)
+            dtype = value.dtype
+            return self.__create_new_instance(value, unit, name, dtype)
 
     def __truediv__(self, other):
         operator = 'div'
@@ -1263,19 +1266,24 @@ class Quantity(np.ndarray):
         except AttributeError:
             self.dimension = None
 
-    def __create_new_instance(self, value, unit=None, name=None):
+    def __create_new_instance(self, value, unit=None, name=None, dtype=None):
 
         quantity_subclass = self.__class__
 
         if unit is None:
             unit = "-"
 
-        value = np.array(value, dtype=self._dtype, copy=False, order=self.order,
+        if dtype is None:
+            dtype = self._dtype
+        else:
+            pass
+
+        value = np.array(value, dtype=dtype, copy=False, order=self.order,
                          subok=self.subok)
 
         value = np.atleast_1d(value)
         view = value.view(quantity_subclass)
-        view.__set_attributes(unit, value, self._dtype, self.copy, self.order, self.subok, False, self.ndmin,
+        view.__set_attributes(unit, value, dtype, self.copy, self.order, self.subok, False, self.ndmin,
                               self.dimension)
         view.set_name(name)
 
