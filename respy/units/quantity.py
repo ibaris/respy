@@ -194,7 +194,6 @@ class Quantity(np.ndarray):
             self.value = getattr(obj, 'value', None)
             self.name = getattr(obj, 'name', None)
             self.constant = getattr(obj, 'constant', None)
-            # self.dtype = getattr(obj, 'dtype', None)
             self._dtype = getattr(obj, '_dtype', None)
             self.copy = getattr(obj, 'copy', None)
             self.order = getattr(obj, 'order', None)
@@ -978,6 +977,14 @@ class Quantity(np.ndarray):
     # --------------------------------------------------------------------------------------------------------
     # Properties
     # --------------------------------------------------------------------------------------------------------
+    @property
+    def real(self):
+        return self.value.real
+
+    @property
+    def imag(self):
+        return self.value.imag
+
     @property
     def unitstr(self):
         """
