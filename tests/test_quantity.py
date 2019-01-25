@@ -1,6 +1,14 @@
 from __future__ import division
-import respy as rsp
+
 import numpy as np
+import pytest
+
+from respy.units import Quantity
+from respy import units
+import respy
+
+import random
+import operator
 
 
 class TestInput:
@@ -8,32 +16,32 @@ class TestInput:
         value = 23
         unit = 'GHz'
         name = 'Test Case'
-        q = rsp.units.Quantity(value=value, unit=unit, name=name)
+        q = Quantity(value=value, unit=unit, name=name)
 
         assert (q.name == name)
         assert (str(q.dimension) == 'frequency')
         assert (q.dtype == float)
-        assert (q.unitstr == str(rsp.Units.frequency[unit]))
+        assert (q.unitstr == str(respy.units.Units.frequency[unit]))
         assert (q.value == value)
         assert (repr(q) == '<Quantity [23.] Test Case in [gigahertz]>')
 
     def test_input_sympy(self):
-        value = 23 * rsp.Units.frequency.GHz
+        value = 23 * respy.units.Units.frequency.GHz
         # unit = 'GHz'
         name = 'Test Case Units'
-        q = rsp.units.Quantity(value=value, name=name, subok=True)
+        q = Quantity(value=value, name=name, subok=True)
 
         assert (q.name == name)
         assert (str(q.dimension) == 'frequency')
         assert (q.dtype == float)
-        assert (q.unit == rsp.Units.frequency.GHz)
+        assert (q.unit == respy.units.Units.frequency.GHz)
         assert (q.value == 23)
         assert (repr(q) == '<Quantity [23.] Test Case Units in [gigahertz]>')
 
     def test_input_none(self):
         value = 23
         name = 'Test Case'
-        q = rsp.units.Quantity(value=value, name='Test Case')
+        q = Quantity(value=value, name='Test Case')
 
         assert (q.name == name)
         assert (str(q.dimension) == 'None')
@@ -45,12 +53,12 @@ class TestInput:
     def test_input_no_name(self):
         value = 23
         unit = 'GHz'
-        q = rsp.units.Quantity(value=value, unit=unit)
+        q = Quantity(value=value, unit=unit)
 
         assert (q.name is None)
         assert (str(q.dimension) == 'frequency')
         assert (q.dtype == float)
-        assert (q.unitstr == str(rsp.Units.frequency[unit]))
+        assert (q.unitstr == str(respy.units.Units.frequency[unit]))
         assert (q.value == value)
         assert (repr(q) == '<Quantity [23.] [gigahertz]>')
 
@@ -59,12 +67,12 @@ class TestInput:
         value = np.linspace(1, 100, 10)
         unit = 'meter'
         name = 'Test Case Array'
-        q = rsp.units.Quantity(value=value, unit=unit, name=name)
+        q = Quantity(value=value, unit=unit, name=name)
 
         assert (q.name == name)
         assert (str(q.dimension) == 'length')
         assert (q.dtype == float)
-        assert (q.unitstr == str(rsp.Units.length[unit]))
+        assert (q.unitstr == str(respy.units.Units.length[unit]))
         assert (np.all(q.value == value))
         assert (repr(
             q) == '<Quantity [  1.,  12.,  23.,  34.,  45.,  56.,  67.,  78.,  89., 100.] Test Case Array in [meter]>')
@@ -72,62 +80,116 @@ class TestInput:
     def test_input_dimension(self):
         value = np.linspace(0, 20, 5)
 
-        for item in rsp.Units.frequency.keys():
+        for item in respy.units.Units.frequency.keys():
             unit = item
-            q = rsp.units.Quantity(value=value, unit=unit)
+            q = Quantity(value=value, unit=unit)
             assert (q.name is None)
             assert (str(q.dimension) == 'frequency')
             assert (q.dtype == float)
-            assert (q.unitstr == str(rsp.Units.frequency[item]))
+            assert (q.unitstr == str(respy.units.Units.frequency[item]))
             assert (np.all(q.value == value))
-            assert (repr(q) == '<Quantity [ 0.,  5., 10., 15., 20.] [{}]>'.format(rsp.Units.frequency[item]))
+            assert (repr(q) == '<Quantity [ 0.,  5., 10., 15., 20.] [{}]>'.format(respy.units.Units.frequency[item]))
 
-        for item in rsp.Units.length.keys():
+        for item in respy.units.Units.length.keys():
             unit = item
-            q = rsp.units.Quantity(value=value, unit=unit)
+            q = Quantity(value=value, unit=unit)
             assert (q.name is None)
             assert (str(q.dimension) == 'length')
             assert (q.dtype == float)
-            assert (q.unitstr == str(rsp.Units.length[item]))
+            assert (q.unitstr == str(respy.units.Units.length[item]))
             assert (np.all(q.value == value))
-            assert (repr(q) == '<Quantity [ 0.,  5., 10., 15., 20.] [{}]>'.format(rsp.Units.length[item]))
+            assert (repr(q) == '<Quantity [ 0.,  5., 10., 15., 20.] [{}]>'.format(respy.units.Units.length[item]))
 
-        for item in rsp.Units.other.keys():
+        for item in respy.units.Units.other.keys():
             unit = item
-            q = rsp.units.Quantity(value=value, unit=unit)
+            q = Quantity(value=value, unit=unit)
             assert (q.name is None)
             assert (str(q.dimension) == 'None')
             assert (q.dtype == float)
-            assert (q.unitstr == str(rsp.Units.other[item]))
+            assert (q.unitstr == str(respy.units.Units.other[item]))
             assert (np.all(q.value == value))
-            assert (repr(q) == '<Quantity [ 0.,  5., 10., 15., 20.] [{}]>'.format(rsp.Units.other[item]))
+            assert (repr(q) == '<Quantity [ 0.,  5., 10., 15., 20.] [{}]>'.format(respy.units.Units.other[item]))
 
-        for item in rsp.Units.temperature.keys():
+        for item in respy.units.Units.temperature.keys():
             unit = item
-            q = rsp.units.Quantity(value=value, unit=unit)
+            q = Quantity(value=value, unit=unit)
             assert (q.name is None)
             assert (str(q.dimension) == 'temperature')
             assert (q.dtype == float)
-            assert (q.unitstr == str(rsp.Units.temperature[item]))
+            assert (q.unitstr == str(respy.units.Units.temperature[item]))
             assert (np.all(q.value == value))
-            assert (repr(q) == '<Quantity [ 0.,  5., 10., 15., 20.] [{}]>'.format(rsp.Units.temperature[item]))
+            assert (repr(q) == '<Quantity [ 0.,  5., 10., 15., 20.] [{}]>'.format(respy.units.Units.temperature[item]))
 
-        for item in rsp.Units.time.keys():
+        for item in respy.units.Units.time.keys():
             unit = item
-            q = rsp.units.Quantity(value=value, unit=unit)
+            q = Quantity(value=value, unit=unit)
             assert (q.name is None)
             assert (str(q.dimension) == 'time')
             assert (q.dtype == float)
-            assert (q.unitstr == str(rsp.Units.time[item]))
+            assert (q.unitstr == str(respy.units.Units.time[item]))
             assert (np.all(q.value == value))
-            assert (repr(q) == '<Quantity [ 0.,  5., 10., 15., 20.] [{}]>'.format(rsp.Units.time[item]))
+            assert (repr(q) == '<Quantity [ 0.,  5., 10., 15., 20.] [{}]>'.format(respy.units.Units.time[item]))
 
-        for item in rsp.Units.energy.keys():
+        for item in respy.units.Units.energy.keys():
             unit = item
-            q = rsp.units.Quantity(value=value, unit=unit)
+            q = Quantity(value=value, unit=unit)
             assert (q.name is None)
             assert (str(q.dimension) == 'energy')
             assert (q.dtype == float)
-            assert (q.unitstr == str(rsp.Units.energy[item]))
+            assert (q.unitstr == str(respy.units.Units.energy[item]))
             assert (np.all(q.value == value))
-            assert (repr(q) == '<Quantity [ 0.,  5., 10., 15., 20.] [{}]>'.format(rsp.Units.energy[item]))
+            assert (repr(q) == '<Quantity [ 0.,  5., 10., 15., 20.] [{}]>'.format(respy.units.Units.energy[item]))
+
+
+ops = {'+': operator.add,
+       '-': operator.sub,
+       '*': operator.mul,
+       '/': operator.truediv}
+
+unit = [units.m, 1 / units.m, units.m ** 2, 1 / units.m ** 2]
+
+
+@pytest.mark.webtest
+@pytest.mark.parametrize("a, b, c, d, a_unit, b_unit, c_unit, d_unit", [
+    (np.random.random_sample(10), np.random.random_sample(10), np.random.random_sample(10), np.random.random_sample(10),
+     unit[np.random.randint(0, 3)], unit[np.random.randint(0, 3)], unit[np.random.randint(0, 3)],
+     unit[np.random.randint(0, 3)]),
+    (np.random.random_sample(10), np.random.random_sample(10), np.random.random_sample(10), np.random.random_sample(10),
+     unit[np.random.randint(0, 3)], unit[np.random.randint(0, 3)], unit[np.random.randint(0, 3)],
+     unit[np.random.randint(0, 3)]),
+    (np.random.random_sample(10), np.random.random_sample(10), np.random.random_sample(10), np.random.random_sample(10),
+     unit[np.random.randint(0, 3)], unit[np.random.randint(0, 3)], unit[np.random.randint(0, 3)],
+     unit[np.random.randint(0, 3)]),
+    (np.random.random_sample(10), np.random.random_sample(10), np.random.random_sample(10), np.random.random_sample(10),
+     unit[np.random.randint(0, 3)], unit[np.random.randint(0, 3)], unit[np.random.randint(0, 3)],
+     unit[np.random.randint(0, 3)])
+])
+class TestOperation:
+    def test_operation(self, a, b, c, d, a_unit, b_unit, c_unit, d_unit):
+        test_list = [a, b, c, d]
+        unit_list = [a_unit, b_unit, c_unit, d_unit]
+
+        for i in range(100):
+            op = random.choice(list(ops.keys()))
+
+            item1_value = random.choice(test_list)
+            item2_value = random.choice(test_list)
+
+            unit1 = random.choice(unit_list)
+            unit2 = unit1
+
+            unit1_temp = item1_value * unit1
+            unit2_temp = item2_value * unit2
+
+            item1 = Quantity(item1_value, unit=unit1)
+            item2 = Quantity(item2_value, unit=unit2)
+
+            test = ops.get(op)(item1, item2)
+            ref = ops.get(op)(unit1_temp, unit2_temp)
+
+            assert np.allclose(test, ops.get(op)(item1_value, item2_value))
+
+            try:
+                assert test.unit == ref[0].as_coeff_mul()[1][1]
+            except IndexError:
+                pass
