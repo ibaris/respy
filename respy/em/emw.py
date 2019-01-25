@@ -101,9 +101,18 @@ class EM(object):
         # Additional Calculation ---------------------------------------------------------------------------------------
         self.__wavenumber = EM.compute_wavenumber(self.__frequency, self.__frequency_unit,
                                                   output=self.__wavelength_unit)
-        self.__region = Bands.which_region(self.__frequency.value, str(self.__frequency_unit))
-        self.__band = Bands.which_band(self.__frequency.value, str(self.__frequency_unit))
         self.__value = np.array([self.__frequency, self.__wavelength, self.__wavenumber])
+
+        if len(self.__frequency) > 1:
+            self.__band = np.zeros_like(self.__frequency.value, dtype=np.chararray)
+            self.__region = np.zeros_like(self.__frequency.value, dtype=np.chararray)
+
+            for i, item in enumerate(self.__frequency):
+                self.__region[i] = Bands.which_region(item, str(self.__frequency_unit))
+                self.__band[i] = Bands.which_band(item, str(self.__frequency_unit))
+        else:
+            self.__region = Bands.which_region(self.__frequency.value, self.__frequency_unit)
+            self.__band = Bands.which_band(self.__frequency.value, self.__frequency_unit)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Magic Methods
@@ -545,6 +554,8 @@ class Bands(object):
         value = Quantity(value, unit)
 
         for item in __WHICH__REGION__.keys():
+
+            # item = __WHICH__REGION__.keys()[7]
 
             temp_band = __WHICH__REGION__[item]
 
