@@ -19,8 +19,11 @@ from .util import (def_unit,
                    joule,
                    joules,
 
+                   W, watts, watt,
+
                    s, h,
                    second, minute, hour,
                    seconds, minutes, hours,
                    __UNITS__,
+                   One,
                    UnitError, Units)
