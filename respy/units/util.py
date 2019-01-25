@@ -13,6 +13,7 @@ One = S.One
 class UnitError(Exception):
     pass
 
+
 class DimensionError(Exception):
     pass
 
@@ -127,6 +128,42 @@ class Length(dict):
 
 class Energy(dict):
     """ Storage for energy units.
+
+    Returns
+    -------
+    Dict with .dot access.
+
+    Notes
+    -----
+    There may be additional attributes not listed above depending of the
+    specific solver. Since this class is essentially a subclass of dict
+    with attribute accessors, one can see which attributes are available
+    using the `keys()` method. adar Backscatter values of multi scattering contribution of surface and volume
+    """
+
+    def __getattr__(self, name):
+        try:
+            return self[name]
+        except KeyError:
+            raise AttributeError("{} is not a valid unit. Use `keys()` method to see all available units".format(name))
+
+    __setattr__ = dict.__setitem__
+    __delattr__ = dict.__delitem__
+
+    def __repr__(self):
+        if self.keys():
+            m = max(map(len, list(self.keys()))) + 1
+            return '\n'.join([k.rjust(m) + ': ' + repr(v)
+                              for k, v in sorted(self.items())])
+        else:
+            return self.__class__.__name__ + "()"
+
+    def __dir__(self):
+        return list(self.keys())
+
+
+class Power(dict):
+    """ Storage for power units.
 
     Returns
     -------
@@ -391,6 +428,8 @@ K = kelvins = kelvin = sympy_units.K
 
 J = joules = joule = sympy_units.J
 
+W = watt = watts = sympy_units.watt
+
 frequency = Frequency(millihertz=millihertz,
                       mhz=mhz,
                       mHz=mHz,
@@ -459,6 +498,10 @@ energy = Energy(J=J,
                 joule=joule,
                 joules=joules)
 
+power = Power(W=W,
+              watt=watt,
+              watts=watts)
+
 temperature = Temperature(K=K,
                           kelvin=kelvin,
                           kelvins=kelvins)
@@ -472,7 +515,9 @@ other = Other(decibel=decibel,
               radian=radian,
               radians=radians)
 
-Units = Units(frequency=frequency, length=length, time=time, energy=energy, temperature=temperature, other=other)
+Units = Units(frequency=frequency, length=length, time=time, energy=energy, power=power, temperature=temperature,
+              other=other)
+
 
 def which_dimension(unit):
     pass
@@ -563,4 +608,8 @@ __UNITS__ = {"-": None,
 
              "J": J,
              "joule": joule,
-             "joules": joules}
+             "joules": joules,
+
+             "W": W,
+             "watt": watt,
+             "watts": watts}
