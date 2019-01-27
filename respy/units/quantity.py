@@ -1,71 +1,18 @@
 from __future__ import division
 
 import inspect
-import operator
 
 import numpy as np
-import sympy
 
-import respy
 import util as util
-from respy.base import unit_base
-from respy.units.util import One, UnitError
+from respy.unit_base.convert import convert_to_unit
+from respy.unit_base.operations import compute_logical_operation, compute_bitwise_operation, compute_operation
+from respy.unit_base.auxil import decompose_expr_to_atoms
+from respy.units.auxil import __NONE_UNITS__, __OPERATORS__, __UFUNC_NAME__
+from respy.units.util import Zero, One
+from respy.unit_base.auxil import get_unit
 
-__OPERATORS__ = {'+': operator.add,
-                 '/': operator.truediv,
-                 '//': operator.floordiv,
-                 '&': operator.and_,
-                 '^': operator.xor,
-                 '~': operator.invert,
-                 '|': operator.or_,
-                 '**': operator.pow,
-                 '<<': operator.lshift,
-                 '*': operator.mul,
-                 '>>': operator.rshift,
-                 '-': operator.sub,
-                 '<': operator.lt,
-                 '<=': operator.le,
-                 '==': operator.eq,
-                 '!=': operator.ne,
-                 '>=': operator.ge,
-                 '>': operator.gt,
-                 '%': operator.mod,
-                 'abs': operator.abs,
-                 'pos': operator.pos,
-                 'neg': operator.neg}
-
-__UFUNC_NAME__ = {'__add__': '+',
-                  '__truediv__': '/',
-                  '__rtruediv__': '/',
-                  '__floordiv__': '//',
-                  '__rfloordiv__': '//',
-                  '__and__': '&',
-                  '__rand__': '&',
-                  '__xor__': '^',
-                  '__rxor__': '^',
-                  '__or__': '|',
-                  '__ror__': '|',
-                  '__pow__': '**',
-                  '__rpow__': '**',
-                  '__lshift__': '<<',
-                  '__rlshift__': '<<',
-                  '__mul__': '*',
-                  '__rshift__': '>>',
-                  '__rrshift__': '>>',
-                  '__sub__': '-',
-                  '__rsub__': '-',
-                  '__lt__': '<',
-                  '__le__': '<=',
-                  '__eq__': '==',
-                  '__ne__': '!=',
-                  '__ge__': '>=',
-                  '__gt__': '>',
-                  '__mod__': '%',
-                  '__rmod__': '%',
-                  '__abs__': 'abs',
-                  '__pos__': 'pos',
-                  '__neg__': 'neg',
-                  '__invert__': '~'}
+np.seterr(divide='ignore', invalid='ignore')
 
 
 class Quantity(np.ndarray):
@@ -76,7 +23,7 @@ class Quantity(np.ndarray):
 
         Parameters
         ----------
-        value : float, int, numpy.ndarray, str, sympy.core.mul.Mul, sympy.physics.units.quantities.Quantity
+        value : float, int, numpy.ndarray, sympy.core.all_classes
             The numerical value of this quantity in the units given by unit.
 
         unit : sympy.physics.units.quantities.Quantity, str
@@ -170,19 +117,6 @@ class Quantity(np.ndarray):
 
         """
 
-        if isinstance(value, tuple(sympy.core.all_classes)):
-            copy_value = value
-            value = copy_value.args[0]
-            value = float(value)
-
-            if len(copy_value.args[1:]) > 1:
-                unit = copy_value.args[1]
-
-                for item in copy_value.args[2:]:
-                    unit *= item
-            else:
-                unit = copy_value.args[1]
-
         x = np.array(value, dtype=dtype, copy=copy, order=order, subok=subok, ndmin=ndmin)
         x = np.atleast_1d(x)
 
@@ -195,22 +129,24 @@ class Quantity(np.ndarray):
         obj = x.view(type=cls)
 
         if unit is None:
-            obj.unit = None
-            obj.dimension = None
+            obj.unit = Zero
+            obj.dimension = Zero
         else:
-            obj.unit = util.def_unit(unit)
+            obj.unit = get_unit(unit)
             try:
                 obj.dimension = obj.unit.dimension.name
 
-                if obj.dimension == 1:
-                    obj.dimension = None
-
             except AttributeError:
-                obj.dimension = None
+                obj.dimension = Zero
 
         obj.value = x
         obj._dtype = x.dtype
-        obj.name = name
+
+        if name is None:
+            obj.name = b''
+        else:
+            obj.name = name
+
         obj.constant = constant
 
         obj.copy = copy
@@ -225,22 +161,16 @@ class Quantity(np.ndarray):
     # Magic Methods
     # --------------------------------------------------------------------------------------------------------
     def __repr__(self):
-        if self.name is None:
-            prefix = '<{0} '.format(self.__class__.__name__)
-            sep = ', '
-            arrstr = np.array2string(self,
-                                     separator=sep,
-                                     prefix=prefix)
+        prefix = '<{0} '.format(self.__class__.__name__)
+        sep = ', '
+        arrstr = np.array2string(self,
+                                 separator=sep,
+                                 prefix=prefix)
 
+        if self.name is None or self.name is b'':
             return '{0}{1} [{2}]>'.format(prefix, arrstr, self.unitstr)
 
         else:
-            prefix = '<{0} '.format(self.__class__.__name__)
-            sep = ', '
-            arrstr = np.array2string(self,
-                                     separator=sep,
-                                     prefix=prefix)
-
             return '{0}{1} {2} in [{3}]>'.format(prefix, arrstr, self.name, self.unitstr)
 
     def __array_finalize__(self, obj):
@@ -273,344 +203,192 @@ class Quantity(np.ndarray):
 
     # Mathematical Operations ----------------------------------------------------------------------------
     # Left Operations -------------------------------------------------------------------------------
-    def __sympy_array(self, value):
-        shape = value.shape
-        value_flatten = value.flatten()
-
-        value = np.zeros_like(value_flatten)
-        unit = np.zeros_like(value_flatten, dtype=np.object)
-
-        for i, item in enumerate(value_flatten):
-            value[i], unit[i] = Quantity.decompose_expr(item)
-
-        value = value.reshape(shape)
-        unit = unit.reshape(shape)
-
-        if np.any(unit[0] == unit):
-            value = value.astype(np.double)
-
-            return value, unit[0]
-        else:
-            raise ValueError("If the input is an array with values the units must for all values equal.")
-
-    def __DO_COMPARISON(self, other, OPERATOR, rhanded=False):
-        if isinstance(other, (self.__class__, type(respy.units.quantity.Quantity), np.ndarray)):
-
-            if hasattr(other, 'quantity'):
-                other_unit = other.unit
-                other_value = other.value
-
-                if self.unit != other_unit:
-                    raise UnitError("Logical or shift operators require the same unit.")
-
-                else:
-                    pass
-
-                value = OPERATOR(self.value, other_value)
-
-            elif other.dtype == np.object:
-                try:
-                    other_value, other_unit = self.__sympy_array(other)
-
-                    if self.unit != other_unit:
-                        raise UnitError("Logical or shift operators require the same unit.")
-
-                    else:
-                        pass
-
-                    value = OPERATOR(self.value, other_value)
-
-                except AttributeError:
-                    raise TypeError("Data type of {0} not understood.".format(str(other)))
-            else:
-                pass
-
-        elif isinstance(other, tuple(sympy.core.all_classes)):
-            other_value, other_unit = Quantity.decompose_expr(other)
-
-            if self.unit != other_unit:
-                raise UnitError("Logical or shift operators require the same unit.")
-
-            else:
-                pass
-
-            value = OPERATOR(self.value, other_value)
-
-        else:
-            value = OPERATOR(self.value, other)
-
-        return value
-
-    def __DO_LOGICAL(self, other, OPERATOR, rhanded=False):
-        if isinstance(other, (self.__class__, type(respy.units.quantity.Quantity), np.ndarray)):
-
-            if hasattr(other, 'quantity'):
-                other_unit = other.unit
-                other_value = other.value
-
-                if self.unit != other_unit:
-                    raise UnitError("Logical or shift operators require the same unit.")
-
-                else:
-                    unit = self.unit
-
-                value = OPERATOR(self.value, other_value) if not rhanded else OPERATOR(other_value, self.value)
-                name = self.__get_name(other)
-
-            elif other.dtype == np.object:
-                try:
-                    other_value, other_unit = self.__sympy_array(other)
-
-                    if self.unit != other_unit:
-                        raise UnitError("Logical or shift operators require the same unit.")
-
-                    else:
-                        unit = self.unit
-
-                    value = OPERATOR(self.value, other_value) if not rhanded else OPERATOR(other_value, self.value)
-                    name = None
-
-                except AttributeError:
-                    raise TypeError("Data type of {0} not understood.".format(str(other)))
-            else:
-                value = OPERATOR(self.value, other) if not rhanded else OPERATOR(other, self.value)
-                unit = self.unit
-                name = self.name if not self.constant else None
-
-        elif isinstance(other, tuple(sympy.core.all_classes)):
-            other_value, other_unit = Quantity.decompose_expr(other)
-
-            if self.unit != other_unit:
-                raise UnitError("Logical or shift operators require the same unit.")
-
-            else:
-                unit = self.unit
-
-            value = OPERATOR(self.value, other_value) if not rhanded else OPERATOR(other_value, self.value)
-            name = self.name if not self.constant else None
-
-        else:
-            value = OPERATOR(self.value, other) if not rhanded else OPERATOR(other, self.value)
-            unit = self.unit
-            name = self.name if not self.constant else None
-
-        dtype = value.dtype
-        return self.__create_new_instance(value, unit, name, dtype)
-
-    def __DO_OPERATOR(self, other, OPERATOR, rhanded=False):
-        name = OPERATOR.__name__
-
-        if isinstance(other, (self.__class__, type(respy.units.quantity.Quantity), np.ndarray)):
-
-            if hasattr(other, 'quantity'):
-                other_unit = other.unit
-                other_value = other.value
-
-                if name == 'add' or name == 'sub':
-                    if self.unit != other_unit:
-                        raise UnitError("Addition and subtraction require the same unit.")
-                    else:
-                        unit = self.unit
-
-                else:
-                    unit = OPERATOR(self.unit, other_unit) if not rhanded else OPERATOR(other_unit, self.unit)
-
-                if name == 'pow':
-                    raise UnitError("An exponent with one unit is not possible.")
-
-                value = OPERATOR(self.value, other_value) if not rhanded else OPERATOR(other_value, self.value)
-                name = self.__get_name(other)
-
-            elif other.dtype == np.object:
-                try:
-                    other_value, other_unit = self.__sympy_array(other)
-                    if name == 'add' or name == 'sub':
-                        if self.unit != other_value:
-                            raise UnitError("Addition and subtraction require the same unit.")
-                        else:
-                            unit = self.unit
-
-                    else:
-                        unit = OPERATOR(self.unit, other_unit) if not rhanded else OPERATOR(other_unit, self.unit)
-
-                    if name == 'pow':
-                        raise UnitError("An exponent with one unit is not possible.")
-
-                    value = OPERATOR(self.value, other_value) if not rhanded else OPERATOR(other_value, self.value)
-                    name = None
-
-                except AttributeError:
-                    raise TypeError("Data type of {0} not understood.".format(str(other)))
-            else:
-                value = OPERATOR(self.value, other) if not rhanded else OPERATOR(other, self.value)
-                unit = self.unit
-                name = self.name if not self.constant else None
-
-        elif isinstance(other, tuple(sympy.core.all_classes)):
-            other_value, other_unit = Quantity.decompose_expr(other)
-
-            if name == 'add' or name == 'sub':
-                if self.unit != other_value:
-                    raise UnitError("Addition and subtraction require the same unit.")
-                else:
-                    unit = self.unit
-
-            else:
-                unit = OPERATOR(self.unit, other_unit) if not rhanded else OPERATOR(other_unit, self.unit)
-
-            if name == 'pow':
-                raise UnitError("An exponent with one unit is not possible.")
-
-            value = OPERATOR(self.value, other_value) if not rhanded else OPERATOR(other_value, self.value)
-            name = self.name if not self.constant else None
-
-        else:
-            value = OPERATOR(self.value, other) if not rhanded else OPERATOR(other, self.value)
-            unit = self.unit
-            name = self.name if not self.constant else None
-
-        dtype = value.dtype
-        return self.__create_new_instance(value, unit, name, dtype)
-
     def __mul__(self, other):
-        name = __UFUNC_NAME__[inspect.currentframe().f_code.co_name]
-        OPERATOR = __OPERATORS__.get(name)
+        other = self.__check_other(other)
+        operator = __UFUNC_NAME__[inspect.currentframe().f_code.co_name]
 
-        return self.__DO_OPERATOR(other, OPERATOR)
+        value, unit, dtype, name = compute_operation(self, other, operator, right_handed=False)
+
+        if unit is None:
+            unit = Zero
+
+        return self.__create_new_instance(value, unit, name, dtype)
 
     def __truediv__(self, other):
-        name = __UFUNC_NAME__[inspect.currentframe().f_code.co_name]
-        OPERATOR = __OPERATORS__.get(name)
+        other = self.__check_other(other)
+        operator = __UFUNC_NAME__[inspect.currentframe().f_code.co_name]
 
-        return self.__DO_OPERATOR(other, OPERATOR)
+        value, unit, dtype, name = compute_operation(self, other, operator, right_handed=False)
+
+        if unit is None:
+            unit = Zero
+
+        return self.__create_new_instance(value, unit, name, dtype)
 
     def __floordiv__(self, other):
-        name = __UFUNC_NAME__[inspect.currentframe().f_code.co_name]
-        OPERATOR = __OPERATORS__.get(name)
+        other = self.__check_other(other)
+        operator = __UFUNC_NAME__[inspect.currentframe().f_code.co_name]
 
-        return self.__DO_OPERATOR(other, OPERATOR)
+        value, unit, dtype, name = compute_operation(self, other, operator, right_handed=False)
+
+        if unit is None:
+            unit = Zero
+
+        return self.__create_new_instance(value, unit, name, dtype)
 
     def __mod__(self, other):
-        name = __UFUNC_NAME__[inspect.currentframe().f_code.co_name]
-        OPERATOR = __OPERATORS__.get(name)
+        other = self.__check_other(other)
+        operator = __UFUNC_NAME__[inspect.currentframe().f_code.co_name]
 
-        return self.__DO_OPERATOR(other, OPERATOR)
+        value, unit, dtype, name = compute_operation(self, other, operator, right_handed=False)
+
+        if unit is None:
+            unit = Zero
+
+        return self.__create_new_instance(value, unit, name, dtype)
 
     __div__ = __truediv__
 
     def __add__(self, other):
-        name = __UFUNC_NAME__[inspect.currentframe().f_code.co_name]
-        OPERATOR = __OPERATORS__.get(name)
+        other = self.__check_other(other)
+        operator = __UFUNC_NAME__[inspect.currentframe().f_code.co_name]
 
-        return self.__DO_OPERATOR(other, OPERATOR)
+        value, unit, dtype, name = compute_operation(self, other, operator, right_handed=False)
+
+        if unit is None:
+            unit = Zero
+
+        return self.__create_new_instance(value, unit, name, dtype)
 
     def __sub__(self, other):
-        name = __UFUNC_NAME__[inspect.currentframe().f_code.co_name]
-        OPERATOR = __OPERATORS__.get(name)
+        other = self.__check_other(other)
+        operator = __UFUNC_NAME__[inspect.currentframe().f_code.co_name]
 
-        return self.__DO_OPERATOR(other, OPERATOR)
+        value, unit, dtype, name = compute_operation(self, other, operator, right_handed=False)
+
+        if unit is None:
+            unit = Zero
+
+        return self.__create_new_instance(value, unit, name, dtype)
 
     def __pow__(self, other):
-        name = __UFUNC_NAME__[inspect.currentframe().f_code.co_name]
-        OPERATOR = __OPERATORS__.get(name)
+        other = self.__check_other(other)
+        operator = __UFUNC_NAME__[inspect.currentframe().f_code.co_name]
 
-        return self.__DO_OPERATOR(other, OPERATOR)
+        value, unit, dtype, name = compute_operation(self, other, operator, right_handed=False)
+
+        if unit is None:
+            unit = Zero
+
+        return self.__create_new_instance(value, unit, name, dtype)
 
     def __lshift__(self, other):
-        name = __UFUNC_NAME__[inspect.currentframe().f_code.co_name]
-        OPERATOR = __OPERATORS__.get(name)
+        other = self.__check_other(other)
+        operator = __UFUNC_NAME__[inspect.currentframe().f_code.co_name]
 
-        return self.__DO_LOGICAL(other, OPERATOR)
+        return compute_bitwise_operation(self, other, operator, right_handed=False)
 
     def __rshift__(self, other):
-        name = __UFUNC_NAME__[inspect.currentframe().f_code.co_name]
-        OPERATOR = __OPERATORS__.get(name)
+        other = self.__check_other(other)
+        operator = __UFUNC_NAME__[inspect.currentframe().f_code.co_name]
 
-        return self.__DO_LOGICAL(other, OPERATOR)
+        return compute_bitwise_operation(self, other, operator, right_handed=False)
 
     def __and__(self, other):
-        name = __UFUNC_NAME__[inspect.currentframe().f_code.co_name]
-        OPERATOR = __OPERATORS__.get(name)
+        other = self.__check_other(other)
+        operator = __UFUNC_NAME__[inspect.currentframe().f_code.co_name]
 
-        return self.__DO_LOGICAL(other, OPERATOR)
+        return compute_bitwise_operation(self, other, operator, right_handed=False)
 
     def __or__(self, other):
-        name = __UFUNC_NAME__[inspect.currentframe().f_code.co_name]
-        OPERATOR = __OPERATORS__.get(name)
+        other = self.__check_other(other)
+        operator = __UFUNC_NAME__[inspect.currentframe().f_code.co_name]
 
-        return self.__DO_LOGICAL(other, OPERATOR)
+        return compute_bitwise_operation(self, other, operator, right_handed=False)
 
     def __xor__(self, other):
-        name = __UFUNC_NAME__[inspect.currentframe().f_code.co_name]
-        OPERATOR = __OPERATORS__.get(name)
+        other = self.__check_other(other)
+        operator = __UFUNC_NAME__[inspect.currentframe().f_code.co_name]
 
-        return self.__DO_LOGICAL(other, OPERATOR)
+        return compute_bitwise_operation(self, other, operator, right_handed=False)
 
     # Right Operations --------------------------------------------------------------------------------
     __rmul__ = __mul__
     __radd__ = __add__
 
     def __rtruediv__(self, other):
-        name = __UFUNC_NAME__[inspect.currentframe().f_code.co_name]
-        OPERATOR = __OPERATORS__.get(name)
+        other = self.__check_other(other)
+        operator = __UFUNC_NAME__[inspect.currentframe().f_code.co_name]
 
-        return self.__DO_OPERATOR(other, OPERATOR, True)
+        value, unit, dtype, name = compute_operation(self, other, operator, right_handed=True)
+
+        if unit is None:
+            unit = Zero
+
+        return self.__create_new_instance(value, unit, name, dtype)
 
     __rdiv__ = __rtruediv__
 
     def __rsub__(self, other):
-        name = __UFUNC_NAME__[inspect.currentframe().f_code.co_name]
-        OPERATOR = __OPERATORS__.get(name)
+        other = self.__check_other(other)
+        operator = __UFUNC_NAME__[inspect.currentframe().f_code.co_name]
 
-        return self.__DO_OPERATOR(other, OPERATOR, True)
+        value, unit, dtype, name = compute_operation(self, other, operator, right_handed=True)
+
+        if unit is None:
+            unit = Zero
+
+        return self.__create_new_instance(value, unit, name, dtype)
 
     def __rlshift__(self, other):
-        name = __UFUNC_NAME__[inspect.currentframe().f_code.co_name]
-        OPERATOR = __OPERATORS__.get(name)
+        other = self.__check_other(other)
+        operator = __UFUNC_NAME__[inspect.currentframe().f_code.co_name]
 
-        return self.__DO_LOGICAL(other, OPERATOR, True)
+        return compute_bitwise_operation(self, other, operator, right_handed=True)
 
     def __rrshift__(self, other):
-        name = __UFUNC_NAME__[inspect.currentframe().f_code.co_name]
-        OPERATOR = __OPERATORS__.get(name)
+        other = self.__check_other(other)
+        operator = __UFUNC_NAME__[inspect.currentframe().f_code.co_name]
 
-        return self.__DO_LOGICAL(other, OPERATOR, True)
+        return compute_bitwise_operation(self, other, operator, right_handed=True)
 
     def __rfloordiv__(self, other):
-        name = __UFUNC_NAME__[inspect.currentframe().f_code.co_name]
-        OPERATOR = __OPERATORS__.get(name)
+        other = self.__check_other(other)
+        operator = __UFUNC_NAME__[inspect.currentframe().f_code.co_name]
 
-        return self.__DO_LOGICAL(other, OPERATOR, True)
+        value, unit, dtype, name = compute_operation(self, other, operator, right_handed=True)
+
+        return self.__create_new_instance(value, unit, name, dtype)
 
     def __rmod__(self, other):
-        name = __UFUNC_NAME__[inspect.currentframe().f_code.co_name]
-        OPERATOR = __OPERATORS__.get(name)
+        other = self.__check_other(other)
+        operator = __UFUNC_NAME__[inspect.currentframe().f_code.co_name]
 
-        return self.__DO_LOGICAL(other, OPERATOR, True)
+        return compute_bitwise_operation(self, other, operator, right_handed=True)
 
     def __rpow__(self, other):
-        name = __UFUNC_NAME__[inspect.currentframe().f_code.co_name]
-        OPERATOR = __OPERATORS__.get(name)
+        other = self.__check_other(other)
+        operator = __UFUNC_NAME__[inspect.currentframe().f_code.co_name]
 
-        return self.__DO_LOGICAL(other, OPERATOR, True)
+        return compute_bitwise_operation(self, other, operator, right_handed=True)
 
     def __rand__(self, other):
-        name = __UFUNC_NAME__[inspect.currentframe().f_code.co_name]
-        OPERATOR = __OPERATORS__.get(name)
+        other = self.__check_other(other)
+        operator = __UFUNC_NAME__[inspect.currentframe().f_code.co_name]
 
-        return self.__DO_LOGICAL(other, OPERATOR, True)
+        return compute_bitwise_operation(self, other, operator, right_handed=True)
 
     def __ror__(self, other):
-        name = __UFUNC_NAME__[inspect.currentframe().f_code.co_name]
-        OPERATOR = __OPERATORS__.get(name)
+        other = self.__check_other(other)
+        operator = __UFUNC_NAME__[inspect.currentframe().f_code.co_name]
 
-        return self.__DO_LOGICAL(other, OPERATOR, True)
+        return compute_bitwise_operation(self, other, operator, right_handed=True)
 
     def __rxor__(self, other):
-        name = __UFUNC_NAME__[inspect.currentframe().f_code.co_name]
-        OPERATOR = __OPERATORS__.get(name)
+        other = self.__check_other(other)
+        operator = __UFUNC_NAME__[inspect.currentframe().f_code.co_name]
 
-        return self.__DO_LOGICAL(other, OPERATOR, True)
+        return compute_bitwise_operation(self, other, operator, right_handed=True)
 
     # Augmented Assignment -------------------------------------------------------------------------------
     __iadd__ = __add__
@@ -631,40 +409,34 @@ class Quantity(np.ndarray):
     #  Comparison
     # --------------------------------------------------------------------------------------------------------
     def __eq__(self, other):
-        name = __UFUNC_NAME__[inspect.currentframe().f_code.co_name]
-        OPERATOR = __OPERATORS__.get(name)
-
-        return self.__DO_COMPARISON(other, OPERATOR)
+        other = self.__check_other(other)
+        operator = __UFUNC_NAME__[inspect.currentframe().f_code.co_name]
+        return compute_logical_operation(self, other, operator)
 
     def __ne__(self, other):
-        name = __UFUNC_NAME__[inspect.currentframe().f_code.co_name]
-        OPERATOR = __OPERATORS__.get(name)
-
-        return self.__DO_COMPARISON(other, OPERATOR)
+        other = self.__check_other(other)
+        operator = __UFUNC_NAME__[inspect.currentframe().f_code.co_name]
+        return compute_logical_operation(self, other, operator)
 
     def __lt__(self, other):
-        name = __UFUNC_NAME__[inspect.currentframe().f_code.co_name]
-        OPERATOR = __OPERATORS__.get(name)
-
-        return self.__DO_COMPARISON(other, OPERATOR)
+        other = self.__check_other(other)
+        operator = __UFUNC_NAME__[inspect.currentframe().f_code.co_name]
+        return compute_logical_operation(self, other, operator)
 
     def __gt__(self, other):
-        name = __UFUNC_NAME__[inspect.currentframe().f_code.co_name]
-        OPERATOR = __OPERATORS__.get(name)
-
-        return self.__DO_COMPARISON(other, OPERATOR)
+        other = self.__check_other(other)
+        operator = __UFUNC_NAME__[inspect.currentframe().f_code.co_name]
+        return compute_logical_operation(self, other, operator)
 
     def __le__(self, other):
-        name = __UFUNC_NAME__[inspect.currentframe().f_code.co_name]
-        OPERATOR = __OPERATORS__.get(name)
-
-        return self.__DO_COMPARISON(other, OPERATOR)
+        other = self.__check_other(other)
+        operator = __UFUNC_NAME__[inspect.currentframe().f_code.co_name]
+        return compute_logical_operation(self, other, operator)
 
     def __ge__(self, other):
-        name = __UFUNC_NAME__[inspect.currentframe().f_code.co_name]
-        OPERATOR = __OPERATORS__.get(name)
-
-        return self.__DO_COMPARISON(other, OPERATOR)
+        other = self.__check_other(other)
+        operator = __UFUNC_NAME__[inspect.currentframe().f_code.co_name]
+        return compute_logical_operation(self, other, operator)
 
     # --------------------------------------------------------------------------------------------------------
     # Numeric Magic Methods
@@ -725,17 +497,13 @@ class Quantity(np.ndarray):
         unit : str
         """
 
-        if self.unit is None:
-            return '-'
-        elif self.unit is 1 or self.unit is '1':
-            return '-'
-        elif isinstance(self.unit, type(One)):
+        if self.unit in __NONE_UNITS__:
             return '-'
         else:
             return str(self.unit)
 
     @property
-    def math_text(self):
+    def unit_mathstr(self):
         """
         Return the unit of the expression as math text of form r'$unit$'.
 
@@ -744,9 +512,7 @@ class Quantity(np.ndarray):
         unit : str
         """
 
-        if self.unit is None:
-            return '-'
-        elif self.unit is 1 or self.unit is '1':
+        if self.unit in __NONE_UNITS__:
             return '-'
         else:
             unit = r'$' + self.unitstr.replace('**', '^') + '$'
@@ -763,7 +529,7 @@ class Quantity(np.ndarray):
         label : str
         """
 
-        return self.name + ' ' + '\n' + ' in ' + '[' + self.math_text + ']'
+        return self.name + ' ' + '\n' + ' in ' + '[' + self.unit_mathstr + ']'
 
     @property
     def expr(self):
@@ -807,43 +573,26 @@ class Quantity(np.ndarray):
         return self.value, self.unit
 
     @staticmethod
-    def decompose_expr(expr):
+    def decompose_expr(expr, quantity=True):
         """
-        Extract value and unit from an sympy expression.
+        Extract value and unit from an sympy expression or an array with sympy expressions.
 
         Parameters
         ----------
-        expr :sympy.core.mul.Mul
+        expr :numpy.ndarray, sympy.core.mul.Mul
             Sympy expression
+        quantity : bool
+            If True (default), the output is an Quantity object.
 
         Returns
         -------
         tuple with (values, units)
         """
-        copy_value = expr
-
-        if isinstance(copy_value, np.ndarray):
-            value, unit = self.__sympy_array(copy_value)
-
+        if quantity:
+            value, unit = decompose_expr_to_atoms(expr)
+            return Quantity(value, unit)
         else:
-            value = copy_value.args[0]
-
-            try:
-                value = float(value)
-
-                if len(copy_value.args[1:]) > 1:
-                    unit = copy_value.args[1]
-
-                    for item in copy_value.args[2:]:
-                        unit *= item
-                else:
-                    unit = copy_value.args[1]
-
-            except TypeError:
-                value = 1
-                unit = copy_value.as_terms()[0][0][0]
-
-        return value, unit
+            return decompose_expr_to_atoms(expr)
 
     def set_name(self, name):
         """
@@ -878,7 +627,7 @@ class Quantity(np.ndarray):
         respy.units.Quantity or None
 
         """
-        unit = util.def_unit(unit)
+        unit = get_unit(unit)
 
         try:
             dimension = unit.dimension.name
@@ -891,14 +640,14 @@ class Quantity(np.ndarray):
                 value = np.zeros_like(self.value, dtype=self._dtype)
 
                 if len(self.value) == 1:
-                    arg = unit_base.convert_to_unit(self.expr, unit)
+                    arg = convert_to_unit(self.expr, unit)
                     value[0] = arg.base
                     value = value.flatten()
 
                 else:
                     shape = self.value.shape
                     expr = self.expr.flatten()
-                    value = unit_base.convert_to_unit(expr, unit)
+                    value = convert_to_unit(expr, unit)
 
                     value = value.base
                     value = value.reshape(shape)
@@ -909,14 +658,14 @@ class Quantity(np.ndarray):
             value = np.zeros_like(self.value, dtype=self._dtype)
 
             if len(self.value) == 1:
-                arg = unit_base.convert_to_unit(self.expr, unit)
+                arg = convert_to_unit(self.expr, unit)
                 value[0] = arg.base
                 value = value.flatten()
 
             else:
                 shape = self.value.shape
                 expr = self.expr.flatten()
-                value = unit_base.convert_to_unit(expr, unit)
+                value = convert_to_unit(expr, unit)
 
                 value = value.base
                 value = value.reshape(shape)
@@ -925,120 +674,19 @@ class Quantity(np.ndarray):
 
         if inplace:
             self.__set_attributes(unit, value, self._dtype, self.copy, self.order, self.subok, False,
-                                  self.ndmin, self.dimension)
+                                  self.ndmin)
         else:
-
             return self.__create_new_instance(value, unit, self.name)
 
     # --------------------------------------------------------------------------------------------------------
     # Private Methods
     # --------------------------------------------------------------------------------------------------------
-    def __get_name(self, other):
-        if hasattr(other, 'name'):
-            name = self.__compute_name(self.name, other.name, self.constant, other.constant)
-        else:
-            name = self.name if not self.constant else None
-
-        return name
-
-    def __get_unit(self, other, operator):
-        if hasattr(other, 'unit'):
-            unit = self.__compute_unit(self.unit, other.unit, operator)
-        else:
-            unit = self.unit
-
-        return unit
-
-    def __get_value(self, other, operator):
-        value = self.value
-
-        if hasattr(other, 'value'):
-            other_value = other.value
-        else:
-            other_value = other
-
-        if operator == "mul" or operator == "rmul":
-            result = value * other_value
-        elif operator == "div":
-            result = value / other_value
-        elif operator == "rdiv":
-            result = other_value / value
-        elif operator == "add" or "radd":
-            result = value + other_value
-        elif operator == "sub":
-            result = value - other_value
-        elif operator == "rsub":
-            result = other_value - value
-        elif operator == "pow":
-            result = value ** other_value
-        elif operator == "rpow":
-            result = other_value ** value
-        else:
-            raise NotImplementedError("Operation {0} is not implemented.".format(operator))
-
-        return result
-
-    def __compute_unit(self, unit1, unit2, operator):
-        if unit1 is None and unit2 is None:
-            unit = None
-        elif unit1 is None:
-            unit = unit2
-        elif unit2 is None:
-            unit = unit1
-
-        elif unit1 is not None and unit2 is not None:
-            if operator == "mul" or operator == "rmul":
-                unit = unit1 * unit2
-            elif operator == "div":
-                unit = unit1 / unit2
-            elif operator == "rdiv":
-                unit = unit2 / unit1
-            elif operator == "add" or "radd":
-                unit = unit1 + unit2
-            elif operator == "sub":
-                unit = unit1 - unit2
-            elif operator == "rsub":
-                unit = unit2 - unit1
-            elif operator == "pow":
-                unit = unit1 ** unit2
-            else:
-                raise NotImplementedError("Operation {0} is not implemented.".format(operator))
-        else:
-            raise RuntimeError("Could not calculate unit.")
-
-        return unit
-
-    def __compute_name(self, name1, name2, const1, const2):
-        if name1 is None and name2 is None:
-            name = None
-
-        elif name1 is None:
-            if const2:
-                name = name1
-            else:
-                name = name2
-
-        elif name2 is None:
-            if const1:
-                name = name2
-            else:
-                name = name1
-
-        elif name1 is not None and name2 is not None:
-            if name1 == name2:
-                name = name1
-            else:
-                name = None
-        else:
-            raise RuntimeError("Could not calculate name")
-
-        return name
 
     def __set_attributes(self, unit, value, dtype, copy, order, subok, constant, ndmin):
         if unit is None or isinstance(unit, type(One)):
             self.unit = None
         else:
-            self.unit = util.def_unit(unit)
+            self.unit = get_unit(unit)
 
         self.value = value
         self._dtype = dtype
@@ -1079,3 +727,11 @@ class Quantity(np.ndarray):
         view.set_name(name)
 
         return view
+
+    def __check_other(self, other):
+        if hasattr(other, 'quantity'):
+            pass
+        else:
+            other = np.atleast_1d(np.asarray(other))
+
+        return other

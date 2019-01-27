@@ -25,5 +25,5 @@ from .util import (def_unit,
                    second, minute, hour,
                    seconds, minutes, hours,
                    __UNITS__,
-                   One,
+                   One, Zero,
                    UnitError, Units)

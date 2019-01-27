@@ -8,7 +8,7 @@ from sympy import S
 __OPERAND__ = ['*', '/', '+', '-', '**']
 
 One = S.One
-
+Zero = S.Zero
 
 class UnitError(Exception):
     pass
