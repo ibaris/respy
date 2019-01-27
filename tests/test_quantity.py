@@ -9,6 +9,13 @@ import respy
 
 import random
 import operator
+from respy.units import Zero, One
+
+a = Quantity(5, unit='cm')
+b = Quantity(2.5, unit='cm')
+c = Quantity(3, unit='m')
+
+a * a
 
 
 class TestInput:
@@ -25,26 +32,13 @@ class TestInput:
         assert (q.value == value)
         assert (repr(q) == '<Quantity [23.] Test Case in [gigahertz]>')
 
-    def test_input_sympy(self):
-        value = 23 * respy.units.Units.frequency.GHz
-        # unit = 'GHz'
-        name = 'Test Case Units'
-        q = Quantity(value=value, name=name, subok=True)
-
-        assert (q.name == name)
-        assert (str(q.dimension) == 'frequency')
-        assert (q.dtype == float)
-        assert (q.unit == respy.units.Units.frequency.GHz)
-        assert (q.value == 23)
-        assert (repr(q) == '<Quantity [23.] Test Case Units in [gigahertz]>')
-
     def test_input_none(self):
         value = 23
         name = 'Test Case'
         q = Quantity(value=value, name='Test Case')
 
         assert (q.name == name)
-        assert (str(q.dimension) == 'None')
+        assert (q.dimension == Zero)
         assert (q.dtype == float)
         assert (q.unitstr == '-')
         assert (q.value == value)
@@ -55,7 +49,7 @@ class TestInput:
         unit = 'GHz'
         q = Quantity(value=value, unit=unit)
 
-        assert (q.name is None)
+        assert (q.name is b'')
         assert (str(q.dimension) == 'frequency')
         assert (q.dtype == float)
         assert (q.unitstr == str(respy.units.Units.frequency[unit]))
@@ -83,7 +77,7 @@ class TestInput:
         for item in respy.units.Units.frequency.keys():
             unit = item
             q = Quantity(value=value, unit=unit)
-            assert (q.name is None)
+            assert (q.name is b'')
             assert (str(q.dimension) == 'frequency')
             assert (q.dtype == float)
             assert (q.unitstr == str(respy.units.Units.frequency[item]))
@@ -93,7 +87,7 @@ class TestInput:
         for item in respy.units.Units.length.keys():
             unit = item
             q = Quantity(value=value, unit=unit)
-            assert (q.name is None)
+            assert (q.name is b'')
             assert (str(q.dimension) == 'length')
             assert (q.dtype == float)
             assert (q.unitstr == str(respy.units.Units.length[item]))
@@ -103,8 +97,8 @@ class TestInput:
         for item in respy.units.Units.other.keys():
             unit = item
             q = Quantity(value=value, unit=unit)
-            assert (q.name is None)
-            assert (str(q.dimension) == 'None')
+            assert (q.name is '')
+            assert (q.dimension == One)
             assert (q.dtype == float)
             assert (q.unitstr == str(respy.units.Units.other[item]))
             assert (np.all(q.value == value))
@@ -113,7 +107,7 @@ class TestInput:
         for item in respy.units.Units.temperature.keys():
             unit = item
             q = Quantity(value=value, unit=unit)
-            assert (q.name is None)
+            assert (q.name is b'')
             assert (str(q.dimension) == 'temperature')
             assert (q.dtype == float)
             assert (q.unitstr == str(respy.units.Units.temperature[item]))
@@ -123,7 +117,7 @@ class TestInput:
         for item in respy.units.Units.time.keys():
             unit = item
             q = Quantity(value=value, unit=unit)
-            assert (q.name is None)
+            assert (q.name is b'')
             assert (str(q.dimension) == 'time')
             assert (q.dtype == float)
             assert (q.unitstr == str(respy.units.Units.time[item]))
@@ -133,7 +127,7 @@ class TestInput:
         for item in respy.units.Units.energy.keys():
             unit = item
             q = Quantity(value=value, unit=unit)
-            assert (q.name is None)
+            assert (q.name is '')
             assert (str(q.dimension) == 'energy')
             assert (q.dtype == float)
             assert (q.unitstr == str(respy.units.Units.energy[item]))
@@ -148,6 +142,9 @@ ops = {'+': operator.add,
 
 unit = [units.m, 1 / units.m, units.m ** 2, 1 / units.m ** 2]
 
+a, b, c, d, a_unit, b_unit, c_unit, d_unit = (np.random.random_sample(10), np.random.random_sample(10), np.random.random_sample(10), np.random.random_sample(10),
+     unit[np.random.randint(0, 3)], unit[np.random.randint(0, 3)], unit[np.random.randint(0, 3)],
+     unit[np.random.randint(0, 3)])
 
 @pytest.mark.webtest
 @pytest.mark.parametrize("a, b, c, d, a_unit, b_unit, c_unit, d_unit", [
@@ -165,7 +162,7 @@ unit = [units.m, 1 / units.m, units.m ** 2, 1 / units.m ** 2]
      unit[np.random.randint(0, 3)])
 ])
 class TestOperation:
-    def test_operation(self, a, b, c, d, a_unit, b_unit, c_unit, d_unit):
+    def test_operation_unit(self, a, b, c, d, a_unit, b_unit, c_unit, d_unit):
         test_list = [a, b, c, d]
         unit_list = [a_unit, b_unit, c_unit, d_unit]
 
@@ -187,7 +184,7 @@ class TestOperation:
             test = ops.get(op)(item1, item2)
             ref = ops.get(op)(unit1_temp, unit2_temp)
 
-            assert np.allclose(test, ops.get(op)(item1_value, item2_value))
+            assert np.allclose(test.value, ops.get(op)(item1_value, item2_value))
 
             try:
                 assert test.unit == ref[0].as_coeff_mul()[1][1]
