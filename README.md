@@ -1,6 +1,6 @@
 <h1 align="center">
   <br>
-  <a href="https://i.imgur.com/tTOJC3x.png"><img src="https://i.imgur.com/tTOJC3x.png" alt="RESPY" width="400"></a>
+  <a href="https://i.imgur.com/tTOJC3x.png"><img src="https://i.imgur.com/tTOJC3x.png" alt="RESPY" width="300"></a>
 </h1>
 <h4 align="center">Fundamental Formulas for Remote Sensing and Sensing Geometry Management</h4>
 
