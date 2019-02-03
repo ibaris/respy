@@ -1,12 +1,18 @@
 # -*- coding: utf-8 -*-
 """
+Unit Base of Physical Quantities
+--------------------------------
 Created on 27.01.2019 by Ismail Baris
+
+This Module is the base for expression decompositions and unit and dimension based operations of `Quantity` objects.
 """
 from __future__ import division
-cimport numpy as np
 import numpy as np
-from respy.units.util import UnitError, __UNITS__
+cimport numpy as np
+from respy.units.util import UnitError, __UNITS__, Zero, One
+from respy.units.dimensions import area, volume, length
 import sympy
+from respy.units.auxil import __NONE_UNITS__
 
 cdef:
     list __OPERATION_LIST__ = ['*', '/', '+', '-', '**']
@@ -110,25 +116,76 @@ cdef tuple decompose_expr(object expr):
         object unit_obj
         tuple unit
 
-    value = expr.args[0]
-
-    try:
-        value = float(value)
-        unit = expr.args[1:]
-
-        if len(unit) == 1:
-            unit_obj = unit[0]
-        else:
-            unit_obj = unit[0]
-
-            for i in range(1, len(unit)):
-                unit_obj *= unit[i]
-
-    except TypeError:
+    if 'Pow' in str(type(expr)):
         value = 1
         unit_obj = expr
 
+    elif 'Mul' in str(type(expr)):
+        value = expr.args[0]
+
+        try:
+            value = float(value)
+            unit = expr.args[1:]
+
+            if len(unit) == 1:
+                unit_obj = unit[0]
+            else:
+                unit_obj = unit[0]
+
+                for i in range(1, len(unit)):
+                    unit_obj *= unit[i]
+
+        except TypeError:
+            value = 1
+            unit_obj = expr
+
+    else:
+        raise TypeError("Data type {0} not understood.".format(str(expr)))
+
     return value, unit_obj
+
+def get_dimension(unit):
+    cdef:
+        object dimension, unit_base
+
+    unit = get_unit(unit)
+
+    if 'Quantity' in str(type(unit)):
+        try:
+            dimension = unit.dimension
+
+            if dimension.name == One:
+                dimension = Zero
+            else:
+                pass
+
+        except AttributeError:
+            dimension = Zero
+
+    elif 'Pow' in str(type(unit)):
+        unit_base, exp = unit.args
+
+        try:
+            dimension_base = unit_base.dimension
+
+            if dimension_base == length:
+
+                if exp == 2:
+                    dimension = area
+                elif exp == 3:
+                    dimension = volume
+                else:
+                    dimension = Zero
+            else:
+                dimension = Zero
+
+        except AttributeError:
+            dimension = Zero
+
+    else:
+        dimension = Zero
+
+    return dimension
 
 cdef tuple decompose_expr_array(value):
     """
@@ -183,6 +240,8 @@ def get_unit(unit):
         return unit
     elif isinstance(unit, str):
         return get_unit_from_str(unit)
+    elif unit in __NONE_UNITS__:
+        return Zero
     else:
         raise UnitError("{} is not a valid unit.".format(str(unit)))
 

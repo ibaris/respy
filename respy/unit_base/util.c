@@ -1204,7 +1204,7 @@ static const char __pyx_k_NONE_UNITS[] = "__NONE_UNITS__";
 static const char __pyx_k_respy_units_util[] = "respy.units.util";
 static const char __pyx_k_respy_units_auxil[] = "respy.units.auxil";
 static const char __pyx_k_cline_in_traceback[] = "cline_in_traceback";
-static const char __pyx_k_Created_on_27_01_2019_by_Ismail[] = "\nCreated on 27.01.2019 by Ismail Baris\n";
+static const char __pyx_k_Utility_of_Physical_Quantities[] = "\nUtility of Physical Quantities\n------------------------------\nCreated on 27.01.2019 by Ismail Baris\n\nThis Module contains utility functions like the check of units and names.\n";
 static const char __pyx_k_Addition_subtraction_and_bitwise[] = "Addition, subtraction and bitwise operations require the same unit or one of the units must be None.";
 static const char __pyx_k_An_exponent_with_unit_is_not_pos[] = "An exponent with unit is not possible.";
 static PyObject *__pyx_kp_b_;
@@ -1226,7 +1226,7 @@ static PyObject *__pyx_n_s_respy_units_util;
 static PyObject *__pyx_n_s_test;
 /* Late includes */
 
-/* "respy/unit_base/util.pyx":10
+/* "respy/unit_base/util.pyx":14
  * from cpython cimport bool
  * 
  * cdef tuple check_units(object unit1, object unit2, char*operator_name):             # <<<<<<<<<<<<<<
@@ -1247,18 +1247,18 @@ static PyObject *__pyx_f_5respy_9unit_base_4util_check_units(PyObject *__pyx_v_u
   __Pyx_INCREF(__pyx_v_unit1);
   __Pyx_INCREF(__pyx_v_unit2);
 
-  /* "respy/unit_base/util.pyx":28
+  /* "respy/unit_base/util.pyx":32
  *     """
  * 
  *     if operator_name in __ADD_SUB__ or operator_name in __BITWISE__:             # <<<<<<<<<<<<<<
  * 
  *         if unit1 in __NONE_UNITS__ and unit2 in __NONE_UNITS__:
  */
-  __pyx_t_2 = __Pyx_PyBytes_FromString(__pyx_v_operator_name); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 28, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyBytes_FromString(__pyx_v_operator_name); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 32, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __Pyx_GetModuleGlobalName(__pyx_t_3, __pyx_n_s_ADD_SUB); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 28, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_3, __pyx_n_s_ADD_SUB); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 32, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_4 = (__Pyx_PySequence_ContainsTF(__pyx_t_2, __pyx_t_3, Py_EQ)); if (unlikely(__pyx_t_4 < 0)) __PYX_ERR(0, 28, __pyx_L1_error)
+  __pyx_t_4 = (__Pyx_PySequence_ContainsTF(__pyx_t_2, __pyx_t_3, Py_EQ)); if (unlikely(__pyx_t_4 < 0)) __PYX_ERR(0, 32, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_t_5 = (__pyx_t_4 != 0);
@@ -1267,11 +1267,11 @@ static PyObject *__pyx_f_5respy_9unit_base_4util_check_units(PyObject *__pyx_v_u
     __pyx_t_1 = __pyx_t_5;
     goto __pyx_L4_bool_binop_done;
   }
-  __pyx_t_3 = __Pyx_PyBytes_FromString(__pyx_v_operator_name); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 28, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyBytes_FromString(__pyx_v_operator_name); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 32, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_BITWISE); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 28, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_BITWISE); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 32, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_5 = (__Pyx_PySequence_ContainsTF(__pyx_t_3, __pyx_t_2, Py_EQ)); if (unlikely(__pyx_t_5 < 0)) __PYX_ERR(0, 28, __pyx_L1_error)
+  __pyx_t_5 = (__Pyx_PySequence_ContainsTF(__pyx_t_3, __pyx_t_2, Py_EQ)); if (unlikely(__pyx_t_5 < 0)) __PYX_ERR(0, 32, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_t_4 = (__pyx_t_5 != 0);
@@ -1279,16 +1279,16 @@ static PyObject *__pyx_f_5respy_9unit_base_4util_check_units(PyObject *__pyx_v_u
   __pyx_L4_bool_binop_done:;
   if (__pyx_t_1) {
 
-    /* "respy/unit_base/util.pyx":30
+    /* "respy/unit_base/util.pyx":34
  *     if operator_name in __ADD_SUB__ or operator_name in __BITWISE__:
  * 
  *         if unit1 in __NONE_UNITS__ and unit2 in __NONE_UNITS__:             # <<<<<<<<<<<<<<
  *             unit1 = Zero
  *             unit2 = Zero
  */
-    __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_NONE_UNITS); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 30, __pyx_L1_error)
+    __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_NONE_UNITS); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 34, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_4 = (__Pyx_PySequence_ContainsTF(__pyx_v_unit1, __pyx_t_2, Py_EQ)); if (unlikely(__pyx_t_4 < 0)) __PYX_ERR(0, 30, __pyx_L1_error)
+    __pyx_t_4 = (__Pyx_PySequence_ContainsTF(__pyx_v_unit1, __pyx_t_2, Py_EQ)); if (unlikely(__pyx_t_4 < 0)) __PYX_ERR(0, 34, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     __pyx_t_5 = (__pyx_t_4 != 0);
     if (__pyx_t_5) {
@@ -1296,40 +1296,40 @@ static PyObject *__pyx_f_5respy_9unit_base_4util_check_units(PyObject *__pyx_v_u
       __pyx_t_1 = __pyx_t_5;
       goto __pyx_L7_bool_binop_done;
     }
-    __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_NONE_UNITS); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 30, __pyx_L1_error)
+    __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_NONE_UNITS); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 34, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_5 = (__Pyx_PySequence_ContainsTF(__pyx_v_unit2, __pyx_t_2, Py_EQ)); if (unlikely(__pyx_t_5 < 0)) __PYX_ERR(0, 30, __pyx_L1_error)
+    __pyx_t_5 = (__Pyx_PySequence_ContainsTF(__pyx_v_unit2, __pyx_t_2, Py_EQ)); if (unlikely(__pyx_t_5 < 0)) __PYX_ERR(0, 34, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     __pyx_t_4 = (__pyx_t_5 != 0);
     __pyx_t_1 = __pyx_t_4;
     __pyx_L7_bool_binop_done:;
     if (__pyx_t_1) {
 
-      /* "respy/unit_base/util.pyx":31
+      /* "respy/unit_base/util.pyx":35
  * 
  *         if unit1 in __NONE_UNITS__ and unit2 in __NONE_UNITS__:
  *             unit1 = Zero             # <<<<<<<<<<<<<<
  *             unit2 = Zero
  * 
  */
-      __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_Zero); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 31, __pyx_L1_error)
+      __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_Zero); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 35, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_2);
       __Pyx_DECREF_SET(__pyx_v_unit1, __pyx_t_2);
       __pyx_t_2 = 0;
 
-      /* "respy/unit_base/util.pyx":32
+      /* "respy/unit_base/util.pyx":36
  *         if unit1 in __NONE_UNITS__ and unit2 in __NONE_UNITS__:
  *             unit1 = Zero
  *             unit2 = Zero             # <<<<<<<<<<<<<<
  * 
  *         elif unit1 in __NONE_UNITS__:
  */
-      __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_Zero); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 32, __pyx_L1_error)
+      __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_Zero); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 36, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_2);
       __Pyx_DECREF_SET(__pyx_v_unit2, __pyx_t_2);
       __pyx_t_2 = 0;
 
-      /* "respy/unit_base/util.pyx":30
+      /* "respy/unit_base/util.pyx":34
  *     if operator_name in __ADD_SUB__ or operator_name in __BITWISE__:
  * 
  *         if unit1 in __NONE_UNITS__ and unit2 in __NONE_UNITS__:             # <<<<<<<<<<<<<<
@@ -1339,33 +1339,33 @@ static PyObject *__pyx_f_5respy_9unit_base_4util_check_units(PyObject *__pyx_v_u
       goto __pyx_L6;
     }
 
-    /* "respy/unit_base/util.pyx":34
+    /* "respy/unit_base/util.pyx":38
  *             unit2 = Zero
  * 
  *         elif unit1 in __NONE_UNITS__:             # <<<<<<<<<<<<<<
  *             unit1 = Zero if unit2 in __NONE_UNITS__ else unit2
  *         elif unit2 in __NONE_UNITS__:
  */
-    __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_NONE_UNITS); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 34, __pyx_L1_error)
+    __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_NONE_UNITS); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 38, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_1 = (__Pyx_PySequence_ContainsTF(__pyx_v_unit1, __pyx_t_2, Py_EQ)); if (unlikely(__pyx_t_1 < 0)) __PYX_ERR(0, 34, __pyx_L1_error)
+    __pyx_t_1 = (__Pyx_PySequence_ContainsTF(__pyx_v_unit1, __pyx_t_2, Py_EQ)); if (unlikely(__pyx_t_1 < 0)) __PYX_ERR(0, 38, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     __pyx_t_4 = (__pyx_t_1 != 0);
     if (__pyx_t_4) {
 
-      /* "respy/unit_base/util.pyx":35
+      /* "respy/unit_base/util.pyx":39
  * 
  *         elif unit1 in __NONE_UNITS__:
  *             unit1 = Zero if unit2 in __NONE_UNITS__ else unit2             # <<<<<<<<<<<<<<
  *         elif unit2 in __NONE_UNITS__:
  *             unit2 = Zero if unit1 in __NONE_UNITS__ else unit1
  */
-      __Pyx_GetModuleGlobalName(__pyx_t_3, __pyx_n_s_NONE_UNITS); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 35, __pyx_L1_error)
+      __Pyx_GetModuleGlobalName(__pyx_t_3, __pyx_n_s_NONE_UNITS); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 39, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_3);
-      __pyx_t_4 = (__Pyx_PySequence_ContainsTF(__pyx_v_unit2, __pyx_t_3, Py_EQ)); if (unlikely(__pyx_t_4 < 0)) __PYX_ERR(0, 35, __pyx_L1_error)
+      __pyx_t_4 = (__Pyx_PySequence_ContainsTF(__pyx_v_unit2, __pyx_t_3, Py_EQ)); if (unlikely(__pyx_t_4 < 0)) __PYX_ERR(0, 39, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
       if ((__pyx_t_4 != 0)) {
-        __Pyx_GetModuleGlobalName(__pyx_t_3, __pyx_n_s_Zero); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 35, __pyx_L1_error)
+        __Pyx_GetModuleGlobalName(__pyx_t_3, __pyx_n_s_Zero); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 39, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_3);
         __pyx_t_2 = __pyx_t_3;
         __pyx_t_3 = 0;
@@ -1376,7 +1376,7 @@ static PyObject *__pyx_f_5respy_9unit_base_4util_check_units(PyObject *__pyx_v_u
       __Pyx_DECREF_SET(__pyx_v_unit1, __pyx_t_2);
       __pyx_t_2 = 0;
 
-      /* "respy/unit_base/util.pyx":34
+      /* "respy/unit_base/util.pyx":38
  *             unit2 = Zero
  * 
  *         elif unit1 in __NONE_UNITS__:             # <<<<<<<<<<<<<<
@@ -1386,33 +1386,33 @@ static PyObject *__pyx_f_5respy_9unit_base_4util_check_units(PyObject *__pyx_v_u
       goto __pyx_L6;
     }
 
-    /* "respy/unit_base/util.pyx":36
+    /* "respy/unit_base/util.pyx":40
  *         elif unit1 in __NONE_UNITS__:
  *             unit1 = Zero if unit2 in __NONE_UNITS__ else unit2
  *         elif unit2 in __NONE_UNITS__:             # <<<<<<<<<<<<<<
  *             unit2 = Zero if unit1 in __NONE_UNITS__ else unit1
  * 
  */
-    __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_NONE_UNITS); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 36, __pyx_L1_error)
+    __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_NONE_UNITS); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 40, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_4 = (__Pyx_PySequence_ContainsTF(__pyx_v_unit2, __pyx_t_2, Py_EQ)); if (unlikely(__pyx_t_4 < 0)) __PYX_ERR(0, 36, __pyx_L1_error)
+    __pyx_t_4 = (__Pyx_PySequence_ContainsTF(__pyx_v_unit2, __pyx_t_2, Py_EQ)); if (unlikely(__pyx_t_4 < 0)) __PYX_ERR(0, 40, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     __pyx_t_1 = (__pyx_t_4 != 0);
     if (__pyx_t_1) {
 
-      /* "respy/unit_base/util.pyx":37
+      /* "respy/unit_base/util.pyx":41
  *             unit1 = Zero if unit2 in __NONE_UNITS__ else unit2
  *         elif unit2 in __NONE_UNITS__:
  *             unit2 = Zero if unit1 in __NONE_UNITS__ else unit1             # <<<<<<<<<<<<<<
  * 
  *         elif unit1 == unit2:
  */
-      __Pyx_GetModuleGlobalName(__pyx_t_3, __pyx_n_s_NONE_UNITS); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 37, __pyx_L1_error)
+      __Pyx_GetModuleGlobalName(__pyx_t_3, __pyx_n_s_NONE_UNITS); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 41, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_3);
-      __pyx_t_1 = (__Pyx_PySequence_ContainsTF(__pyx_v_unit1, __pyx_t_3, Py_EQ)); if (unlikely(__pyx_t_1 < 0)) __PYX_ERR(0, 37, __pyx_L1_error)
+      __pyx_t_1 = (__Pyx_PySequence_ContainsTF(__pyx_v_unit1, __pyx_t_3, Py_EQ)); if (unlikely(__pyx_t_1 < 0)) __PYX_ERR(0, 41, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
       if ((__pyx_t_1 != 0)) {
-        __Pyx_GetModuleGlobalName(__pyx_t_3, __pyx_n_s_Zero); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 37, __pyx_L1_error)
+        __Pyx_GetModuleGlobalName(__pyx_t_3, __pyx_n_s_Zero); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 41, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_3);
         __pyx_t_2 = __pyx_t_3;
         __pyx_t_3 = 0;
@@ -1423,7 +1423,7 @@ static PyObject *__pyx_f_5respy_9unit_base_4util_check_units(PyObject *__pyx_v_u
       __Pyx_DECREF_SET(__pyx_v_unit2, __pyx_t_2);
       __pyx_t_2 = 0;
 
-      /* "respy/unit_base/util.pyx":36
+      /* "respy/unit_base/util.pyx":40
  *         elif unit1 in __NONE_UNITS__:
  *             unit1 = Zero if unit2 in __NONE_UNITS__ else unit2
  *         elif unit2 in __NONE_UNITS__:             # <<<<<<<<<<<<<<
@@ -1433,31 +1433,31 @@ static PyObject *__pyx_f_5respy_9unit_base_4util_check_units(PyObject *__pyx_v_u
       goto __pyx_L6;
     }
 
-    /* "respy/unit_base/util.pyx":39
+    /* "respy/unit_base/util.pyx":43
  *             unit2 = Zero if unit1 in __NONE_UNITS__ else unit1
  * 
  *         elif unit1 == unit2:             # <<<<<<<<<<<<<<
  *             unit2 = Zero
  * 
  */
-    __pyx_t_2 = PyObject_RichCompare(__pyx_v_unit1, __pyx_v_unit2, Py_EQ); __Pyx_XGOTREF(__pyx_t_2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 39, __pyx_L1_error)
-    __pyx_t_1 = __Pyx_PyObject_IsTrue(__pyx_t_2); if (unlikely(__pyx_t_1 < 0)) __PYX_ERR(0, 39, __pyx_L1_error)
+    __pyx_t_2 = PyObject_RichCompare(__pyx_v_unit1, __pyx_v_unit2, Py_EQ); __Pyx_XGOTREF(__pyx_t_2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 43, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyObject_IsTrue(__pyx_t_2); if (unlikely(__pyx_t_1 < 0)) __PYX_ERR(0, 43, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     if (likely(__pyx_t_1)) {
 
-      /* "respy/unit_base/util.pyx":40
+      /* "respy/unit_base/util.pyx":44
  * 
  *         elif unit1 == unit2:
  *             unit2 = Zero             # <<<<<<<<<<<<<<
  * 
  *             return unit1, unit2
  */
-      __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_Zero); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 40, __pyx_L1_error)
+      __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_Zero); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 44, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_2);
       __Pyx_DECREF_SET(__pyx_v_unit2, __pyx_t_2);
       __pyx_t_2 = 0;
 
-      /* "respy/unit_base/util.pyx":42
+      /* "respy/unit_base/util.pyx":46
  *             unit2 = Zero
  * 
  *             return unit1, unit2             # <<<<<<<<<<<<<<
@@ -1465,7 +1465,7 @@ static PyObject *__pyx_f_5respy_9unit_base_4util_check_units(PyObject *__pyx_v_u
  *         else:
  */
       __Pyx_XDECREF(__pyx_r);
-      __pyx_t_2 = PyTuple_New(2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 42, __pyx_L1_error)
+      __pyx_t_2 = PyTuple_New(2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 46, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_2);
       __Pyx_INCREF(__pyx_v_unit1);
       __Pyx_GIVEREF(__pyx_v_unit1);
@@ -1477,7 +1477,7 @@ static PyObject *__pyx_f_5respy_9unit_base_4util_check_units(PyObject *__pyx_v_u
       __pyx_t_2 = 0;
       goto __pyx_L0;
 
-      /* "respy/unit_base/util.pyx":39
+      /* "respy/unit_base/util.pyx":43
  *             unit2 = Zero if unit1 in __NONE_UNITS__ else unit1
  * 
  *         elif unit1 == unit2:             # <<<<<<<<<<<<<<
@@ -1486,7 +1486,7 @@ static PyObject *__pyx_f_5respy_9unit_base_4util_check_units(PyObject *__pyx_v_u
  */
     }
 
-    /* "respy/unit_base/util.pyx":45
+    /* "respy/unit_base/util.pyx":49
  * 
  *         else:
  *             raise UnitError("Addition, subtraction and bitwise operations require the same unit or "             # <<<<<<<<<<<<<<
@@ -1494,7 +1494,7 @@ static PyObject *__pyx_f_5respy_9unit_base_4util_check_units(PyObject *__pyx_v_u
  * 
  */
     /*else*/ {
-      __Pyx_GetModuleGlobalName(__pyx_t_3, __pyx_n_s_UnitError); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 45, __pyx_L1_error)
+      __Pyx_GetModuleGlobalName(__pyx_t_3, __pyx_n_s_UnitError); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 49, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_3);
       __pyx_t_6 = NULL;
       if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_3))) {
@@ -1508,16 +1508,16 @@ static PyObject *__pyx_f_5respy_9unit_base_4util_check_units(PyObject *__pyx_v_u
       }
       __pyx_t_2 = (__pyx_t_6) ? __Pyx_PyObject_Call2Args(__pyx_t_3, __pyx_t_6, __pyx_kp_s_Addition_subtraction_and_bitwise) : __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_kp_s_Addition_subtraction_and_bitwise);
       __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
-      if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 45, __pyx_L1_error)
+      if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 49, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_2);
       __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
       __Pyx_Raise(__pyx_t_2, 0, 0, 0);
       __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-      __PYX_ERR(0, 45, __pyx_L1_error)
+      __PYX_ERR(0, 49, __pyx_L1_error)
     }
     __pyx_L6:;
 
-    /* "respy/unit_base/util.pyx":28
+    /* "respy/unit_base/util.pyx":32
  *     """
  * 
  *     if operator_name in __ADD_SUB__ or operator_name in __BITWISE__:             # <<<<<<<<<<<<<<
@@ -1527,39 +1527,39 @@ static PyObject *__pyx_f_5respy_9unit_base_4util_check_units(PyObject *__pyx_v_u
     goto __pyx_L3;
   }
 
-  /* "respy/unit_base/util.pyx":48
+  /* "respy/unit_base/util.pyx":52
  *                             "one of the units must be None.")
  * 
  *     elif operator_name == b'pow' and unit2 not in __NONE_UNITS__:             # <<<<<<<<<<<<<<
  *         raise UnitError("An exponent with unit is not possible.")
  * 
  */
-  __pyx_t_2 = __Pyx_PyBytes_FromString(__pyx_v_operator_name); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 48, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyBytes_FromString(__pyx_v_operator_name); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 52, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_4 = (__Pyx_PyBytes_Equals(__pyx_t_2, __pyx_n_b_pow, Py_EQ)); if (unlikely(__pyx_t_4 < 0)) __PYX_ERR(0, 48, __pyx_L1_error)
+  __pyx_t_4 = (__Pyx_PyBytes_Equals(__pyx_t_2, __pyx_n_b_pow, Py_EQ)); if (unlikely(__pyx_t_4 < 0)) __PYX_ERR(0, 52, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   if (__pyx_t_4) {
   } else {
     __pyx_t_1 = __pyx_t_4;
     goto __pyx_L9_bool_binop_done;
   }
-  __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_NONE_UNITS); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 48, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_NONE_UNITS); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 52, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_4 = (__Pyx_PySequence_ContainsTF(__pyx_v_unit2, __pyx_t_2, Py_NE)); if (unlikely(__pyx_t_4 < 0)) __PYX_ERR(0, 48, __pyx_L1_error)
+  __pyx_t_4 = (__Pyx_PySequence_ContainsTF(__pyx_v_unit2, __pyx_t_2, Py_NE)); if (unlikely(__pyx_t_4 < 0)) __PYX_ERR(0, 52, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_t_5 = (__pyx_t_4 != 0);
   __pyx_t_1 = __pyx_t_5;
   __pyx_L9_bool_binop_done:;
   if (unlikely(__pyx_t_1)) {
 
-    /* "respy/unit_base/util.pyx":49
+    /* "respy/unit_base/util.pyx":53
  * 
  *     elif operator_name == b'pow' and unit2 not in __NONE_UNITS__:
  *         raise UnitError("An exponent with unit is not possible.")             # <<<<<<<<<<<<<<
  * 
  *     else:
  */
-    __Pyx_GetModuleGlobalName(__pyx_t_3, __pyx_n_s_UnitError); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 49, __pyx_L1_error)
+    __Pyx_GetModuleGlobalName(__pyx_t_3, __pyx_n_s_UnitError); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 53, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __pyx_t_6 = NULL;
     if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_3))) {
@@ -1573,14 +1573,14 @@ static PyObject *__pyx_f_5respy_9unit_base_4util_check_units(PyObject *__pyx_v_u
     }
     __pyx_t_2 = (__pyx_t_6) ? __Pyx_PyObject_Call2Args(__pyx_t_3, __pyx_t_6, __pyx_kp_s_An_exponent_with_unit_is_not_pos) : __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_kp_s_An_exponent_with_unit_is_not_pos);
     __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
-    if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 49, __pyx_L1_error)
+    if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 53, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
     __Pyx_Raise(__pyx_t_2, 0, 0, 0);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-    __PYX_ERR(0, 49, __pyx_L1_error)
+    __PYX_ERR(0, 53, __pyx_L1_error)
 
-    /* "respy/unit_base/util.pyx":48
+    /* "respy/unit_base/util.pyx":52
  *                             "one of the units must be None.")
  * 
  *     elif operator_name == b'pow' and unit2 not in __NONE_UNITS__:             # <<<<<<<<<<<<<<
@@ -1589,7 +1589,7 @@ static PyObject *__pyx_f_5respy_9unit_base_4util_check_units(PyObject *__pyx_v_u
  */
   }
 
-  /* "respy/unit_base/util.pyx":52
+  /* "respy/unit_base/util.pyx":56
  * 
  *     else:
  *         unit1 = One if unit1 in __NONE_UNITS__ else unit1             # <<<<<<<<<<<<<<
@@ -1597,12 +1597,12 @@ static PyObject *__pyx_f_5respy_9unit_base_4util_check_units(PyObject *__pyx_v_u
  * 
  */
   /*else*/ {
-    __Pyx_GetModuleGlobalName(__pyx_t_3, __pyx_n_s_NONE_UNITS); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 52, __pyx_L1_error)
+    __Pyx_GetModuleGlobalName(__pyx_t_3, __pyx_n_s_NONE_UNITS); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 56, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_1 = (__Pyx_PySequence_ContainsTF(__pyx_v_unit1, __pyx_t_3, Py_EQ)); if (unlikely(__pyx_t_1 < 0)) __PYX_ERR(0, 52, __pyx_L1_error)
+    __pyx_t_1 = (__Pyx_PySequence_ContainsTF(__pyx_v_unit1, __pyx_t_3, Py_EQ)); if (unlikely(__pyx_t_1 < 0)) __PYX_ERR(0, 56, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
     if ((__pyx_t_1 != 0)) {
-      __Pyx_GetModuleGlobalName(__pyx_t_3, __pyx_n_s_One); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 52, __pyx_L1_error)
+      __Pyx_GetModuleGlobalName(__pyx_t_3, __pyx_n_s_One); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 56, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_3);
       __pyx_t_2 = __pyx_t_3;
       __pyx_t_3 = 0;
@@ -1613,19 +1613,19 @@ static PyObject *__pyx_f_5respy_9unit_base_4util_check_units(PyObject *__pyx_v_u
     __Pyx_DECREF_SET(__pyx_v_unit1, __pyx_t_2);
     __pyx_t_2 = 0;
 
-    /* "respy/unit_base/util.pyx":53
+    /* "respy/unit_base/util.pyx":57
  *     else:
  *         unit1 = One if unit1 in __NONE_UNITS__ else unit1
  *         unit2 = One if unit2 in __NONE_UNITS__ else unit2             # <<<<<<<<<<<<<<
  * 
  *         return unit1, unit2
  */
-    __Pyx_GetModuleGlobalName(__pyx_t_3, __pyx_n_s_NONE_UNITS); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 53, __pyx_L1_error)
+    __Pyx_GetModuleGlobalName(__pyx_t_3, __pyx_n_s_NONE_UNITS); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 57, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_1 = (__Pyx_PySequence_ContainsTF(__pyx_v_unit2, __pyx_t_3, Py_EQ)); if (unlikely(__pyx_t_1 < 0)) __PYX_ERR(0, 53, __pyx_L1_error)
+    __pyx_t_1 = (__Pyx_PySequence_ContainsTF(__pyx_v_unit2, __pyx_t_3, Py_EQ)); if (unlikely(__pyx_t_1 < 0)) __PYX_ERR(0, 57, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
     if ((__pyx_t_1 != 0)) {
-      __Pyx_GetModuleGlobalName(__pyx_t_3, __pyx_n_s_One); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 53, __pyx_L1_error)
+      __Pyx_GetModuleGlobalName(__pyx_t_3, __pyx_n_s_One); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 57, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_3);
       __pyx_t_2 = __pyx_t_3;
       __pyx_t_3 = 0;
@@ -1636,7 +1636,7 @@ static PyObject *__pyx_f_5respy_9unit_base_4util_check_units(PyObject *__pyx_v_u
     __Pyx_DECREF_SET(__pyx_v_unit2, __pyx_t_2);
     __pyx_t_2 = 0;
 
-    /* "respy/unit_base/util.pyx":55
+    /* "respy/unit_base/util.pyx":59
  *         unit2 = One if unit2 in __NONE_UNITS__ else unit2
  * 
  *         return unit1, unit2             # <<<<<<<<<<<<<<
@@ -1644,7 +1644,7 @@ static PyObject *__pyx_f_5respy_9unit_base_4util_check_units(PyObject *__pyx_v_u
  * cdef char*check_names(char*name1, char*name2, bool constant1, bool constant2):
  */
     __Pyx_XDECREF(__pyx_r);
-    __pyx_t_2 = PyTuple_New(2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 55, __pyx_L1_error)
+    __pyx_t_2 = PyTuple_New(2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 59, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
     __Pyx_INCREF(__pyx_v_unit1);
     __Pyx_GIVEREF(__pyx_v_unit1);
@@ -1658,7 +1658,7 @@ static PyObject *__pyx_f_5respy_9unit_base_4util_check_units(PyObject *__pyx_v_u
   }
   __pyx_L3:;
 
-  /* "respy/unit_base/util.pyx":10
+  /* "respy/unit_base/util.pyx":14
  * from cpython cimport bool
  * 
  * cdef tuple check_units(object unit1, object unit2, char*operator_name):             # <<<<<<<<<<<<<<
@@ -1683,7 +1683,7 @@ static PyObject *__pyx_f_5respy_9unit_base_4util_check_units(PyObject *__pyx_v_u
   return __pyx_r;
 }
 
-/* "respy/unit_base/util.pyx":57
+/* "respy/unit_base/util.pyx":61
  *         return unit1, unit2
  * 
  * cdef char*check_names(char*name1, char*name2, bool constant1, bool constant2):             # <<<<<<<<<<<<<<
@@ -1702,31 +1702,31 @@ static char *__pyx_f_5respy_9unit_base_4util_check_names(char *__pyx_v_name1, ch
   char *__pyx_t_5;
   __Pyx_RefNannySetupContext("check_names", 0);
 
-  /* "respy/unit_base/util.pyx":78
+  /* "respy/unit_base/util.pyx":82
  *     """
  * 
  *     if name1 == b'' and name2 == b'':             # <<<<<<<<<<<<<<
  *         name = b''
  *     elif name1 == b'' and name2 != b'':
  */
-  __pyx_t_2 = __Pyx_PyBytes_FromString(__pyx_v_name1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 78, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyBytes_FromString(__pyx_v_name1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 82, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = (__Pyx_PyBytes_Equals(__pyx_t_2, __pyx_kp_b_, Py_EQ)); if (unlikely(__pyx_t_3 < 0)) __PYX_ERR(0, 78, __pyx_L1_error)
+  __pyx_t_3 = (__Pyx_PyBytes_Equals(__pyx_t_2, __pyx_kp_b_, Py_EQ)); if (unlikely(__pyx_t_3 < 0)) __PYX_ERR(0, 82, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   if (__pyx_t_3) {
   } else {
     __pyx_t_1 = __pyx_t_3;
     goto __pyx_L4_bool_binop_done;
   }
-  __pyx_t_2 = __Pyx_PyBytes_FromString(__pyx_v_name2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 78, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyBytes_FromString(__pyx_v_name2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 82, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = (__Pyx_PyBytes_Equals(__pyx_t_2, __pyx_kp_b_, Py_EQ)); if (unlikely(__pyx_t_3 < 0)) __PYX_ERR(0, 78, __pyx_L1_error)
+  __pyx_t_3 = (__Pyx_PyBytes_Equals(__pyx_t_2, __pyx_kp_b_, Py_EQ)); if (unlikely(__pyx_t_3 < 0)) __PYX_ERR(0, 82, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_t_1 = __pyx_t_3;
   __pyx_L4_bool_binop_done:;
   if (__pyx_t_1) {
 
-    /* "respy/unit_base/util.pyx":79
+    /* "respy/unit_base/util.pyx":83
  * 
  *     if name1 == b'' and name2 == b'':
  *         name = b''             # <<<<<<<<<<<<<<
@@ -1736,7 +1736,7 @@ static char *__pyx_f_5respy_9unit_base_4util_check_names(char *__pyx_v_name1, ch
     __Pyx_INCREF(__pyx_kp_b_);
     __pyx_v_name = __pyx_kp_b_;
 
-    /* "respy/unit_base/util.pyx":78
+    /* "respy/unit_base/util.pyx":82
  *     """
  * 
  *     if name1 == b'' and name2 == b'':             # <<<<<<<<<<<<<<
@@ -1746,40 +1746,40 @@ static char *__pyx_f_5respy_9unit_base_4util_check_names(char *__pyx_v_name1, ch
     goto __pyx_L3;
   }
 
-  /* "respy/unit_base/util.pyx":80
+  /* "respy/unit_base/util.pyx":84
  *     if name1 == b'' and name2 == b'':
  *         name = b''
  *     elif name1 == b'' and name2 != b'':             # <<<<<<<<<<<<<<
  *         name = name2 if not constant1 else b''
  *     elif name1 != b'' and name2 == b'':
  */
-  __pyx_t_2 = __Pyx_PyBytes_FromString(__pyx_v_name1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 80, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyBytes_FromString(__pyx_v_name1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 84, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = (__Pyx_PyBytes_Equals(__pyx_t_2, __pyx_kp_b_, Py_EQ)); if (unlikely(__pyx_t_3 < 0)) __PYX_ERR(0, 80, __pyx_L1_error)
+  __pyx_t_3 = (__Pyx_PyBytes_Equals(__pyx_t_2, __pyx_kp_b_, Py_EQ)); if (unlikely(__pyx_t_3 < 0)) __PYX_ERR(0, 84, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   if (__pyx_t_3) {
   } else {
     __pyx_t_1 = __pyx_t_3;
     goto __pyx_L6_bool_binop_done;
   }
-  __pyx_t_2 = __Pyx_PyBytes_FromString(__pyx_v_name2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 80, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyBytes_FromString(__pyx_v_name2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 84, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = (__Pyx_PyBytes_Equals(__pyx_t_2, __pyx_kp_b_, Py_NE)); if (unlikely(__pyx_t_3 < 0)) __PYX_ERR(0, 80, __pyx_L1_error)
+  __pyx_t_3 = (__Pyx_PyBytes_Equals(__pyx_t_2, __pyx_kp_b_, Py_NE)); if (unlikely(__pyx_t_3 < 0)) __PYX_ERR(0, 84, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_t_1 = __pyx_t_3;
   __pyx_L6_bool_binop_done:;
   if (__pyx_t_1) {
 
-    /* "respy/unit_base/util.pyx":81
+    /* "respy/unit_base/util.pyx":85
  *         name = b''
  *     elif name1 == b'' and name2 != b'':
  *         name = name2 if not constant1 else b''             # <<<<<<<<<<<<<<
  *     elif name1 != b'' and name2 == b'':
  *         name = name1 if not constant1 else b''
  */
-    __pyx_t_1 = __Pyx_PyObject_IsTrue(((PyObject *)__pyx_v_constant1)); if (unlikely(__pyx_t_1 < 0)) __PYX_ERR(0, 81, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyObject_IsTrue(((PyObject *)__pyx_v_constant1)); if (unlikely(__pyx_t_1 < 0)) __PYX_ERR(0, 85, __pyx_L1_error)
     if (((!__pyx_t_1) != 0)) {
-      __pyx_t_4 = __Pyx_PyBytes_FromString(__pyx_v_name2); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 81, __pyx_L1_error)
+      __pyx_t_4 = __Pyx_PyBytes_FromString(__pyx_v_name2); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 85, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_4);
       __pyx_t_2 = __pyx_t_4;
       __pyx_t_4 = 0;
@@ -1790,7 +1790,7 @@ static char *__pyx_f_5respy_9unit_base_4util_check_names(char *__pyx_v_name1, ch
     __pyx_v_name = __pyx_t_2;
     __pyx_t_2 = 0;
 
-    /* "respy/unit_base/util.pyx":80
+    /* "respy/unit_base/util.pyx":84
  *     if name1 == b'' and name2 == b'':
  *         name = b''
  *     elif name1 == b'' and name2 != b'':             # <<<<<<<<<<<<<<
@@ -1800,40 +1800,40 @@ static char *__pyx_f_5respy_9unit_base_4util_check_names(char *__pyx_v_name1, ch
     goto __pyx_L3;
   }
 
-  /* "respy/unit_base/util.pyx":82
+  /* "respy/unit_base/util.pyx":86
  *     elif name1 == b'' and name2 != b'':
  *         name = name2 if not constant1 else b''
  *     elif name1 != b'' and name2 == b'':             # <<<<<<<<<<<<<<
  *         name = name1 if not constant1 else b''
  *     else:
  */
-  __pyx_t_2 = __Pyx_PyBytes_FromString(__pyx_v_name1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 82, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyBytes_FromString(__pyx_v_name1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 86, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = (__Pyx_PyBytes_Equals(__pyx_t_2, __pyx_kp_b_, Py_NE)); if (unlikely(__pyx_t_3 < 0)) __PYX_ERR(0, 82, __pyx_L1_error)
+  __pyx_t_3 = (__Pyx_PyBytes_Equals(__pyx_t_2, __pyx_kp_b_, Py_NE)); if (unlikely(__pyx_t_3 < 0)) __PYX_ERR(0, 86, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   if (__pyx_t_3) {
   } else {
     __pyx_t_1 = __pyx_t_3;
     goto __pyx_L8_bool_binop_done;
   }
-  __pyx_t_2 = __Pyx_PyBytes_FromString(__pyx_v_name2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 82, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyBytes_FromString(__pyx_v_name2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 86, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = (__Pyx_PyBytes_Equals(__pyx_t_2, __pyx_kp_b_, Py_EQ)); if (unlikely(__pyx_t_3 < 0)) __PYX_ERR(0, 82, __pyx_L1_error)
+  __pyx_t_3 = (__Pyx_PyBytes_Equals(__pyx_t_2, __pyx_kp_b_, Py_EQ)); if (unlikely(__pyx_t_3 < 0)) __PYX_ERR(0, 86, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_t_1 = __pyx_t_3;
   __pyx_L8_bool_binop_done:;
   if (__pyx_t_1) {
 
-    /* "respy/unit_base/util.pyx":83
+    /* "respy/unit_base/util.pyx":87
  *         name = name2 if not constant1 else b''
  *     elif name1 != b'' and name2 == b'':
  *         name = name1 if not constant1 else b''             # <<<<<<<<<<<<<<
  *     else:
  *         name = b''
  */
-    __pyx_t_1 = __Pyx_PyObject_IsTrue(((PyObject *)__pyx_v_constant1)); if (unlikely(__pyx_t_1 < 0)) __PYX_ERR(0, 83, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyObject_IsTrue(((PyObject *)__pyx_v_constant1)); if (unlikely(__pyx_t_1 < 0)) __PYX_ERR(0, 87, __pyx_L1_error)
     if (((!__pyx_t_1) != 0)) {
-      __pyx_t_4 = __Pyx_PyBytes_FromString(__pyx_v_name1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 83, __pyx_L1_error)
+      __pyx_t_4 = __Pyx_PyBytes_FromString(__pyx_v_name1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 87, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_4);
       __pyx_t_2 = __pyx_t_4;
       __pyx_t_4 = 0;
@@ -1844,7 +1844,7 @@ static char *__pyx_f_5respy_9unit_base_4util_check_names(char *__pyx_v_name1, ch
     __pyx_v_name = __pyx_t_2;
     __pyx_t_2 = 0;
 
-    /* "respy/unit_base/util.pyx":82
+    /* "respy/unit_base/util.pyx":86
  *     elif name1 == b'' and name2 != b'':
  *         name = name2 if not constant1 else b''
  *     elif name1 != b'' and name2 == b'':             # <<<<<<<<<<<<<<
@@ -1854,7 +1854,7 @@ static char *__pyx_f_5respy_9unit_base_4util_check_names(char *__pyx_v_name1, ch
     goto __pyx_L3;
   }
 
-  /* "respy/unit_base/util.pyx":85
+  /* "respy/unit_base/util.pyx":89
  *         name = name1 if not constant1 else b''
  *     else:
  *         name = b''             # <<<<<<<<<<<<<<
@@ -1867,16 +1867,16 @@ static char *__pyx_f_5respy_9unit_base_4util_check_names(char *__pyx_v_name1, ch
   }
   __pyx_L3:;
 
-  /* "respy/unit_base/util.pyx":87
+  /* "respy/unit_base/util.pyx":91
  *         name = b''
  * 
  *     return name             # <<<<<<<<<<<<<<
  */
-  __pyx_t_5 = __Pyx_PyObject_AsWritableString(__pyx_v_name); if (unlikely((!__pyx_t_5) && PyErr_Occurred())) __PYX_ERR(0, 87, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyObject_AsWritableString(__pyx_v_name); if (unlikely((!__pyx_t_5) && PyErr_Occurred())) __PYX_ERR(0, 91, __pyx_L1_error)
   __pyx_r = __pyx_t_5;
   goto __pyx_L0;
 
-  /* "respy/unit_base/util.pyx":57
+  /* "respy/unit_base/util.pyx":61
  *         return unit1, unit2
  * 
  * cdef char*check_names(char*name1, char*name2, bool constant1, bool constant2):             # <<<<<<<<<<<<<<
@@ -1914,7 +1914,7 @@ static PyModuleDef_Slot __pyx_moduledef_slots[] = {
 static struct PyModuleDef __pyx_moduledef = {
     PyModuleDef_HEAD_INIT,
     "util",
-    __pyx_k_Created_on_27_01_2019_by_Ismail, /* m_doc */
+    __pyx_k_Utility_of_Physical_Quantities, /* m_doc */
   #if CYTHON_PEP489_MULTI_PHASE_INIT
     0, /* m_size */
   #else
@@ -2226,7 +2226,7 @@ if (!__Pyx_RefNanny) {
   Py_INCREF(__pyx_m);
   #else
   #if PY_MAJOR_VERSION < 3
-  __pyx_m = Py_InitModule4("util", __pyx_methods, __pyx_k_Created_on_27_01_2019_by_Ismail, 0, PYTHON_API_VERSION); Py_XINCREF(__pyx_m);
+  __pyx_m = Py_InitModule4("util", __pyx_methods, __pyx_k_Utility_of_Physical_Quantities, 0, PYTHON_API_VERSION); Py_XINCREF(__pyx_m);
   #else
   __pyx_m = PyModule_Create(&__pyx_moduledef);
   #endif
@@ -2273,14 +2273,14 @@ if (!__Pyx_RefNanny) {
   if (__Pyx_patch_abc() < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   #endif
 
-  /* "respy/unit_base/util.pyx":6
+  /* "respy/unit_base/util.pyx":10
  * """
  * from __future__ import division
  * from respy.units.auxil import __NONE_UNITS__, __ADD_SUB__, __BITWISE__             # <<<<<<<<<<<<<<
  * from respy.units.util import UnitError, Zero, One
  * from cpython cimport bool
  */
-  __pyx_t_1 = PyList_New(3); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 6, __pyx_L1_error)
+  __pyx_t_1 = PyList_New(3); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 10, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_INCREF(__pyx_n_s_NONE_UNITS);
   __Pyx_GIVEREF(__pyx_n_s_NONE_UNITS);
@@ -2291,31 +2291,31 @@ if (!__Pyx_RefNanny) {
   __Pyx_INCREF(__pyx_n_s_BITWISE);
   __Pyx_GIVEREF(__pyx_n_s_BITWISE);
   PyList_SET_ITEM(__pyx_t_1, 2, __pyx_n_s_BITWISE);
-  __pyx_t_2 = __Pyx_Import(__pyx_n_s_respy_units_auxil, __pyx_t_1, -1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 6, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_Import(__pyx_n_s_respy_units_auxil, __pyx_t_1, -1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 10, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_ImportFrom(__pyx_t_2, __pyx_n_s_NONE_UNITS); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 6, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_ImportFrom(__pyx_t_2, __pyx_n_s_NONE_UNITS); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 10, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_NONE_UNITS, __pyx_t_1) < 0) __PYX_ERR(0, 6, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_NONE_UNITS, __pyx_t_1) < 0) __PYX_ERR(0, 10, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_ImportFrom(__pyx_t_2, __pyx_n_s_ADD_SUB); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 6, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_ImportFrom(__pyx_t_2, __pyx_n_s_ADD_SUB); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 10, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_ADD_SUB, __pyx_t_1) < 0) __PYX_ERR(0, 6, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_ADD_SUB, __pyx_t_1) < 0) __PYX_ERR(0, 10, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_ImportFrom(__pyx_t_2, __pyx_n_s_BITWISE); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 6, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_ImportFrom(__pyx_t_2, __pyx_n_s_BITWISE); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 10, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_BITWISE, __pyx_t_1) < 0) __PYX_ERR(0, 6, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_BITWISE, __pyx_t_1) < 0) __PYX_ERR(0, 10, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "respy/unit_base/util.pyx":7
+  /* "respy/unit_base/util.pyx":11
  * from __future__ import division
  * from respy.units.auxil import __NONE_UNITS__, __ADD_SUB__, __BITWISE__
  * from respy.units.util import UnitError, Zero, One             # <<<<<<<<<<<<<<
  * from cpython cimport bool
  * 
  */
-  __pyx_t_2 = PyList_New(3); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 7, __pyx_L1_error)
+  __pyx_t_2 = PyList_New(3); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 11, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_INCREF(__pyx_n_s_UnitError);
   __Pyx_GIVEREF(__pyx_n_s_UnitError);
@@ -2326,27 +2326,27 @@ if (!__Pyx_RefNanny) {
   __Pyx_INCREF(__pyx_n_s_One);
   __Pyx_GIVEREF(__pyx_n_s_One);
   PyList_SET_ITEM(__pyx_t_2, 2, __pyx_n_s_One);
-  __pyx_t_1 = __Pyx_Import(__pyx_n_s_respy_units_util, __pyx_t_2, -1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 7, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_Import(__pyx_n_s_respy_units_util, __pyx_t_2, -1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 11, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_2 = __Pyx_ImportFrom(__pyx_t_1, __pyx_n_s_UnitError); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 7, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_ImportFrom(__pyx_t_1, __pyx_n_s_UnitError); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 11, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_UnitError, __pyx_t_2) < 0) __PYX_ERR(0, 7, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_UnitError, __pyx_t_2) < 0) __PYX_ERR(0, 11, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_2 = __Pyx_ImportFrom(__pyx_t_1, __pyx_n_s_Zero); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 7, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_ImportFrom(__pyx_t_1, __pyx_n_s_Zero); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 11, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_Zero, __pyx_t_2) < 0) __PYX_ERR(0, 7, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_Zero, __pyx_t_2) < 0) __PYX_ERR(0, 11, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_2 = __Pyx_ImportFrom(__pyx_t_1, __pyx_n_s_One); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 7, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_ImportFrom(__pyx_t_1, __pyx_n_s_One); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 11, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_One, __pyx_t_2) < 0) __PYX_ERR(0, 7, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_One, __pyx_t_2) < 0) __PYX_ERR(0, 11, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
   /* "respy/unit_base/util.pyx":1
  * # -*- coding: utf-8 -*-             # <<<<<<<<<<<<<<
  * """
- * Created on 27.01.2019 by Ismail Baris
+ * Utility of Physical Quantities
  */
   __pyx_t_1 = __Pyx_PyDict_NewPresized(0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);

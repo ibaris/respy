@@ -1,6 +1,6 @@
 from quantity import Quantity
-from .util import (def_unit,
-                   deg, degrees, degree, rad, radian, radians,
+import dimensions
+from .util import (deg, degrees, degree, rad, radian, radians,
                    nm, um, mm, cm, dm, m, km,
 
                    decibel, dB, millihertz, mhz, mHz, centihertz, chz, cHz, decihertz, dhz, dHz, hertz, hz, Hz,
@@ -24,6 +24,8 @@ from .util import (def_unit,
                    s, h,
                    second, minute, hour,
                    seconds, minutes, hours,
+                   kilograms, kilogram, kg, gram, grams, g, micrograms, microgram, ug, milligrams, milligram, mg,
+                   amperes, ampere, A,
                    __UNITS__,
                    One, Zero,
                    UnitError, Units)

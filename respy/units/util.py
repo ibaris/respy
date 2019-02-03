@@ -1,14 +1,25 @@
+# -*- coding: utf-8 -*-
+"""
+Utility for Physical Quantities
+-------------------------------
+Created on 20.01.2019 by Ismail Baris
+
+This module defines all units of `Quantity` objects.
+"""
+
 from __future__ import division
+
 import sympy.physics.units as sympy_units
-import sympy
-from sympy.physics.units.quantities import Quantity as sQuantity
-from sympy.physics.units.dimensions import frequency as dim_frequency
 from sympy import S
+from sympy.physics.units.quantities import Quantity as sQuantity
+
+from respy.units import dimensions
 
 __OPERAND__ = ['*', '/', '+', '-', '**']
 
 One = S.One
 Zero = S.Zero
+
 
 class UnitError(Exception):
     pass
@@ -270,6 +281,78 @@ class Temperature(dict):
         return list(self.keys())
 
 
+class Mass(dict):
+    """ Storage for mass units.
+
+    Returns
+    -------
+    Dict with .dot access.
+
+    Notes
+    -----
+    There may be additional attributes not listed above depending of the
+    specific solver. Since this class is essentially a subclass of dict
+    with attribute accessors, one can see which attributes are available
+    using the `keys()` method. adar Backscatter values of multi scattering contribution of surface and volume
+    """
+
+    def __getattr__(self, name):
+        try:
+            return self[name]
+        except KeyError:
+            raise AttributeError("{} is not a valid unit. Use `keys()` method to see all available units".format(name))
+
+    __setattr__ = dict.__setitem__
+    __delattr__ = dict.__delitem__
+
+    def __repr__(self):
+        if self.keys():
+            m = max(map(len, list(self.keys()))) + 1
+            return '\n'.join([k.rjust(m) + ': ' + repr(v)
+                              for k, v in sorted(self.items())])
+        else:
+            return self.__class__.__name__ + "()"
+
+    def __dir__(self):
+        return list(self.keys())
+
+
+class Current(dict):
+    """ Storage for current units.
+
+    Returns
+    -------
+    Dict with .dot access.
+
+    Notes
+    -----
+    There may be additional attributes not listed above depending of the
+    specific solver. Since this class is essentially a subclass of dict
+    with attribute accessors, one can see which attributes are available
+    using the `keys()` method. adar Backscatter values of multi scattering contribution of surface and volume
+    """
+
+    def __getattr__(self, name):
+        try:
+            return self[name]
+        except KeyError:
+            raise AttributeError("{} is not a valid unit. Use `keys()` method to see all available units".format(name))
+
+    __setattr__ = dict.__setitem__
+    __delattr__ = dict.__delitem__
+
+    def __repr__(self):
+        if self.keys():
+            m = max(map(len, list(self.keys()))) + 1
+            return '\n'.join([k.rjust(m) + ': ' + repr(v)
+                              for k, v in sorted(self.items())])
+        else:
+            return self.__class__.__name__ + "()"
+
+    def __dir__(self):
+        return list(self.keys())
+
+
 class Other(dict):
     """ Storage for other, dimensionless units.
 
@@ -306,61 +389,6 @@ class Other(dict):
         return list(self.keys())
 
 
-def def_unit(unit):
-    if not isinstance(unit, tuple(sympy.core.all_classes)):
-
-        if isinstance(unit, str):
-
-            if unit == "-":
-                return unit
-
-            else:
-                unit = unit.split()
-
-                unit_list = list()
-                operand_list = list()
-
-                for item in unit:
-                    if item in __OPERAND__:
-                        operand_list.append(item)
-                    else:
-                        try:
-                            item = int(item)
-                            unit_list.append(item)
-
-                        except ValueError:
-                            try:
-                                unit_list.append(__UNITS__[item])
-
-                            except KeyError:
-                                raise AttributeError("{} is not a valid unit.".format(str(item)))
-
-                unit = unit_list[0]
-
-                for i in range(1, len(unit_list)):
-                    item = unit_list[i]
-                    try:
-                        if operand_list[i - 1] == '*':
-                            unit *= item
-                        elif operand_list[i - 1] == '/':
-                            unit /= item
-                        elif operand_list[i - 1] == '+':
-                            unit += item
-                        elif operand_list[i - 1] == '-':
-                            unit -= item
-                        elif operand_list[i - 1] == '**':
-                            unit **= item
-                    except IndexError:
-                        pass
-
-                return unit
-
-        else:
-            raise AttributeError("{} is not a valid unit.".format(str(unit)))
-    else:
-        return unit
-
-
 deg = degree = degrees = sympy_units.degree
 rad = radian = radians = sympy_units.radian
 
@@ -369,47 +397,47 @@ dB.set_dimension(One)
 dB.set_scale_factor(One)
 
 millihertz = mhz = mHz = sQuantity("millihertz", abbrev="mHz")
-millihertz.set_dimension(dim_frequency)
+millihertz.set_dimension(dimensions.frequency)
 millihertz.set_scale_factor(1 / 1e3)
 
 centihertz = chz = cHz = sQuantity("centihertz", abbrev="cHz")
-centihertz.set_dimension(dim_frequency)
+centihertz.set_dimension(dimensions.frequency)
 centihertz.set_scale_factor(1 / 1e2)
 
 decihertz = dhz = dHz = sQuantity("decihertz", abbrev="dHz")
-decihertz.set_dimension(dim_frequency)
+decihertz.set_dimension(dimensions.frequency)
 decihertz.set_scale_factor(1 / 1e1)
 
 hertz = hz = Hz = sQuantity("hertz", abbrev="Hz")
-hertz.set_dimension(dim_frequency)
+hertz.set_dimension(dimensions.frequency)
 hertz.set_scale_factor(One)
 
 decahertz = dahz = daHz = sQuantity("decahertz", abbrev="daHz")
-decahertz.set_dimension(dim_frequency)
+decahertz.set_dimension(dimensions.frequency)
 decahertz.set_scale_factor(10)
 
 hectohertz = hhz = hHz = sQuantity("hectohertz", abbrev="hHz")
-hectohertz.set_dimension(dim_frequency)
+hectohertz.set_dimension(dimensions.frequency)
 hectohertz.set_scale_factor(100)
 
 kilohertz = khz = kHz = sQuantity("kilohertz", abbrev="kHz")
-kilohertz.set_dimension(dim_frequency)
+kilohertz.set_dimension(dimensions.frequency)
 kilohertz.set_scale_factor(1000)
 
 megahertz = MHz = sQuantity("megahertz", abbrev="MHz")
-megahertz.set_dimension(dim_frequency)
+megahertz.set_dimension(dimensions.frequency)
 megahertz.set_scale_factor(1e6)
 
 gigahertz = ghz = GHz = sQuantity("gigahertz", abbrev="GHz")
-gigahertz.set_dimension(dim_frequency)
+gigahertz.set_dimension(dimensions.frequency)
 gigahertz.set_scale_factor(1e9)
 
 terahertz = thz = THz = sQuantity("terahertz", abbrev="THz")
-terahertz.set_dimension(dim_frequency)
+terahertz.set_dimension(dimensions.frequency)
 terahertz.set_scale_factor(1e12)
 
 petahertz = phz = PHz = sQuantity("petahertz", abbrev="PHz")
-petahertz.set_dimension(dim_frequency)
+petahertz.set_dimension(dimensions.frequency)
 petahertz.set_scale_factor(1e15)
 
 nm = nanometers = nanometer = sympy_units.nm
@@ -429,6 +457,30 @@ K = kelvins = kelvin = sympy_units.K
 J = joules = joule = sympy_units.J
 
 W = watt = watts = sympy_units.watt
+
+milligram = milligrams = mg = sympy_units.milligram
+microgram = micrograms = ug = sympy_units.microgram
+gram = grams = g = sympy_units.gram
+kilogram = kilograms = kg = sympy_units.kilogram
+
+ampere = amperes = A = sympy_units.ampere
+
+mass = Mass(milligram=milligram,
+            milligrams=milligrams,
+            mg=mg,
+            microgram=microgram,
+            micrograms=micrograms,
+            ug=ug,
+            gram=gram,
+            grams=grams,
+            g=g,
+            kilogram=kilogram,
+            kilograms=kilograms,
+            kg=kg)
+
+current = Current(ampere=ampere,
+                  amperes=amperes,
+                  A=A)
 
 frequency = Frequency(millihertz=millihertz,
                       mhz=mhz,
@@ -516,12 +568,11 @@ other = Other(decibel=decibel,
               radians=radians)
 
 Units = Units(frequency=frequency, length=length, time=time, energy=energy, power=power, temperature=temperature,
-              other=other)
+              other=other, mass=mass, current=current)
 
-
-def which_dimension(unit):
-    pass
-
+current = Current(ampere=ampere,
+                  amperes=amperes,
+                  A=A)
 
 __UNITS__ = {"-": None,
 
@@ -612,4 +663,20 @@ __UNITS__ = {"-": None,
 
              "W": W,
              "watt": watt,
-             "watts": watts}
+             "watts": watts,
+
+             "milligram": milligram,
+             "milligrams": milligrams,
+             "mg": mg,
+             "microgram": microgram,
+             "micrograms": micrograms,
+             "ug": ug,
+             "gram": gram,
+             "grams": grams,
+             "g": g,
+             "kilogram": kilogram,
+             "kilograms": kilograms,
+             "kg": kg,
+             "ampere": ampere,
+             "amperes": amperes,
+             "A": A}

@@ -1,21 +1,88 @@
+# -*- coding: utf-8 -*-
+"""
+Physical Quantities
+-------------------
+Created on 10.01.2019 by Ismail Baris
+
+This module defines the `Quantity` objects. A Quantity object represents a number with some an associated unit.
+`Quantity` objects are subclasses of numpy.ndarray. Thus, a `Quantity` object support operations like ordinary arrays,
+but will deal with unit conversions internally. The base of the `Quantity` object is programmed in `Cython`.
+"""
 from __future__ import division
 
 import inspect
 
 import numpy as np
-
-import util as util
+from respy.unit_base.auxil import decompose_expr_to_atoms
+from respy.unit_base.auxil import get_unit, get_dimension
 from respy.unit_base.convert import convert_to_unit
 from respy.unit_base.operations import compute_logical_operation, compute_bitwise_operation, compute_operation
-from respy.unit_base.auxil import decompose_expr_to_atoms
+
+import util as util
 from respy.units.auxil import __NONE_UNITS__, __OPERATORS__, __UFUNC_NAME__
-from respy.units.util import Zero, One
-from respy.unit_base.auxil import get_unit
+from respy.units.util import Zero
 
 np.seterr(divide='ignore', invalid='ignore')
 
 
 class Quantity(np.ndarray):
+    """ Physical Quantities
+
+    This module defines the `Quantity` objects. A Quantity object represents a number with some an associated unit.
+
+    Attributes
+    ----------
+    Quantity.value : np.ndarray
+        The numerical value of this quantity in the units given by unit.
+    Quantity.unit : sympy.physics.units.quantities.Quantity
+        An object that represents the unit associated with the input value.
+    Quantity.dtype : type
+        The data type of the value
+    Quantity.copy: bool
+        The entered copy bool value.
+    Quantity.order : str
+        Order of the array.
+    Quantity.subok : bool
+        The entered subok value.
+    Quantity.ndmin : int
+        Minimum number of dimensions
+    Quantity.name : str
+        Name of the Quantity
+    Quantity.constant : bool
+        Information about if the Quantity is an constant or not.
+    Quantity.unitstr : str
+        Parameter unit as str.
+    Quantity.unit_mathstr : str
+        Parameter unit as math text.
+    Quantity.label : str
+        Parameter name and unit as math text.
+    Quantity.expr : np.ndarray
+        The whole expression (value * unit) as sympy.core.mul.Mul.
+    Quantity.tolist : list
+        Value and unit as a list.
+
+    Methods
+    -------
+    decompose()
+        Return value as np.ndarray and unit as sympy.physics.units.quantities.Quantity object.
+    decompose_expr(expr)
+        Extract value and unit from a sympy.core.mul.Mul object.
+    set_name(name)
+        Set a name for the current Quantity.
+    convert_to(unit, inplace=True)
+        Convert unit to another units.
+    set_constant(bool)
+        Set a `Quantity` object as constant. In this case, every operation will drop the name of the Quantity.
+    Raises
+    ------
+    UnitError
+    DimensionError
+
+    See Also
+    --------
+    respry.units.util.Units
+
+    """
     def __new__(cls, value, unit=None, dtype=None, copy=True, order=None,
                 subok=False, ndmin=0, name=None, constant=False):
         """
@@ -63,58 +130,6 @@ class Quantity(np.ndarray):
         constant : bool
             If True and the constant has a name the name will be replaced after a operation.
 
-        Attributes
-        ----------
-        value : np.ndarray
-            The numerical value of this quantity in the units given by unit.
-        unit : sympy.physics.units.quantities.Quantity
-            An object that represents the unit associated with the input value.
-        dtype : type
-            The data type of the value
-        copy: bool
-            The entered copy bool value.
-        order : str
-            Order of the array.
-        subok : bool
-            The entered subok value.
-        ndmin : int
-            Minimum number of dimensions
-        name : str
-            Name of the Quantity
-        constant : bool
-            Information about if the Quantity is an constant or not.
-        unitstr : str
-            Parameter unit as str.
-        math_text : str
-            Parameter unit as math text.
-        label : str
-            Parameter name and unit as math text.
-        expr : np.ndarray
-            The whole expression (value * unit) as sympy.core.mul.Mul.
-        tolist : list
-            Value and unit as a list.
-
-
-        Methods
-        -------
-        decompose()
-            Return value as np.ndarray and unit as sympy.physics.units.quantities.Quantity object.
-        decompose_expr(expr)
-            Extract value and unit from a sympy.core.mul.Mul object.
-        set_name(name)
-            Set a name for the current Quantity.
-        convert_to(unit, inplace=True)
-            Convert unit to another units.
-
-        Raises
-        ------
-        UnitError
-        DimensionError
-
-        See Also
-        --------
-        respry.units.util.Units
-
         """
 
         x = np.array(value, dtype=dtype, copy=copy, order=order, subok=subok, ndmin=ndmin)
@@ -129,23 +144,19 @@ class Quantity(np.ndarray):
         obj = x.view(type=cls)
 
         if unit is None:
-            obj.unit = Zero
-            obj.dimension = Zero
+            obj._unit = Zero
         else:
-            obj.unit = get_unit(unit)
-            try:
-                obj.dimension = obj.unit.dimension.name
+            obj._unit = get_unit(unit)
 
-            except AttributeError:
-                obj.dimension = Zero
+        obj._dimension = get_dimension(obj._unit)
 
         obj.value = x
         obj._dtype = x.dtype
 
         if name is None:
-            obj.name = b''
+            obj._name = b''
         else:
-            obj.name = name
+            obj._name = name
 
         obj.constant = constant
 
@@ -167,7 +178,7 @@ class Quantity(np.ndarray):
                                  separator=sep,
                                  prefix=prefix)
 
-        if self.name is None or self.name is b'':
+        if self._name is None or self._name is b'':
             return '{0}{1} [{2}]>'.format(prefix, arrstr, self.unitstr)
 
         else:
@@ -178,16 +189,16 @@ class Quantity(np.ndarray):
         if obj is None:
             return
         else:
-            self.unit = getattr(obj, 'unit', None)
+            self._unit = getattr(obj, '_unit', None)
             self.value = getattr(obj, 'value', None)
-            self.name = getattr(obj, 'name', None)
+            self._name = getattr(obj, 'name', None)
             self.constant = getattr(obj, 'constant', None)
             self._dtype = getattr(obj, '_dtype', None)
             self.copy = getattr(obj, 'copy', None)
             self.order = getattr(obj, 'order', None)
             self.subok = getattr(obj, 'subok', None)
             self.ndmin = getattr(obj, 'ndmin', None)
-            self.dimension = getattr(obj, 'dimension', None)
+            self._dimension = getattr(obj, '_dimension', None)
             self.quantity = getattr(obj, 'quantity', None)
 
     def __array_wrap__(self, out_arr, context=None):
@@ -199,7 +210,7 @@ class Quantity(np.ndarray):
     # Attribute Operations -------------------------------------------------------------------------------
     def __getitem__(self, item):
         value = self.value[item]
-        return self.__create_new_instance(value, self.unit, self.name)
+        return self.__create_new_instance(value, self.unit, self._name)
 
     # Mathematical Operations ----------------------------------------------------------------------------
     # Left Operations -------------------------------------------------------------------------------
@@ -220,9 +231,6 @@ class Quantity(np.ndarray):
 
         value, unit, dtype, name = compute_operation(self, other, operator, right_handed=False)
 
-        if unit is None:
-            unit = Zero
-
         return self.__create_new_instance(value, unit, name, dtype)
 
     def __floordiv__(self, other):
@@ -231,9 +239,6 @@ class Quantity(np.ndarray):
 
         value, unit, dtype, name = compute_operation(self, other, operator, right_handed=False)
 
-        if unit is None:
-            unit = Zero
-
         return self.__create_new_instance(value, unit, name, dtype)
 
     def __mod__(self, other):
@@ -241,9 +246,6 @@ class Quantity(np.ndarray):
         operator = __UFUNC_NAME__[inspect.currentframe().f_code.co_name]
 
         value, unit, dtype, name = compute_operation(self, other, operator, right_handed=False)
-
-        if unit is None:
-            unit = Zero
 
         return self.__create_new_instance(value, unit, name, dtype)
 
@@ -255,9 +257,6 @@ class Quantity(np.ndarray):
 
         value, unit, dtype, name = compute_operation(self, other, operator, right_handed=False)
 
-        if unit is None:
-            unit = Zero
-
         return self.__create_new_instance(value, unit, name, dtype)
 
     def __sub__(self, other):
@@ -266,9 +265,6 @@ class Quantity(np.ndarray):
 
         value, unit, dtype, name = compute_operation(self, other, operator, right_handed=False)
 
-        if unit is None:
-            unit = Zero
-
         return self.__create_new_instance(value, unit, name, dtype)
 
     def __pow__(self, other):
@@ -276,9 +272,6 @@ class Quantity(np.ndarray):
         operator = __UFUNC_NAME__[inspect.currentframe().f_code.co_name]
 
         value, unit, dtype, name = compute_operation(self, other, operator, right_handed=False)
-
-        if unit is None:
-            unit = Zero
 
         return self.__create_new_instance(value, unit, name, dtype)
 
@@ -322,9 +315,6 @@ class Quantity(np.ndarray):
 
         value, unit, dtype, name = compute_operation(self, other, operator, right_handed=True)
 
-        if unit is None:
-            unit = Zero
-
         return self.__create_new_instance(value, unit, name, dtype)
 
     __rdiv__ = __rtruediv__
@@ -334,9 +324,6 @@ class Quantity(np.ndarray):
         operator = __UFUNC_NAME__[inspect.currentframe().f_code.co_name]
 
         value, unit, dtype, name = compute_operation(self, other, operator, right_handed=True)
-
-        if unit is None:
-            unit = Zero
 
         return self.__create_new_instance(value, unit, name, dtype)
 
@@ -370,7 +357,9 @@ class Quantity(np.ndarray):
         other = self.__check_other(other)
         operator = __UFUNC_NAME__[inspect.currentframe().f_code.co_name]
 
-        return compute_bitwise_operation(self, other, operator, right_handed=True)
+        value, unit, dtype, name = compute_operation(self, other, operator, right_handed=True)
+
+        return self.__create_new_instance(value, unit, name, dtype)
 
     def __rand__(self, other):
         other = self.__check_other(other)
@@ -446,46 +435,67 @@ class Quantity(np.ndarray):
         OPERATOR = __OPERATORS__.get(name)
 
         value = OPERATOR(self.value)
-        return self.__create_new_instance(value, self.unit, self.name)
+        return self.__create_new_instance(value, self.unit, self._name)
 
     def __neg__(self):
         name = __UFUNC_NAME__[inspect.currentframe().f_code.co_name]
         OPERATOR = __OPERATORS__.get(name)
 
         value = OPERATOR(self.value)
-        return self.__create_new_instance(value, self.unit, self.name)
+        return self.__create_new_instance(value, self.unit, self._name)
 
     def __abs__(self):
         name = __UFUNC_NAME__[inspect.currentframe().f_code.co_name]
         OPERATOR = __OPERATORS__.get(name)
 
         value = OPERATOR(self.value)
-        return self.__create_new_instance(value, self.unit, self.name)
+        return self.__create_new_instance(value, self.unit, self._name)
 
     def __invert__(self):
         name = __UFUNC_NAME__[inspect.currentframe().f_code.co_name]
         OPERATOR = __OPERATORS__.get(name)
 
         value = OPERATOR(self.value)
-        return self.__create_new_instance(value, self.unit, self.name)
+        return self.__create_new_instance(value, self.unit, self._name)
 
     def __iter__(self):
         def iter_over_value(unit, name):
             for item in self.value:
                 yield self.__create_new_instance(item, unit, name)
 
-        return iter_over_value(self.unit, self.name)
+        return iter_over_value(self.unit, self._name)
 
     # --------------------------------------------------------------------------------------------------------
     # Properties
     # --------------------------------------------------------------------------------------------------------
     @property
     def real(self):
-        return self.__create_new_instance(self.value.real, unit=self.unit, name=self.name, dtype=self.value.real.dtype)
+        return self.__create_new_instance(self.value.real, unit=self.unit, name=self._name, dtype=self.value.real.dtype)
 
     @property
     def imag(self):
-        return self.__create_new_instance(self.value.imag, unit=self.unit, name=self.name, dtype=self.value.imag.dtype)
+        return self.__create_new_instance(self.value.imag, unit=self.unit, name=self._name, dtype=self.value.imag.dtype)
+
+    @property
+    def dimension(self):
+        if self._dimension in __NONE_UNITS__:
+            return Zero
+        else:
+            return self._dimension
+
+    @property
+    def name(self):
+        if self._name == b'' or self._name is None:
+            return None
+        else:
+            return self._name
+
+    @property
+    def unit(self):
+        if self._unit in __NONE_UNITS__:
+            return Zero
+        else:
+            return self._unit
 
     @property
     def unitstr(self):
@@ -607,7 +617,7 @@ class Quantity(np.ndarray):
         -------
         None
         """
-        self.name = name
+        self._name = name
 
     def convert_to(self, unit, inplace=False):
         """
@@ -673,20 +683,17 @@ class Quantity(np.ndarray):
             dtype = value.dtype
 
         if inplace:
-            self.__set_attributes(unit, value, self._dtype, self.copy, self.order, self.subok, False,
-                                  self.ndmin)
+            self.__set_attributes(unit, value, dtype, self.copy, self.order, self.subok, self.constant, self.ndmin,
+                                  self._name)
+
         else:
-            return self.__create_new_instance(value, unit, self.name)
+            return self.__create_new_instance(value, unit, self._name)
 
     # --------------------------------------------------------------------------------------------------------
     # Private Methods
     # --------------------------------------------------------------------------------------------------------
 
-    def __set_attributes(self, unit, value, dtype, copy, order, subok, constant, ndmin):
-        if unit is None or isinstance(unit, type(One)):
-            self.unit = None
-        else:
-            self.unit = get_unit(unit)
+    def __set_attributes(self, unit, value, dtype, copy, order, subok, constant, ndmin, name):
 
         self.value = value
         self._dtype = dtype
@@ -695,22 +702,16 @@ class Quantity(np.ndarray):
         self.subok = subok
         self.constant = constant
         self.ndmin = ndmin
+        self._name = name
 
-        try:
-            self.dimension = self.unit.dimension.name
-        except AttributeError:
-            self.dimension = None
+        self._unit = get_unit(unit)
+        self._dimension = get_dimension(self._unit)
 
     def __create_new_instance(self, value, unit=None, name=None, dtype=None):
 
         quantity_subclass = self.__class__
 
-        if unit is None or unit is 1:
-            unit = None
-        elif isinstance(unit, type(One)):
-            unit = None
-        else:
-            pass
+        unit = get_unit(unit)
 
         if dtype is None:
             dtype = self._dtype
@@ -723,8 +724,7 @@ class Quantity(np.ndarray):
         value = np.atleast_1d(value)
         view = value.view(quantity_subclass)
 
-        view.__set_attributes(unit, value, dtype, self.copy, self.order, self.subok, self.constant, self.ndmin)
-        view.set_name(name)
+        view.__set_attributes(unit, value, dtype, self.copy, self.order, self.subok, self.constant, self.ndmin, name)
 
         return view
 

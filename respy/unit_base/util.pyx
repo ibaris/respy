@@ -1,6 +1,10 @@
 # -*- coding: utf-8 -*-
 """
+Utility of Physical Quantities
+------------------------------
 Created on 27.01.2019 by Ismail Baris
+
+This Module contains utility functions like the check of units and names.
 """
 from __future__ import division
 from respy.units.auxil import __NONE_UNITS__, __ADD_SUB__, __BITWISE__

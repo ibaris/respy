@@ -1,14 +1,20 @@
-# # -*- coding: utf-8 -*-
-# """
-# Created on 26.01.2019 by Ismail Baris
-# """
+# -*- coding: utf-8 -*-
+"""
+Operation Base of Physical Quantities
+-------------------------------------
+Created on 26.01.2019 by Ismail Baris
+
+This Module is the base for every operation of `Quantity` objects.
+
+"""
 from __future__ import division
 import numpy as np
 cimport numpy as np
-from respy.units.util import Zero, UnitError
-from respy.unit_base.util cimport check_units, check_names
+from respy.units.util import Zero, One, UnitError
+from respy.unit_base.util cimport check_names
 from cpython cimport bool
-from respy.units.auxil import __NONE_UNITS__, __OPERATORS__
+from respy.units.auxil import __NONE_UNITS__, __OPERATORS__, __ADD_SUB__, __BITWISE__
+import warnings
 
 ctypedef fused DTYPE_ARRAY:
     np.ndarray
@@ -120,7 +126,7 @@ cdef tuple bitwise_array(DTYPE_ARRAY self, DTYPE_ARRAY other, char*operator, boo
                                                                                                      str(operator)))
     unit = self.unit
 
-    name = self.name if not self.constant else b''
+    name = self._name if not self.constant else b''
     value = OPERATOR(self.value.astype(np.int), other_value) if not right_handed else OPERATOR(other_value, self.value.astype(np.int))
     dtype = value.dtype
 
@@ -164,19 +170,44 @@ cdef tuple operator_array(DTYPE_ARRAY self, DTYPE_ARRAY other, char*operator, bo
     if hasattr(other, 'quantity'):
         other_value = other.value
         other_unit = other.unit
-        other_name = other.name
+        other_name = other._name
         other_constant = other.constant
 
     else:
         other_value = other
-        other_unit = Zero
+        other_unit = One
         other_name = b''
         other_constant = False
 
-    name = check_names(self.name, other_name, self.constant, other_constant)
-    self_unit, other_unit = check_units(self.unit, other_unit, operator)
+    name = check_names(self._name, other_name, self.constant, other_constant)
 
-    unit = OPERATOR(self_unit, other_unit) if not right_handed else OPERATOR(other_unit, self_unit)
+    if operator in __ADD_SUB__ or operator in __BITWISE__:
+        if self.unit in __NONE_UNITS__:
+            unit = other_unit if other_unit not in __NONE_UNITS__ else One
+
+        elif other_unit in __NONE_UNITS__:
+            unit = self.unit
+
+        elif other_unit == self.unit:
+            unit = self.unit
+
+        else:
+            raise UnitError("Addition, subtraction and bitwise operations require the same unit or "
+                            "one of the units must be None.")
+
+    elif operator == b'**':
+        if other_unit not in __NONE_UNITS__:
+            warnings.warn("An exponent should not have a unit. Thus, the unit of the "
+                          "exponent {0} will be ignored.".format(str(other_unit)))
+
+            unit = One if self.unit in __NONE_UNITS__ else self.unit
+
+        else:
+            unit = One if self.unit in __NONE_UNITS__ else self.unit
+
+    else:
+        unit = OPERATOR(self.unit, other_unit) if not right_handed else OPERATOR(other_unit, self.unit)
+
     value = OPERATOR(self.value, other_value) if not right_handed else OPERATOR(other_value, self.value)
     dtype = value.dtype
 

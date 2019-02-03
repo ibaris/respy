@@ -1,3 +1,12 @@
+# -*- coding: utf-8 -*-
+"""
+Conversion Base of Physical Quantities
+--------------------------------------
+Created on 24.01.2019 by Ismail Baris
+
+This Module is the base for unit conversions of `Quantity` objects.
+"""
+
 from __future__ import division
 cimport numpy as np
 import numpy as np

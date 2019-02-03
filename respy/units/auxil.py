@@ -14,6 +14,7 @@ __ADD_SUB__ = [b'+', b'-']
 
 __BITWISE__ = [b'&', b'^', b'|', b'<<', b'>>']
 
+__POW__ = [b'**']
 
 __UFUNC_NAME__ = {'__add__': '+',
                   '__truediv__': '/',
