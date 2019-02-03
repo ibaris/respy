@@ -1,17 +1,65 @@
+# -*- coding: utf-8 -*-
+"""
+Electromagnetic Waves
+---------------------
+Created on 01.12.2018 by Ismail Baris
+
+This module contains all functions and classes related to electromagnetic waves.
+"""
+
 from __future__ import division
 
 import numpy as np
+from respy.unit_base.auxil import get_unit
 
 import respy.constants as const
-from respy.util import align_all
+from respy.em.util import __REGION__, __BANDS__, __WHICH__BAND__, __WHICH__REGION__
 from respy.units import Quantity
 from respy.units import Units
-from respy.units.util import def_unit, DimensionError
-from respy.em.util import __REGION__, __BANDS__, __WHICH__BAND__, __WHICH__REGION__
 from respy.units.util import DimensionError, UnitError
+from respy.util import align_all
+from respy.units import dimensions
 
 
 class EM(object):
+    """
+    This is a simple transverse wave travelling in a one-dimensional space.
+
+    Attributes
+    ----------
+    EM.band : str
+        Shows the band that the input belongs to.
+    EM.region : str
+        Shows the region that the input belongs to.
+    EM.frequency : `Quantity` object
+        Frequency.
+    EM.wavelength : `Quantity` object
+        Wavelength.
+    EM.len : int
+        Length of array.
+    EM.shape : tuple
+        Shape of array.
+    EM.value : np.ndarray
+        An array with the values of frequency, wavelength and wavenumber.
+    EM.wavenumber : `Quantity` object
+        Wavenumber.
+    EM.speed : `Quantity` object
+        Speed of the electromagnetic wave.
+    EM.angular_speed : `Quantity` object
+        Angular velocity of the electromagnetic wave.
+
+    Methods
+    -------
+    align_with(value)
+        Expand all input values to the same length depend on an external array.
+    compute_frequency(wavelength, unit, output, quantity=True)
+        Static method to convert wavelengths in frequencies.
+    compute_wavelength(frequency, unit, output, quantity=True)
+        Static method to convert frequencies in wavelengths.
+    compute_wavenumber(frequency, unit, output, quantity=True)
+        Static method to convert frequencies in free space wavenumbers.
+
+    """
     def __init__(self, input, unit='GHz', output='cm'):
         """
         A class to describe electromagnetic waves.
@@ -25,34 +73,6 @@ class EM(object):
         output : str, respy.units.Units, sympy.physics.units.quantities.Quantity
             Unit of output. Default is 'cm'.
 
-        Attributes
-        ----------
-        band : str
-            Shows the band that the input belongs to.
-        region : str
-            Shows the region that the input belongs to.
-        frequency : respy.units.quantity.Quantity
-            Frequency.
-        wavelength : respy.units.quantity.Quantity
-            Wavelength.
-        len : int
-            Length of array.
-        shape : tuple
-            Shape of array.
-        value : np.ndarray
-            An array with the values of frequency, wavelength and wavenumber.
-
-        Methods
-        -------
-        align_with(value)
-            Expand all input values to the same length depend on an external array.
-        compute_frequency(wavelength, unit, output, quantity=True)
-            Static method to convert wavelengths in frequencies.
-        compute_wavelength(frequency, unit, output, quantity=True)
-            Static method to convert frequencies in wavelengths.
-        compute_wavenumber(frequency, unit, output, quantity=True)
-            Static method to convert frequencies in free space wavenumbers.
-        
         """
 
         # Prepare Input Data and set values ----------------------------------------------------------------------------
@@ -211,6 +231,32 @@ class EM(object):
     def value(self):
         return self.__value
 
+    @property
+    def speed(self):
+        """
+        Returns the propagation speed of the wave in meter per seconds.
+
+        Returns
+        -------
+        Quantity object
+        """
+        f = self.frequency.convert_to('1 / s')
+        w = self.frequency.convert_to('m')
+        return w * f
+
+    @property
+    def angular_speed(self):
+        """
+        Returns the angular velocity of the wave in radians per secodn.
+
+        Returns
+        -------
+        Quantity object
+        """
+        p2 = Quantity(2*const.pi, 'rad')
+        f = self.frequency.convert_to('1 / s')
+        return p2 * f
+
     # --------------------------------------------------------------------------------------------------------
     # Callable Methods
     # --------------------------------------------------------------------------------------------------------
@@ -310,8 +356,8 @@ class EM(object):
         -------
         Wavelength: float, np.ndarray or respy.units.quantity.Quantity
         """
-        unit = def_unit(unit)
-        output = def_unit(output)
+        unit = get_unit(unit)
+        output = get_unit(output)
 
         if frequency.__class__.__name__ == 'Quantity':
             frequency = frequency.convert_to('1 / s')
@@ -388,7 +434,7 @@ class Bands(object):
             Static method to get the corresponding region of a frequency or a wavelength.
 
         """
-        self.output = def_unit(output)
+        self.output = get_unit(output)
         self.dimension = self.output.dimension.name
         self.dtype = dtype
 
@@ -522,7 +568,7 @@ class Bands(object):
             else:
                 pass
 
-            bands = temp_band[0] <= value <= temp_band[1]
+            bands = temp_band.value[0] <= value.value <= temp_band.value[1]
 
             if np.all(bands):
                 return item
@@ -562,10 +608,10 @@ class Bands(object):
             if value.dimension == temp_band.dimension:
                 temp_band = temp_band.convert_to(value.unit)
 
-            elif str(value.dimension) == 'frequency':
+            elif value.dimension == dimensions.frequency:
                 temp_band = EM.compute_frequency(temp_band, temp_band.unit, value.unit)
 
-            elif str(value.dimension) == 'length':
+            elif value.dimension == dimension.length:
                 temp_band = EM.compute_wavelength(temp_band, temp_band.unit, value.unit)
 
             else:
