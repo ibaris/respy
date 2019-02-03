@@ -237,8 +237,8 @@ class Conversion(object):
 
         Parameters
         ----------
-        BSC : int, float or array_like
-            Radar Backscatter Coefficient (sigma 0).
+        BRDF : int, float or array_like
+            Intensity as a BRDF.
         vza : int, float or array_like
             View or scattering zenith angle.
         angle_unit : {'DEG', 'RAD'} (default = 'RAD'), optional
@@ -252,7 +252,6 @@ class Conversion(object):
         """
         if angle_unit in __ANGLE_UNIT_RAD__:
             return BRDF * cos(vza) * 4 * const.pi
-
 
         elif angle_unit in __ANGLE_UNIT_DEG__:
             return BRDF * cos(rad(vza)) * (4 * const.pi)
