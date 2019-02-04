@@ -20,7 +20,9 @@ from respy.unit_base.operations import compute_logical_operation, compute_bitwis
 
 import util as util
 from respy.units.auxil import __NONE_UNITS__, __OPERATORS__, __UFUNC_NAME__
-from respy.units.util import Zero
+from respy.units.util import Zero, One, UnitError
+from respy.units.unit_ufuncs import (__CONVERT__MATH__, __MATH_UNIT_GETS_LOST__, __MATH_UNIT_REMAINS_STABLE__,
+                                     __CHECK_UNIT__, __MATH_LOGICAL_AND_MORE__, __NOT_IMPLEMENTED__)
 
 np.seterr(divide='ignore', invalid='ignore')
 
@@ -83,6 +85,7 @@ class Quantity(np.ndarray):
     respry.units.util.Units
 
     """
+
     def __new__(cls, value, unit=None, dtype=None, copy=True, order=None,
                 subok=False, ndmin=0, name=None, constant=False):
         """
@@ -202,7 +205,91 @@ class Quantity(np.ndarray):
             self.quantity = getattr(obj, 'quantity', None)
 
     def __array_wrap__(self, out_arr, context=None):
-        return np.ndarray.__array_wrap__(self, out_arr, context)
+        # return np.ndarray.__array_wrap__(self, out_arr, context)
+        return self.__create_new_instance(self.value)
+
+    def __array_ufunc__(self, function, method, *inputs, **kwargs):
+        if function.nout > 1 or function.__name__ in __NOT_IMPLEMENTED__:
+            raise NotImplementedError
+
+        if function.nin == 1:
+            value = (self.value,)
+            unit = (self.unit,)
+            result = super(Quantity, self).__array_ufunc__(function, method, *value, **kwargs)
+
+            if function.__name__ in __MATH_UNIT_GETS_LOST__:
+                unit = One
+            elif function.__name__ in __MATH_UNIT_REMAINS_STABLE__:
+                unit = self.unit
+            elif function.__name__ in __CONVERT__MATH__.keys():
+                try:
+                    unit_ufunc = __CONVERT__MATH__[function.__name__]
+                    unit = unit_ufunc(self.unit)
+                    unit = unit.n()
+
+                except (AttributeError, TypeError):
+                    unit = One
+
+            elif function.__name__ in __MATH_LOGICAL_AND_MORE__:
+                return result
+
+            else:
+                try:
+                    unit = super(Quantity, self).__array_ufunc__(function, method, *unit, **kwargs)
+
+                except (AttributeError, TypeError):
+                    unit = One
+
+            dtype = result.dtype
+
+            return self.__create_new_instance(result[0] if len(result) == 1 else result,
+                                              unit,
+                                              self._name if not self.constant else b'',
+                                              dtype)
+
+        elif function.nin == 2:
+            values = self.__check_values(*inputs)
+            units = list()
+
+            for item in inputs:
+                units.append(item.unit if hasattr(item, 'quantity') else One)
+
+            units = tuple(units)
+
+            if function.__name__ in __CHECK_UNIT__:
+                if units[1] == One or units[0] == units[1]:
+                    try:
+                        unit = super(Quantity, self).__array_ufunc__(function, method, *units, **kwargs)
+
+                    except (AttributeError, TypeError):
+                        unit = One
+                else:
+                    raise UnitError("Units are not the same")
+
+            elif function.__name__ in __MATH_UNIT_GETS_LOST__:
+                unit = One
+            elif function.__name__ in __MATH_UNIT_REMAINS_STABLE__:
+                unit = units[0] if units[0] != One else units[1]
+            elif function.__name__ in __MATH_LOGICAL_AND_MORE__:
+                return super(Quantity, self).__array_ufunc__(function, method, *values, **kwargs)
+
+            else:
+                try:
+                    unit = super(Quantity, self).__array_ufunc__(function, method, *units, **kwargs)
+
+                except (AttributeError, TypeError):
+                    unit = One
+
+            result = super(Quantity, self).__array_ufunc__(function, method, *values, **kwargs)
+
+            dtype = result.dtype
+
+            return self.__create_new_instance(result[0] if len(result) == 1 else result,
+                                              unit,
+                                              self._name if not self.constant else b'',
+                                              dtype)
+        else:
+            raise NotImplementedError
 
     # --------------------------------------------------------------------------------------------------------
     # Operator
@@ -215,6 +302,7 @@ class Quantity(np.ndarray):
     # Mathematical Operations ----------------------------------------------------------------------------
     # Left Operations -------------------------------------------------------------------------------
     def __mul__(self, other):
+
         other = self.__check_other(other)
         operator = __UFUNC_NAME__[inspect.currentframe().f_code.co_name]
 
@@ -725,6 +813,7 @@ class Quantity(np.ndarray):
         view = value.view(quantity_subclass)
 
         view.__set_attributes(unit, value, dtype, self.copy, self.order, self.subok, self.constant, self.ndmin, name)
+        view.__array_finalize__(view)
 
         return view
 
@@ -735,3 +824,11 @@ class Quantity(np.ndarray):
             other = np.atleast_1d(np.asarray(other))
 
         return other
+
+    def __check_values(self, *values):
+        results = list()
+
+        for val in values:
+            results.append(val.value if hasattr(val, 'quantity') else np.atleast_1d(np.asarray(val)))
+
+        return results

@@ -1,5 +1,6 @@
 from quantity import Quantity
 import dimensions
+import unit_ufuncs
 from .util import (deg, degrees, degree, rad, radian, radians,
                    nm, um, mm, cm, dm, m, km,
 
@@ -29,3 +30,5 @@ from .util import (deg, degrees, degree, rad, radian, radians,
                    __UNITS__,
                    One, Zero,
                    UnitError, Units)
+
+

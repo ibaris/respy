@@ -170,7 +170,7 @@ cdef tuple operator_array(DTYPE_ARRAY self, DTYPE_ARRAY other, char*operator, bo
     if hasattr(other, 'quantity'):
         other_value = other.value
         other_unit = other.unit
-        other_name = other._name
+        other_name = other._name if other._name is not None else b''
         other_constant = other.constant
 
     else:
@@ -179,7 +179,9 @@ cdef tuple operator_array(DTYPE_ARRAY self, DTYPE_ARRAY other, char*operator, bo
         other_name = b''
         other_constant = False
 
-    name = check_names(self._name, other_name, self.constant, other_constant)
+    sname = self._name if self._name is not None else b''
+    name = check_names(sname, other_name, self.constant,
+                       other_constant)
 
     if operator in __ADD_SUB__ or operator in __BITWISE__:
         if self.unit in __NONE_UNITS__:
