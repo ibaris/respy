@@ -29,6 +29,6 @@ from .util import (deg, degrees, degree, rad, radian, radians,
                    amperes, ampere, A,
                    __UNITS__,
                    One, Zero,
-                   UnitError, Units)
+                   UnitError, Units, DimensionError)
 
 
