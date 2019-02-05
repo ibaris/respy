@@ -9,13 +9,14 @@ import respy
 
 import random
 import operator
-from respy.units import Zero, One
-
+from respy.units import Zero
+from respy.units import dimensions
+#
 a = Quantity(5, unit='cm')
-b = Quantity(2.5, unit='cm')
-c = Quantity(3, unit='m')
-
-a * a
+# b = Quantity(2.5, unit='cm')
+# c = Quantity(3, unit='m')
+#
+# a * a
 
 
 class TestInput:
@@ -26,7 +27,7 @@ class TestInput:
         q = Quantity(value=value, unit=unit, name=name)
 
         assert (q.name == name)
-        assert (str(q.dimension) == 'frequency')
+        assert (q.dimension == dimensions.frequency)
         assert (q.dtype == float)
         assert (q.unitstr == str(respy.units.Units.frequency[unit]))
         assert (q.value == value)
@@ -49,8 +50,8 @@ class TestInput:
         unit = 'GHz'
         q = Quantity(value=value, unit=unit)
 
-        assert (q.name is b'')
-        assert (str(q.dimension) == 'frequency')
+        assert (q.name is None)
+        assert (q.dimension == dimensions.frequency)
         assert (q.dtype == float)
         assert (q.unitstr == str(respy.units.Units.frequency[unit]))
         assert (q.value == value)
@@ -64,7 +65,7 @@ class TestInput:
         q = Quantity(value=value, unit=unit, name=name)
 
         assert (q.name == name)
-        assert (str(q.dimension) == 'length')
+        assert (q.dimension == dimensions.length)
         assert (q.dtype == float)
         assert (q.unitstr == str(respy.units.Units.length[unit]))
         assert (np.all(q.value == value))
@@ -77,8 +78,8 @@ class TestInput:
         for item in respy.units.Units.frequency.keys():
             unit = item
             q = Quantity(value=value, unit=unit)
-            assert (q.name is b'')
-            assert (str(q.dimension) == 'frequency')
+            assert (q.name is None)
+            assert (q.dimension == dimensions.frequency)
             assert (q.dtype == float)
             assert (q.unitstr == str(respy.units.Units.frequency[item]))
             assert (np.all(q.value == value))
@@ -87,8 +88,8 @@ class TestInput:
         for item in respy.units.Units.length.keys():
             unit = item
             q = Quantity(value=value, unit=unit)
-            assert (q.name is b'')
-            assert (str(q.dimension) == 'length')
+            assert (q.name is None)
+            assert (q.dimension == dimensions.length)
             assert (q.dtype == float)
             assert (q.unitstr == str(respy.units.Units.length[item]))
             assert (np.all(q.value == value))
@@ -97,8 +98,8 @@ class TestInput:
         for item in respy.units.Units.other.keys():
             unit = item
             q = Quantity(value=value, unit=unit)
-            assert (q.name is '')
-            assert (q.dimension == One)
+            assert (q.name is None)
+            assert (q.dimension == Zero)
             assert (q.dtype == float)
             assert (q.unitstr == str(respy.units.Units.other[item]))
             assert (np.all(q.value == value))
@@ -107,8 +108,8 @@ class TestInput:
         for item in respy.units.Units.temperature.keys():
             unit = item
             q = Quantity(value=value, unit=unit)
-            assert (q.name is b'')
-            assert (str(q.dimension) == 'temperature')
+            assert (q.name is None)
+            assert (q.dimension == dimensions.temperature)
             assert (q.dtype == float)
             assert (q.unitstr == str(respy.units.Units.temperature[item]))
             assert (np.all(q.value == value))
@@ -117,8 +118,8 @@ class TestInput:
         for item in respy.units.Units.time.keys():
             unit = item
             q = Quantity(value=value, unit=unit)
-            assert (q.name is b'')
-            assert (str(q.dimension) == 'time')
+            assert (q.name is None)
+            assert (q.dimension == dimensions.time)
             assert (q.dtype == float)
             assert (q.unitstr == str(respy.units.Units.time[item]))
             assert (np.all(q.value == value))
@@ -127,8 +128,8 @@ class TestInput:
         for item in respy.units.Units.energy.keys():
             unit = item
             q = Quantity(value=value, unit=unit)
-            assert (q.name is '')
-            assert (str(q.dimension) == 'energy')
+            assert (q.name is None)
+            assert (q.dimension == dimensions.energy)
             assert (q.dtype == float)
             assert (q.unitstr == str(respy.units.Units.energy[item]))
             assert (np.all(q.value == value))
