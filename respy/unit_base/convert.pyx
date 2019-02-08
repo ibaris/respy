@@ -11,6 +11,7 @@ from __future__ import division
 cimport numpy as np
 import numpy as np
 from sympy.physics.units import convert_to as sympy_convert_to
+from respy.units.util import Zero
 
 ctypedef fused DTYPE_ARRAY:
     np.ndarray
@@ -54,7 +55,7 @@ cdef double[:] convert_to(DTYPE_ARRAY expr, object unit):
 
     for i in range(x):
         arg = sympy_convert_to(expr[i], unit).n()
-        value_view[i] = arg.args[0]
+        value_view[i] = arg.args[0] if arg.args[0] != Zero else arg
 
     return value
 
