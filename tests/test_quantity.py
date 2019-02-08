@@ -12,8 +12,16 @@ import operator
 from respy.units import Zero
 from respy.units import dimensions
 #
-a = Quantity(5, unit='cm')
-# b = Quantity(2.5, unit='cm')
+a = Quantity(53, unit='1 / s')
+av = Quantity(53, unit='cm', verbose=True)
+b = Quantity(2.5, unit='m / s')
+bc = b.convert_to('cm')
+self = a
+other = bc
+
+
+
+
 # c = Quantity(3, unit='m')
 #
 # a * a
