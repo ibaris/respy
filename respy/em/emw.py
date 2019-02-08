@@ -60,7 +60,7 @@ class EM(object):
         Evaluate Planck's radiation law.
     """
 
-    def __init__(self, input, unit='GHz', output='cm'):
+    def __init__(self, input, unit='GHz', output='cm', identify=False):
         """
         A class to describe electromagnetic waves.
 
@@ -72,7 +72,9 @@ class EM(object):
             Unit of input. Default is 'GHz'.
         output : str, respy.units.Units, sympy.physics.units.quantities.Quantity
             Unit of output. Default is 'cm'.
-
+        identify : bool
+            Identify the band and region of the entered frequency or wavelength. Due to performance problems at
+            large arrays, the default value is False.
         """
 
         # Prepare Input Data and set values ----------------------------------------------------------------------------
@@ -81,6 +83,7 @@ class EM(object):
         # Self Definitions ---------------------------------------------------------------------------------------------
         self.__unit = unit
         self.__output = output
+        self.identify = identify
 
         # Assign Input Parameter ---------------------------------------------------------------------------------------
         if hasattr(input, 'quantity'):
@@ -147,17 +150,22 @@ class EM(object):
                                                   output=self.__wavelength_unit)
         self.__value = np.array([self.__frequency, self.__wavelength, self.__wavenumber])
 
-        if len(self.__frequency) > 1:
-            self.__band = np.zeros_like(self.__frequency.value, dtype=np.chararray)
-            self.__region = np.zeros_like(self.__frequency.value, dtype=np.chararray)
+        if self.identify:
+            if len(self.__frequency) > 1:
+                self.__band = np.zeros_like(self.__frequency.value, dtype=np.chararray)
+                self.__region = np.zeros_like(self.__frequency.value, dtype=np.chararray)
 
-            for i, item in enumerate(self.__frequency):
-                self.__region[i] = Bands.which_region(item, str(self.__frequency_unit))
-                self.__band[i] = Bands.which_band(item, str(self.__frequency_unit))
+                for i, item in enumerate(self.__frequency):
+                    self.__region[i] = Bands.which_region(item, str(self.__frequency_unit))
+                    self.__band[i] = Bands.which_band(item, str(self.__frequency_unit))
+            else:
+                self.__region = Bands.which_region(self.__frequency.value, self.__frequency_unit)
+                self.__band = Bands.which_band(self.__frequency.value, self.__frequency_unit)
+                # pass
         else:
-            self.__region = Bands.which_region(self.__frequency.value, self.__frequency_unit)
-            self.__band = Bands.which_band(self.__frequency.value, self.__frequency_unit)
-            # pass
+            self.__region = 'NaN'
+            self.__band = 'NaN'
+
     # ------------------------------------------------------------------------------------------------------------------
     # Magic Methods
     # ------------------------------------------------------------------------------------------------------------------
@@ -357,7 +365,7 @@ class EM(object):
         ----------
         wavelength : int, float, np.ndarray, object
             Wavelength as int, float, numpy.ndarray or as a respy.units.quantity.Quantity object.
-        unit : str, respy.units.Units, sympy.physics.units.quantities.Quantity
+        unit : str, object
             Unit of the wavelength (default is 'cm'). See respy.units.Units.length.keys() for available units.
             This is optional if the input is an respy.units.quantity.Quantity object.
         output : str, respy.units.Units, sympy.physics.units.quantities.Quantity
@@ -371,18 +379,22 @@ class EM(object):
         frequency: float, np.ndarray or respy.units.quantity.Quantity
 
         """
+        unit = get_unit(unit)
         if wavelength.__class__.__name__ is 'Quantity':
-            wavelength = wavelength.convert_to('m')
+            pass
         else:
             wavelength = Quantity(wavelength, unit, dtype=np.float)
-            wavelength = wavelength.convert_to('m')
 
-        f = const.c / wavelength
+        c = const.c.convert_to(unit / Units.time.s)
+
+        f = c / wavelength
+
+        f = f.convert_to(output)
 
         if quantity:
-            return f.convert_to(output)
+            return f
+
         else:
-            f.convert_to(output, True)
             return f.value
 
     @staticmethod
@@ -409,8 +421,9 @@ class EM(object):
         unit = get_unit(unit)
         output = get_unit(output)
 
-        if frequency.__class__.__name__ == 'Quantity':
+        if hasattr(frequency, 'quantity'):
             frequency = frequency.convert_to('1 / s')
+
         else:
             frequency = Quantity(frequency, unit, dtype=np.float)
             frequency = frequency.convert_to('1 / s')
@@ -420,7 +433,7 @@ class EM(object):
         if quantity:
             return w.convert_to(output)
         else:
-            w.convert_to(output, True)
+            w = w.convert_to(output)
             return w.value
 
     @staticmethod
@@ -485,10 +498,10 @@ class Bands(object):
 
         """
         self.output = get_unit(output)
-        self.dimension = self.output.dimension.name
+        self.dimension = self.output.dimension
         self.dtype = dtype
 
-        if str(self.dimension) != 'frequency' and str(self.dimension) != 'length':
+        if self.dimension != dimensions.frequency and self.dimension != dimensions.length:
             raise DimensionError("The output unit must be a dimension of frequency or length.")
 
         self.bands = __BANDS__
@@ -522,17 +535,20 @@ class Bands(object):
             value = self.__get_single_band(item)
 
             if value.dimension == self.dimension:
-                value.convert_to(self.output, True)
+                if self.output != value.unit:
+                    value = value.convert_to(self.output)
+
                 band_list.append(value.value)
 
-            elif str(value.dimension) == 'frequency':
+            elif value.dimension == dimensions.frequency:
                 wavelength = EM.compute_wavelength(value, value.unit, self.output)
                 band_list.append(wavelength.value)
 
-            elif str(value.dimension) == 'length':
+            elif value.dimension == dimensions.length:
                 frequency = EM.compute_frequency(value, value.unit, self.output)
                 band_list.append(frequency.value)
 
+        # self.bbb = band_list
         conc_list = np.concatenate(tuple(band_list))
         conc_list = conc_list.astype(self.dtype)
         conc_list = np.sort(conc_list)
@@ -609,10 +625,10 @@ class Bands(object):
             if value.dimension == temp_band.dimension:
                 temp_band = temp_band.convert_to(value.unit)
 
-            elif str(value.dimension) == 'frequency':
+            elif value.dimension == dimensions.frequency:
                 temp_band = EM.compute_frequency(temp_band, temp_band.unit, value.unit)
 
-            elif str(value.dimension) == 'length':
+            elif value.dimension == dimensions.length:
                 temp_band = EM.compute_wavelength(temp_band, temp_band.unit, value.unit)
 
             else:
@@ -775,4 +791,4 @@ class Bands(object):
                              "Supported bands are (lower- or uppercase) {1}.".format(str(band),
                                                                                      str(__BANDS__.keys())))
 
-b = Bands('GHz')
+# b = Bands('GHz')
