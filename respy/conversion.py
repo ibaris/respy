@@ -8,7 +8,7 @@ from respy.units import Quantity
 
 
 class Conversion(object):
-    def __init__(self, value, vza, value_unit="BRDF", angle_unit='RAD', quantity=True):
+    def __init__(self, value, vza=None, value_unit="BRDF", angle_unit='RAD', quantity=True):
         """
         Conversion of BRDF, BRF, BSC and BSC in dB.
 
@@ -56,46 +56,63 @@ class Conversion(object):
         """
         self.value_unit = value_unit
         self.quantity = quantity
-
-        if angle_unit is "rad":
-            angle_unit = "RAD"
-        elif angle_unit is "deg":
-            angle_unit = "DEG"
-
         self.angle_unit = angle_unit
+
 
         if self.value_unit is "BRDF":
             self.I = value
-            self.BSC = Conversion.BRDF_to_BSC(value, vza, self.angle_unit)
-            self.BSCdB = Conversion.dB(Conversion.BRDF_to_BSC(value, vza, self.angle_unit))
             self.BRF = Conversion.BRDF_to_BRF(value)
+
+            if vza is not None:
+                self.BSC = Conversion.BRDF_to_BSC(value, vza, self.angle_unit)
+                self.BSCdB = Conversion.dB(Conversion.BRDF_to_BSC(value, vza, self.angle_unit))
+
+            else:
+                self.BSC = np.zeros_like(value)
+                self.BSCdB = np.zeros_like(value)
 
         elif self.value_unit is "BSC":
             self.BSC = value
-            self.I = Conversion.BSC_to_BRDF(value, vza, self.angle_unit)
-            self.BRF = Conversion.BRDF_to_BRF(self.I)
             self.BSCdB = Conversion.dB(value)
+
+            if vza is not None:
+                self.I = Conversion.BSC_to_BRDF(value, vza, self.angle_unit)
+                self.BRF = Conversion.BRDF_to_BRF(self.I)
+            else:
+                self.I = np.zeros_like(value)
+                self.BRF = np.zeros_like(value)
 
         elif self.value_unit is "BSCdB":
             self.BSCdB = value
             self.BSC = Conversion.linear(value)
-            self.I = Conversion.BSC_to_BRDF(self.BSC, vza, self.angle_unit)
-            self.BRF = Conversion.BRDF_to_BRF(self.I)
+
+            if vza is not None:
+                self.I = Conversion.BSC_to_BRDF(value, vza, self.angle_unit)
+                self.BRF = Conversion.BRDF_to_BRF(self.I)
+            else:
+                self.I = np.zeros_like(value)
+                self.BRF = np.zeros_like(value)
 
         elif self.value_unit is "BRF":
             self.BRF = value
             self.I = value / const.pi
-            self.BSC = Conversion.BRDF_to_BSC(self.I, vza, self.angle_unit)
-            self.BSCdB = Conversion.dB(Conversion.BRDF_to_BSC(self.I, vza, self.angle_unit))
+
+            if vza is not None:
+                self.BSC = Conversion.BRDF_to_BSC(value, vza, self.angle_unit)
+                self.BSCdB = Conversion.dB(Conversion.BRDF_to_BSC(value, vza, self.angle_unit))
+
+            else:
+                self.BSC = np.zeros_like(value)
+                self.BSCdB = np.zeros_like(value)
 
         else:
             raise ValueError("the unit of value must be 'BRDF', 'BRF', 'BSC' or 'BSCdB'")
 
         if quantity:
-            self.BSC = Quantity(self.BSC, name='Backscattering Coefficient')
-            self.BSCdB = Quantity(self.BSC, unit='dB', name='Backscattering Coefficient')
-            self.I = Quantity(self.I, name='Intensity')
-            self.BRF = Quantity(self.BRF, name='Bidirectional Reflectance Factor')
+            self.BSC = Quantity(self.BSC, name='Backscattering Coefficient', constant=True)
+            self.BSCdB = Quantity(self.BSCdB, unit='dB', name='Backscattering Coefficient', constant=True)
+            self.I = Quantity(self.I, name='Intensity', constant=True)
+            self.BRF = Quantity(self.BRF, name='Bidirectional Reflectance Factor', constant=True)
         else:
             pass
 

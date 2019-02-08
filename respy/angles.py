@@ -6,6 +6,7 @@ import numpy as np
 
 import respy.constants as const
 from respy.util import (sec, align_all, asarrays, DTYPES, __ANGLE_UNIT_DEG__, __ANGLE_UNIT_RAD__)
+from respy.units import Quantity, util
 
 # python 3.6 comparability
 if sys.version_info < (3, 0):
@@ -233,7 +234,7 @@ class Angles(object):
         return rep
 
     def __len__(self):
-        return len(self.__array)
+        return self.__array.shape[1]
 
     # ------------------------------------------------------------------------------------------------------------------
     # Property Access
@@ -248,7 +249,7 @@ class Angles(object):
         -------
         len : int
         """
-        return len(self.__array)
+        return self.__array.shape[1]
 
     @property
     def shape(self):
@@ -271,7 +272,8 @@ class Angles(object):
         -------
         iza : array_like
         """
-        return self.__array[0]
+
+        return Quantity(self.__array[0], unit=util.radians, name='Incidence Zenith Angle', constant=True)
 
     @property
     def izaDeg(self):
@@ -282,7 +284,7 @@ class Angles(object):
         -------
         iza : array_like
         """
-        return self.__arrayDeg[0]
+        return Quantity(self.__arrayDeg[0], unit=util.degrees, name='Incidence Zenith Angle', constant=True)
 
     @property
     def vza(self):
@@ -293,7 +295,7 @@ class Angles(object):
         -------
         vza : array_like
         """
-        return self.__array[1]
+        return Quantity(self.__array[1], unit=util.radians, name='Incidence Viewing Angle', constant=True)
 
     @property
     def vzaDeg(self):
@@ -304,7 +306,7 @@ class Angles(object):
         -------
         vzaDeg : array_like
         """
-        return self.__arrayDeg[1]
+        return Quantity(self.__arrayDeg[1], unit=util.degrees, name='Incidence Viewing Angle', constant=True)
 
     @property
     def raa(self):
@@ -319,7 +321,7 @@ class Angles(object):
         -------
         raa : array_like
         """
-        return self.__array[2]
+        return Quantity(self.__array[2], unit=util.radians, name='Relative Azimuth Angle', constant=True)
 
     @property
     def raaDeg(self):
@@ -334,7 +336,7 @@ class Angles(object):
         -------
         raaDeg : array_like
         """
-        return self.__arrayDeg[2]
+        return Quantity(self.__arrayDeg[2], unit=util.degrees, name='Relative Azimuth Angle', constant=True)
 
     @property
     def iaa(self):
@@ -349,7 +351,7 @@ class Angles(object):
         -------
         iaa : array_like
         """
-        return self.__array[3]
+        return Quantity(self.__array[3], unit=util.radians, name='Incidence Azimuth Angle', constant=True)
 
     @property
     def iaaDeg(self):
@@ -364,7 +366,7 @@ class Angles(object):
         -------
         iaaDeg : array_like
         """
-        return self.__arrayDeg[3]
+        return Quantity(self.__arrayDeg[3], unit=util.degrees, name='Incidence Azimuth Angle', constant=True)
 
     @property
     def vaa(self):
@@ -379,7 +381,7 @@ class Angles(object):
         -------
         vaa : array_like
         """
-        return self.__array[4]
+        return Quantity(self.__array[4], unit=util.radians, name='Viewing Azimuth Angle', constant=True)
 
     @property
     def vaaDeg(self):
@@ -394,7 +396,7 @@ class Angles(object):
         -------
         vaaDeg : array_like
         """
-        return self.__arrayDeg[4]
+        return Quantity(self.__arrayDeg[4], unit=util.degrees, name='Viewing Azimuth Angle', constant=True)
 
     @property
     def alpha(self):
@@ -405,7 +407,7 @@ class Angles(object):
         -------
         alpha : array_like
         """
-        return self.__array[5]
+        return Quantity(self.__array[5], unit=util.radians, name='Euler Angle Alpha', constant=True)
 
     @property
     def alphaDeg(self):
@@ -416,7 +418,7 @@ class Angles(object):
         -------
         alphaDeg : array_like
         """
-        return self.__arrayDeg[5]
+        return Quantity(self.__arrayDeg[5], unit=util.degrees, name='Euler Angle Alpha', constant=True)
 
     @property
     def beta(self):
@@ -427,7 +429,7 @@ class Angles(object):
         -------
         beta : array_like
         """
-        return self.__array[6]
+        return Quantity(self.__array[6], unit=util.radians, name='Euler Angle Beta', constant=True)
 
     @property
     def betaDeg(self):
@@ -438,7 +440,7 @@ class Angles(object):
         -------
         betaDeg : array_like
         """
-        return self.__arrayDeg[6]
+        return Quantity(self.__arrayDeg[6], unit=util.degrees, name='Euler Angle Beta', constant=True)
 
     @property
     def B(self):
@@ -450,7 +452,10 @@ class Angles(object):
         -------
         B : array_like
         """
-        return sec(self.iza) + sec(self.vza)
+        B = sec(self.iza) + sec(self.vza)
+        B.set_name("Secants of iza + vza")
+        B.set_constant(True)
+        return B
 
     @property
     def BDeg(self):
@@ -462,7 +467,11 @@ class Angles(object):
         -------
         BDeg : array_like
         """
-        return sec(self.izaDeg) + sec(self.vzaDeg)
+        B = sec(self.izaDeg) + sec(self.vzaDeg)
+        B.set_name("Secants of iza + vza")
+        B.set_constant(True)
+
+        return B
 
     @property
     def mui(self):
@@ -473,7 +482,11 @@ class Angles(object):
         -------
         mui : array_like
         """
-        return np.cos(self.__array[0])
+        mui = np.cos(self.iza)
+        mui.set_name("Cosine of iza")
+        mui.set_constant(True)
+
+        return mui
 
     @property
     def muv(self):
@@ -484,7 +497,11 @@ class Angles(object):
         -------
         mui : array_like
         """
-        return np.cos(self.__array[1])
+        muv = np.cos(self.vza)
+        muv.set_name("Cosine of vza")
+        muv.set_constant(True)
+
+        return muv
 
     @property
     def phi(self):
@@ -495,7 +512,11 @@ class Angles(object):
         -------
         phi : array_like
         """
-        return np.abs((self.raa % (2. * const.pi)))
+        phi = np.abs((self.raa % (2. * const.pi)))
+        phi.set_name("Normalized Relative Azimuth Angle")
+        phi.set_constant(True)
+
+        return phi
 
     @property
     def geometries(self):
@@ -582,7 +603,7 @@ class Angles(object):
         -------
         nbar : float
         """
-        return self.__nbar
+        return  Quantity(self.__nbar, unit=util.rad, name='Normalization Angle', constant=True)
 
     @nbar.setter
     def nbar(self, value):
