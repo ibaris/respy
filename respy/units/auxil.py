@@ -7,67 +7,44 @@ from __future__ import division
 import operator as op
 
 from respy.units.util import Zero, One
+from sympy import zoo, oo, S
 
-__NONE_UNITS__ = [Zero, One, None]
+__NONE_UNITS__ = [Zero, One, None, zoo, oo, S.NaN]
 
-__ADD_SUB__ = [b'+', b'-']
-
-__BITWISE__ = [b'&', b'^', b'|', b'<<', b'>>']
+__SAME_UNIT_OPERATOR__ = [op.add.__name__, op.sub.__name__, op.and_.__name__, op.xor.__name__,
+                          op.or_.__name__, op.lshift.__name__, op.rshift.__name__, op.mod.__name__]
 
 __POW__ = [b'**']
 
-__UFUNC_NAME__ = {'__add__': '+',
-                  '__truediv__': '/',
-                  '__rtruediv__': '/',
-                  '__floordiv__': '//',
-                  '__rfloordiv__': '//',
-                  '__and__': '&',
-                  '__rand__': '&',
-                  '__xor__': '^',
-                  '__rxor__': '^',
-                  '__or__': '|',
-                  '__ror__': '|',
-                  '__pow__': '**',
-                  '__rpow__': '**',
-                  '__lshift__': '<<',
-                  '__rlshift__': '<<',
-                  '__mul__': '*',
-                  '__rshift__': '>>',
-                  '__rrshift__': '>>',
-                  '__sub__': '-',
-                  '__rsub__': '-',
-                  '__lt__': '<',
-                  '__le__': '<=',
-                  '__eq__': '==',
-                  '__ne__': '!=',
-                  '__ge__': '>=',
-                  '__gt__': '>',
-                  '__mod__': '%',
-                  '__rmod__': '%',
-                  '__abs__': 'abs',
-                  '__pos__': 'pos',
-                  '__neg__': 'neg',
-                  '__invert__': '~'}
-
-__OPERATORS__ = {'+': op.add,
-                 '/': op.truediv,
-                 '//': op.floordiv,
-                 '&': op.and_,
-                 '^': op.xor,
-                 '~': op.invert,
-                 '|': op.or_,
-                 '**': op.pow,
-                 '<<': op.lshift,
-                 '*': op.mul,
-                 '>>': op.rshift,
-                 '-': op.sub,
-                 '<': op.lt,
-                 '<=': op.le,
-                 '==': op.eq,
-                 '!=': op.ne,
-                 '>=': op.ge,
-                 '>': op.gt,
-                 '%': op.mod,
-                 'abs': op.abs,
-                 'pos': op.pos,
-                 'neg': op.neg}
+__OPERATOR__ = {'__add__': op.add,
+                '__truediv__': op.truediv,
+                '__rtruediv__': op.truediv,
+                '__floordiv__': op.floordiv,
+                '__rfloordiv__': op.floordiv,
+                '__and__': op.and_,
+                '__rand__': op.and_,
+                '__xor__': op.xor,
+                '__rxor__': op.xor,
+                '__or__': op.or_,
+                '__ror__': op.or_,
+                '__pow__': op.pow,
+                '__rpow__': op.pow,
+                '__lshift__': op.lshift,
+                '__rlshift__': op.lshift,
+                '__mul__': op.mul,
+                '__rshift__': op.rshift,
+                '__rrshift__': op.rshift,
+                '__sub__': op.sub,
+                '__rsub__': op.sub,
+                '__lt__': op.lt,
+                '__le__': op.le,
+                '__eq__': op.eq,
+                '__ne__': op.ne,
+                '__ge__': op.ge,
+                '__gt__': op.gt,
+                '__mod__': op.mod,
+                '__rmod__': op.mod,
+                '__abs__': op.abs,
+                '__pos__': op.pos,
+                '__neg__': op.neg,
+                '__invert__': op.invert}

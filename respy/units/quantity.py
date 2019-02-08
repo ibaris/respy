@@ -19,7 +19,7 @@ from respy.unit_base.convert import convert_to_unit
 from respy.unit_base.operations import compute_logical_operation, compute_bitwise_operation, compute_operation
 
 import util as util
-from respy.units.auxil import __NONE_UNITS__, __OPERATORS__, __UFUNC_NAME__
+from respy.units.auxil import __NONE_UNITS__, __OPERATOR__
 from respy.units.util import Zero, One, UnitError
 from respy.units.unit_ufuncs import (__CONVERT__MATH__, __MATH_UNIT_GETS_LOST__, __MATH_UNIT_REMAINS_STABLE__,
                                      __CHECK_UNIT__, __MATH_LOGICAL_AND_MORE__, __NOT_IMPLEMENTED__)
@@ -87,7 +87,7 @@ class Quantity(np.ndarray):
     """
 
     def __new__(cls, value, unit=None, dtype=None, copy=True, order=None,
-                subok=False, ndmin=0, name=None, constant=False):
+                subok=False, ndmin=0, name=None, constant=True, verbose=False):
         """
         The Quantity object is meant to represent a value that has some unit associated with the number.
 
@@ -168,6 +168,7 @@ class Quantity(np.ndarray):
         obj.subok = subok
         obj.ndmin = ndmin
         obj.quantity = True
+        obj.verbose = verbose
 
         return obj
 
@@ -203,10 +204,11 @@ class Quantity(np.ndarray):
             self.ndmin = getattr(obj, 'ndmin', None)
             self._dimension = getattr(obj, '_dimension', None)
             self.quantity = getattr(obj, 'quantity', None)
+            self.verbose = getattr(obj, 'verbose', None)
 
     def __array_wrap__(self, out_arr, context=None):
-        # return np.ndarray.__array_wrap__(self, out_arr, context)
-        return self.__create_new_instance(self.value)
+        return np.ndarray.__array_wrap__(self, out_arr, context)
+        # return self.__create_new_instance(self.value)
 
     def __array_ufunc__(self, function, method, *inputs, **kwargs):
         if function.nout > 1 or function.__name__ in __NOT_IMPLEMENTED__:
@@ -284,7 +286,12 @@ class Quantity(np.ndarray):
 
             dtype = result.dtype
 
-            return self.__create_new_instance(result[0] if len(result) == 1 else result,
+            try:
+                result = result[0] if len(result) == 1 else result
+            except TypeError:
+                pass
+
+            return self.__create_new_instance(result,
                                               unit,
                                               self._name if not self.constant else b'',
                                               dtype)
@@ -296,7 +303,8 @@ class Quantity(np.ndarray):
     # --------------------------------------------------------------------------------------------------------
     # Attribute Operations -------------------------------------------------------------------------------
     def __getitem__(self, item):
-        value = self.value[item]
+        value = super(Quantity, self).__getitem__(item)
+
         return self.__create_new_instance(value, self.unit, self._name)
 
     # Mathematical Operations ----------------------------------------------------------------------------
@@ -304,9 +312,9 @@ class Quantity(np.ndarray):
     def __mul__(self, other):
 
         other = self.__check_other(other)
-        operator = __UFUNC_NAME__[inspect.currentframe().f_code.co_name]
+        operator = __OPERATOR__[inspect.currentframe().f_code.co_name]
 
-        value, unit, dtype, name = compute_operation(self, other, operator, right_handed=False)
+        value, unit, dtype, name = compute_operation(self, other, operator, right_handed=False, verbose=self.verbose)
 
         if unit is None:
             unit = Zero
@@ -315,25 +323,25 @@ class Quantity(np.ndarray):
 
     def __truediv__(self, other):
         other = self.__check_other(other)
-        operator = __UFUNC_NAME__[inspect.currentframe().f_code.co_name]
+        operator = __OPERATOR__[inspect.currentframe().f_code.co_name]
 
-        value, unit, dtype, name = compute_operation(self, other, operator, right_handed=False)
+        value, unit, dtype, name = compute_operation(self, other, operator, right_handed=False, verbose=self.verbose)
 
         return self.__create_new_instance(value, unit, name, dtype)
 
     def __floordiv__(self, other):
         other = self.__check_other(other)
-        operator = __UFUNC_NAME__[inspect.currentframe().f_code.co_name]
+        operator = __OPERATOR__[inspect.currentframe().f_code.co_name]
 
-        value, unit, dtype, name = compute_operation(self, other, operator, right_handed=False)
+        value, unit, dtype, name = compute_operation(self, other, operator, right_handed=False, verbose=self.verbose)
 
         return self.__create_new_instance(value, unit, name, dtype)
 
     def __mod__(self, other):
         other = self.__check_other(other)
-        operator = __UFUNC_NAME__[inspect.currentframe().f_code.co_name]
+        operator = __OPERATOR__[inspect.currentframe().f_code.co_name]
 
-        value, unit, dtype, name = compute_operation(self, other, operator, right_handed=False)
+        value, unit, dtype, name = compute_operation(self, other, operator, right_handed=False, verbose=self.verbose)
 
         return self.__create_new_instance(value, unit, name, dtype)
 
@@ -341,55 +349,55 @@ class Quantity(np.ndarray):
 
     def __add__(self, other):
         other = self.__check_other(other)
-        operator = __UFUNC_NAME__[inspect.currentframe().f_code.co_name]
+        operator = __OPERATOR__[inspect.currentframe().f_code.co_name]
 
-        value, unit, dtype, name = compute_operation(self, other, operator, right_handed=False)
+        value, unit, dtype, name = compute_operation(self, other, operator, right_handed=False, verbose=self.verbose)
 
         return self.__create_new_instance(value, unit, name, dtype)
 
     def __sub__(self, other):
         other = self.__check_other(other)
-        operator = __UFUNC_NAME__[inspect.currentframe().f_code.co_name]
+        operator = __OPERATOR__[inspect.currentframe().f_code.co_name]
 
-        value, unit, dtype, name = compute_operation(self, other, operator, right_handed=False)
+        value, unit, dtype, name = compute_operation(self, other, operator, right_handed=False, verbose=self.verbose)
 
         return self.__create_new_instance(value, unit, name, dtype)
 
     def __pow__(self, other):
         other = self.__check_other(other)
-        operator = __UFUNC_NAME__[inspect.currentframe().f_code.co_name]
+        operator = __OPERATOR__[inspect.currentframe().f_code.co_name]
 
-        value, unit, dtype, name = compute_operation(self, other, operator, right_handed=False)
+        value, unit, dtype, name = compute_operation(self, other, operator, right_handed=False, verbose=self.verbose)
 
         return self.__create_new_instance(value, unit, name, dtype)
 
     def __lshift__(self, other):
         other = self.__check_other(other)
-        operator = __UFUNC_NAME__[inspect.currentframe().f_code.co_name]
+        operator = __OPERATOR__[inspect.currentframe().f_code.co_name]
 
         return compute_bitwise_operation(self, other, operator, right_handed=False)
 
     def __rshift__(self, other):
         other = self.__check_other(other)
-        operator = __UFUNC_NAME__[inspect.currentframe().f_code.co_name]
+        operator = __OPERATOR__[inspect.currentframe().f_code.co_name]
 
         return compute_bitwise_operation(self, other, operator, right_handed=False)
 
     def __and__(self, other):
         other = self.__check_other(other)
-        operator = __UFUNC_NAME__[inspect.currentframe().f_code.co_name]
+        operator = __OPERATOR__[inspect.currentframe().f_code.co_name]
 
         return compute_bitwise_operation(self, other, operator, right_handed=False)
 
     def __or__(self, other):
         other = self.__check_other(other)
-        operator = __UFUNC_NAME__[inspect.currentframe().f_code.co_name]
+        operator = __OPERATOR__[inspect.currentframe().f_code.co_name]
 
         return compute_bitwise_operation(self, other, operator, right_handed=False)
 
     def __xor__(self, other):
         other = self.__check_other(other)
-        operator = __UFUNC_NAME__[inspect.currentframe().f_code.co_name]
+        operator = __OPERATOR__[inspect.currentframe().f_code.co_name]
 
         return compute_bitwise_operation(self, other, operator, right_handed=False)
 
@@ -399,9 +407,9 @@ class Quantity(np.ndarray):
 
     def __rtruediv__(self, other):
         other = self.__check_other(other)
-        operator = __UFUNC_NAME__[inspect.currentframe().f_code.co_name]
+        operator = __OPERATOR__[inspect.currentframe().f_code.co_name]
 
-        value, unit, dtype, name = compute_operation(self, other, operator, right_handed=True)
+        value, unit, dtype, name = compute_operation(self, other, operator, right_handed=True, verbose=self.verbose)
 
         return self.__create_new_instance(value, unit, name, dtype)
 
@@ -409,61 +417,63 @@ class Quantity(np.ndarray):
 
     def __rsub__(self, other):
         other = self.__check_other(other)
-        operator = __UFUNC_NAME__[inspect.currentframe().f_code.co_name]
+        operator = __OPERATOR__[inspect.currentframe().f_code.co_name]
 
-        value, unit, dtype, name = compute_operation(self, other, operator, right_handed=True)
+        value, unit, dtype, name = compute_operation(self, other, operator, right_handed=True, verbose=self.verbose)
 
         return self.__create_new_instance(value, unit, name, dtype)
 
     def __rlshift__(self, other):
         other = self.__check_other(other)
-        operator = __UFUNC_NAME__[inspect.currentframe().f_code.co_name]
+        operator = __OPERATOR__[inspect.currentframe().f_code.co_name]
 
         return compute_bitwise_operation(self, other, operator, right_handed=True)
 
     def __rrshift__(self, other):
         other = self.__check_other(other)
-        operator = __UFUNC_NAME__[inspect.currentframe().f_code.co_name]
+        operator = __OPERATOR__[inspect.currentframe().f_code.co_name]
 
         return compute_bitwise_operation(self, other, operator, right_handed=True)
 
     def __rfloordiv__(self, other):
         other = self.__check_other(other)
-        operator = __UFUNC_NAME__[inspect.currentframe().f_code.co_name]
+        operator = __OPERATOR__[inspect.currentframe().f_code.co_name]
 
-        value, unit, dtype, name = compute_operation(self, other, operator, right_handed=True)
+        value, unit, dtype, name = compute_operation(self, other, operator, right_handed=True, verbose=self.verbose)
 
         return self.__create_new_instance(value, unit, name, dtype)
 
     def __rmod__(self, other):
         other = self.__check_other(other)
-        operator = __UFUNC_NAME__[inspect.currentframe().f_code.co_name]
+        operator = __OPERATOR__[inspect.currentframe().f_code.co_name]
 
-        return compute_bitwise_operation(self, other, operator, right_handed=True)
+        value, unit, dtype, name = compute_operation(self, other, operator, right_handed=True, verbose=self.verbose)
+
+        return self.__create_new_instance(value, unit, name, dtype)
 
     def __rpow__(self, other):
         other = self.__check_other(other)
-        operator = __UFUNC_NAME__[inspect.currentframe().f_code.co_name]
+        operator = __OPERATOR__[inspect.currentframe().f_code.co_name]
 
-        value, unit, dtype, name = compute_operation(self, other, operator, right_handed=True)
+        value, unit, dtype, name = compute_operation(self, other, operator, right_handed=True, verbose=self.verbose)
 
         return self.__create_new_instance(value, unit, name, dtype)
 
     def __rand__(self, other):
         other = self.__check_other(other)
-        operator = __UFUNC_NAME__[inspect.currentframe().f_code.co_name]
+        operator = __OPERATOR__[inspect.currentframe().f_code.co_name]
 
         return compute_bitwise_operation(self, other, operator, right_handed=True)
 
     def __ror__(self, other):
         other = self.__check_other(other)
-        operator = __UFUNC_NAME__[inspect.currentframe().f_code.co_name]
+        operator = __OPERATOR__[inspect.currentframe().f_code.co_name]
 
         return compute_bitwise_operation(self, other, operator, right_handed=True)
 
     def __rxor__(self, other):
         other = self.__check_other(other)
-        operator = __UFUNC_NAME__[inspect.currentframe().f_code.co_name]
+        operator = __OPERATOR__[inspect.currentframe().f_code.co_name]
 
         return compute_bitwise_operation(self, other, operator, right_handed=True)
 
@@ -487,61 +497,57 @@ class Quantity(np.ndarray):
     # --------------------------------------------------------------------------------------------------------
     def __eq__(self, other):
         other = self.__check_other(other)
-        operator = __UFUNC_NAME__[inspect.currentframe().f_code.co_name]
-        return compute_logical_operation(self, other, operator)
+        operator = __OPERATOR__[inspect.currentframe().f_code.co_name]
+        return compute_logical_operation(self, other, operator, self.verbose)
 
     def __ne__(self, other):
         other = self.__check_other(other)
-        operator = __UFUNC_NAME__[inspect.currentframe().f_code.co_name]
-        return compute_logical_operation(self, other, operator)
+        operator = __OPERATOR__[inspect.currentframe().f_code.co_name]
+        return compute_logical_operation(self, other, operator, self.verbose)
 
     def __lt__(self, other):
         other = self.__check_other(other)
-        operator = __UFUNC_NAME__[inspect.currentframe().f_code.co_name]
-        return compute_logical_operation(self, other, operator)
+        operator = __OPERATOR__[inspect.currentframe().f_code.co_name]
+        return compute_logical_operation(self, other, operator, self.verbose)
 
     def __gt__(self, other):
         other = self.__check_other(other)
-        operator = __UFUNC_NAME__[inspect.currentframe().f_code.co_name]
-        return compute_logical_operation(self, other, operator)
+        operator = __OPERATOR__[inspect.currentframe().f_code.co_name]
+        return compute_logical_operation(self, other, operator, self.verbose)
 
     def __le__(self, other):
         other = self.__check_other(other)
-        operator = __UFUNC_NAME__[inspect.currentframe().f_code.co_name]
-        return compute_logical_operation(self, other, operator)
+        operator = __OPERATOR__[inspect.currentframe().f_code.co_name]
+        return compute_logical_operation(self, other, operator, self.verbose)
 
     def __ge__(self, other):
         other = self.__check_other(other)
-        operator = __UFUNC_NAME__[inspect.currentframe().f_code.co_name]
-        return compute_logical_operation(self, other, operator)
+        operator = __OPERATOR__[inspect.currentframe().f_code.co_name]
+        return compute_logical_operation(self, other, operator, self.verbose)
 
     # --------------------------------------------------------------------------------------------------------
     # Numeric Magic Methods
     # --------------------------------------------------------------------------------------------------------
     def __pos__(self):
-        name = __UFUNC_NAME__[inspect.currentframe().f_code.co_name]
-        OPERATOR = __OPERATORS__.get(name)
+        OPERATOR = __OPERATOR__[inspect.currentframe().f_code.co_name]
 
         value = OPERATOR(self.value)
         return self.__create_new_instance(value, self.unit, self._name)
 
     def __neg__(self):
-        name = __UFUNC_NAME__[inspect.currentframe().f_code.co_name]
-        OPERATOR = __OPERATORS__.get(name)
+        OPERATOR = __OPERATOR__[inspect.currentframe().f_code.co_name]
 
         value = OPERATOR(self.value)
         return self.__create_new_instance(value, self.unit, self._name)
 
     def __abs__(self):
-        name = __UFUNC_NAME__[inspect.currentframe().f_code.co_name]
-        OPERATOR = __OPERATORS__.get(name)
+        OPERATOR = __OPERATOR__[inspect.currentframe().f_code.co_name]
 
         value = OPERATOR(self.value)
         return self.__create_new_instance(value, self.unit, self._name)
 
     def __invert__(self):
-        name = __UFUNC_NAME__[inspect.currentframe().f_code.co_name]
-        OPERATOR = __OPERATORS__.get(name)
+        OPERATOR = __OPERATOR__[inspect.currentframe().f_code.co_name]
 
         value = OPERATOR(self.value)
         return self.__create_new_instance(value, self.unit, self._name)
@@ -583,7 +589,7 @@ class Quantity(np.ndarray):
         if self._unit in __NONE_UNITS__:
             return Zero
         else:
-            return self._unit
+            return self._unit.n()
 
     @property
     def unitstr(self):
@@ -654,6 +660,38 @@ class Quantity(np.ndarray):
     # --------------------------------------------------------------------------------------------------------
     # Callable Methods
     # --------------------------------------------------------------------------------------------------------
+    def create_arraystr(self, prefix=None, name=None):
+        """
+        Create a new array string for repr purpose.
+
+        Parameters
+        ----------
+        prefix : str or None
+            If None the prefix '<Quantity' will be used.
+        name : str or None
+            Name of the Quantity.
+
+        Returns
+        -------
+        str
+        """
+        arrstr = np.array2string(self,
+                                 separator=', ',
+                                 prefix=prefix)
+
+        if prefix is None:
+            prefix = '<{0} '.format(self.__class__.__name__)
+        else:
+            prefix = '<{0} '.format(prefix)
+
+        if name is None:
+            if self.name is None or self.name is b'':
+                return '{0}{1} [{2}]>'.format(prefix, arrstr, self.unitstr)
+            else:
+                return '{0}{1} {2} in [{3}]>'.format(prefix, arrstr, self.name, self.unitstr)
+        else:
+            return '{0}{1} {2} in [{3}]>'.format(prefix, arrstr, name, self.unitstr)
+
     def set_constant(self, constant):
         if isinstance(constant, bool):
             self.constant = constant
@@ -707,7 +745,7 @@ class Quantity(np.ndarray):
         """
         self._name = name
 
-    def convert_to(self, unit, inplace=False):
+    def convert_to(self, unit):
         """
         Convert a quantity to another unit.
 
@@ -717,8 +755,6 @@ class Quantity(np.ndarray):
             An object that represents the unit associated with the input value.
             Must be an `sympy.physics.units.quantities.Quantity` object or a string parsable by
             the :mod:`~respy.units` package.
-        inplace : bool
-            If True the values of the actual class will be overwritten.
 
         Returns
         -------
@@ -727,12 +763,23 @@ class Quantity(np.ndarray):
         """
         unit = get_unit(unit)
 
-        try:
-            dimension = unit.dimension.name
+        if unit == 1 / util.Units.time.s and self.dimension == util.dimensions.frequency:
+            scaled_value = self.value.astype(self._dtype) * self.unit.scale_factor
 
-            if dimension == self.dimension:
-                scaled_value = self.value.astype(self._dtype) * util.Units[str(dimension)][str(self.unit)].scale_factor
-                value = scaled_value / util.Units[str(dimension)][str(unit)].scale_factor
+            value = scaled_value / util.Units[str(self.dimension.name)]['Hz'].scale_factor
+
+        elif hasattr(unit, 'dimension'):
+
+            if self.unit == 1 / util.Units.time.s and unit.dimension == util.dimensions.frequency:
+                scaled_value = self.value.astype(self._dtype)
+
+                value = scaled_value / util.Units[str(unit.dimension.name)][str(unit)].scale_factor
+
+            elif unit.dimension == self.dimension:
+                scaled_value = self.value.astype(self._dtype) * util.Units[str(unit.dimension.name)][
+                    str(self.unit)].scale_factor
+
+                value = scaled_value / util.Units[str(unit.dimension.name)][str(unit)].scale_factor
 
             else:
                 value = np.zeros_like(self.value, dtype=self._dtype)
@@ -750,9 +797,7 @@ class Quantity(np.ndarray):
                     value = value.base
                     value = value.reshape(shape)
 
-            dtype = value.dtype
-
-        except AttributeError:
+        else:
             value = np.zeros_like(self.value, dtype=self._dtype)
 
             if len(self.value) == 1:
@@ -768,14 +813,9 @@ class Quantity(np.ndarray):
                 value = value.base
                 value = value.reshape(shape)
 
-            dtype = value.dtype
+        dtype = self._dtype
 
-        if inplace:
-            self.__set_attributes(unit, value, dtype, self.copy, self.order, self.subok, self.constant, self.ndmin,
-                                  self._name)
-
-        else:
-            return self.__create_new_instance(value, unit, self._name)
+        return self.__create_new_instance(value, unit, self._name)
 
     # --------------------------------------------------------------------------------------------------------
     # Private Methods
