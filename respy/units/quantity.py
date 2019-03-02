@@ -211,8 +211,27 @@ class Quantity(np.ndarray):
         # return self.__create_new_instance(self.value)
 
     def __array_ufunc__(self, function, method, *inputs, **kwargs):
-        if function.nout > 1 or function.__name__ in __NOT_IMPLEMENTED__:
+        if function.__name__ in __NOT_IMPLEMENTED__:
             raise NotImplementedError
+
+        try:
+            nin = function.nin
+        except AttributeError:
+            if function.__name__ in __MATH_UNIT_REMAINS_STABLE__:
+                unit = self.unit
+            else:
+                unit = One
+
+            value = (self.value,)
+            result = super(Quantity, self).__array_ufunc__(function, method, *value, **kwargs)
+
+
+            dtype = result.dtype
+
+            return self.__create_new_instance(result[0] if len(result) == 1 else result,
+                                              unit,
+                                              self._name if not self.constant else b'',
+                                              dtype)
 
         if function.nin == 1:
             value = (self.value,)
