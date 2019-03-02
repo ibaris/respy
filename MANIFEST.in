@@ -1,1 +1,2 @@
 recursive-include respy/unit_base *.c
+recursive-include respy/unit_base *.pyx

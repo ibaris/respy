@@ -1,18 +1,21 @@
 language: python
-sudo: false
+sudo: required
 cache: pip
 
 python:
   - "2.7"
 #  - "3.4"
 
+virtualenv:
+  system_site_packages: true
+
 before_install:
   - pip install -U pip
+  - pip install --upgrade pip
 
 install:
-  - pip install --upgrade pip
   - pip install -r requirements.txt
-  - pip install Cython
+  - pip install Cython -vv
   - pip install coveralls
   - pip install coverage
   - python setup.py install
