@@ -214,24 +214,33 @@ class Angles(object):
         return info
 
     def __repr__(self):
+        names = ['Incidence Zenith Angle', 'Viewing Angle', 'Relative Azimuth Angle', 'Incidence Azimuth Angle',
+                 'Viewing Azimuth Angle', 'Euler Angle Alpha', 'Euler Angle Beta']
+
+        prefix = '<{0} '.format(self.__class__.__name__)
+        sep = ', '
+        # iza, vza, raa, iaa, vaa, alpha, beta
+        angle_str = list()
         if self.angle_unit is 'RAD' or self.angle_unit is 'rad':
-            rep = "Angles(iza={0}, vza={1}, raa={2}, iaa={3}, vaa={4}, alpha={5}, beta={6}, normalize={7}, nbar={8}, " \
-                  "angle_unit={9}, align={10}, dtype={11})".format(str(self.iza), str(self.vza), str(self.raa),
-                                                                   str(self.iaa), str(self.vaa), str(self.alpha),
-                                                                   str(self.beta), str(self.normalize), str(self.nbar),
-                                                                   str(self.angle_unit), str(self.align),
-                                                                   str(self.dtype))
+            for i in range(self.array.shape[0]):
+                angle_str.append(np.array2string(self.array[i],
+                                                 separator=sep,
+                                                 prefix=prefix))
+            unit = util.radians
 
         else:
-            rep = "Angles(iza={0}, vza={1}, raa={2}, iaa={3}, vaa={4}, alpha={5}, beta={6}, normalize={7}, nbar={8}, " \
-                  "angle_unit={9}, align={10}, dtype={11})".format(str(self.izaDeg), str(self.vzaDeg), str(self.raaDeg),
-                                                                   str(self.iaaDeg), str(self.vaaDeg),
-                                                                   str(self.alphaDeg), str(self.betaDeg),
-                                                                   str(self.normalize), str(self.nbar),
-                                                                   str(self.angle_unit), str(self.align),
-                                                                   str(self.dtype))
+            for i in range(self.array.shape[0]):
+                angle_str.append(np.array2string(self.arrayDeg[i],
+                                                 separator=sep,
+                                                 prefix=prefix))
 
-        return rep
+            unit = util.degrees
+
+        return_list = ''
+        for i, item in enumerate(angle_str):
+            return_list += "{0}{1} {2} in [{3}]>\n".format(prefix, item, names[i], unit)
+
+        return return_list
 
     def __len__(self):
         return self.__array.shape[1]
@@ -295,7 +304,7 @@ class Angles(object):
         -------
         vza : array_like
         """
-        return Quantity(self.__array[1], unit=util.radians, name='Incidence Viewing Angle', constant=True)
+        return Quantity(self.__array[1], unit=util.radians, name='Viewing Angle', constant=True)
 
     @property
     def vzaDeg(self):
@@ -306,7 +315,7 @@ class Angles(object):
         -------
         vzaDeg : array_like
         """
-        return Quantity(self.__arrayDeg[1], unit=util.degrees, name='Incidence Viewing Angle', constant=True)
+        return Quantity(self.__arrayDeg[1], unit=util.degrees, name='Viewing Angle', constant=True)
 
     @property
     def raa(self):
@@ -603,7 +612,7 @@ class Angles(object):
         -------
         nbar : float
         """
-        return  Quantity(self.__nbar, unit=util.rad, name='Normalization Angle', constant=True)
+        return Quantity(self.__nbar, unit=util.rad, name='Normalization Angle', constant=True)
 
     @nbar.setter
     def nbar(self, value):

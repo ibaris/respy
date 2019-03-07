@@ -5,6 +5,7 @@ Created on 26.02.2019 by Ismail Baris
 from __future__ import division
 from respy import Angles, EM
 import numpy as np
+from respy.units import Units
 
 
 class Sensor(Angles, EM):
@@ -16,3 +17,27 @@ class Sensor(Angles, EM):
 
         EM.__init__(self, input=input, unit=unit, output=output, identify=identify)
         self.name = name
+        self.input_unit = unit
+        self.output = output
+
+    def __repr__(self):
+        prefix = '<{0} '.format(self.__class__.__name__)
+        sep = ', '
+        if self.input_unit in Units.frequency.keys():
+            arrstr = np.array2string(self.frequency.value,
+                                     separator=sep,
+                                     prefix=prefix)
+
+            unit = self.frequency.unitstr
+
+        else:
+            arrstr = np.array2string(self.wavelength.value,
+                                     separator=sep,
+                                     prefix=prefix)
+
+            unit = self.wavelength.unitstr
+
+        if self.name is None or self.name is b'':
+            return '{0}{1} [{2}]>'.format(prefix, arrstr, unit)
+        else:
+            return '{0}{1} {2} in [{3}]>'.format(prefix, arrstr, self.name, unit)

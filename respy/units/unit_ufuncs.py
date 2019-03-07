@@ -16,6 +16,7 @@ import operator
 #     """
 #     UNSUPPORTED = set()
 #
+#
 #     def register_module(self, module, names, importer):
 #         """Register (but do not import) a set of ufunc helpers.
 #
@@ -44,7 +45,7 @@ import operator
 #     @property
 #     def register_ufunc_converter(self, numpy_ufunc, sympy_ufunc):
 #         pass
-
+#
 # u = UfuncHelpers()
 
 
@@ -98,7 +99,8 @@ __MATH_UNIT_REMAINS_STABLE__ = ["absolute",
                                 "negative",
                                 "positive",
                                 "rint",
-                                "conj"
+                                "conj",
+                                "conjugate",
                                 "nan_to_num"]
 
 __CHECK_UNIT__ = ["power",  # Unit must be checked

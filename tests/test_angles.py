@@ -58,6 +58,8 @@ class TestRaises:
         angles = Angles(iza=10, vza=10, raa=10, angle_unit='DEG')
         angles = Angles(iza=10, vza=10, raa=10, angle_unit='deg')
 
+        assert angles.len == 1
+        assert angles.shape == angles.array.shape
 
 class TestSpecials:
     # def test__str__(self):

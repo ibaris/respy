@@ -211,7 +211,11 @@ class Quantity(np.ndarray):
         # return self.__create_new_instance(self.value)
 
     def __array_ufunc__(self, function, method, *inputs, **kwargs):
-        if function.__name__ in __NOT_IMPLEMENTED__:
+        if (function.__name__ not in __MATH_UNIT_REMAINS_STABLE__
+                and function.__name__ not in __MATH_UNIT_GETS_LOST__
+                and function.__name__ not in __CONVERT__MATH__
+                and function.__name__ not in __CHECK_UNIT__
+                and function.__name__ not in __MATH_LOGICAL_AND_MORE__):
             raise NotImplementedError
 
         try:
@@ -224,7 +228,6 @@ class Quantity(np.ndarray):
 
             value = (self.value,)
             result = super(Quantity, self).__array_ufunc__(function, method, *value, **kwargs)
-
 
             dtype = result.dtype
 
@@ -261,12 +264,25 @@ class Quantity(np.ndarray):
                 except (AttributeError, TypeError):
                     unit = One
 
-            dtype = result.dtype
+            if function.nout == 2:
+                dtype1 = result[0].dtype
+                dtype2 = result[1].dtype
 
-            return self.__create_new_instance(result[0] if len(result) == 1 else result,
-                                              unit,
-                                              self._name if not self.constant else b'',
-                                              dtype)
+                dtype = (dtype1, dtype2)
+
+                for i in range(2):
+                    return self.__create_new_instance(result[i][0] if len(result[i]) == 1 else result[i],
+                                                      unit,
+                                                      self._name if not self.constant else b'',
+                                                      dtype[i])
+
+            else:
+                dtype = result.dtype
+
+                return self.__create_new_instance(result[0] if len(result) == 1 else result,
+                                                  unit,
+                                                  self._name if not self.constant else b'',
+                                                  dtype)
 
         elif function.nin == 2:
             values = self.__check_values(*inputs)
@@ -303,17 +319,29 @@ class Quantity(np.ndarray):
 
             result = super(Quantity, self).__array_ufunc__(function, method, *values, **kwargs)
 
-            dtype = result.dtype
+            if function.nout == 2:
+                dtype1 = result[0].dtype
+                dtype2 = result[1].dtype
 
-            try:
-                result = result[0] if len(result) == 1 else result
-            except TypeError:
-                pass
+                dtype = (dtype1, dtype2)
 
-            return self.__create_new_instance(result,
-                                              unit,
-                                              self._name if not self.constant else b'',
-                                              dtype)
+                nout = list()
+                for i in range(2):
+                    nout.append(self.__create_new_instance(result[i][0] if len(result) == 1 else result[i],
+                                                           unit,
+                                                           self._name if not self.constant else b'',
+                                                           dtype[i]))
+
+                return tuple(nout)
+
+            else:
+                dtype = result.dtype
+
+                return self.__create_new_instance(result[0] if len(result) == 1 else result,
+                                                  unit,
+                                                  self._name if not self.constant else b'',
+                                                  dtype)
+
         else:
             raise NotImplementedError
 
