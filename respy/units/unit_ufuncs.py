@@ -48,6 +48,7 @@ import operator
 #
 # u = UfuncHelpers()
 
+__OPERATIONS__ = ["multiply"]
 
 __CONVERT__MATH__ = {"power": sym.power,  # Unit must be checked
                      "remainder": operator.div,
@@ -101,7 +102,10 @@ __MATH_UNIT_REMAINS_STABLE__ = ["absolute",
                                 "rint",
                                 "conj",
                                 "conjugate",
-                                "nan_to_num"]
+                                "nan_to_num",
+                                "amin",
+                                "amax",
+                                "round_"]
 
 __CHECK_UNIT__ = ["power",  # Unit must be checked
                   "gcd",  # Unit must be checked

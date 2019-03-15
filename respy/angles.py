@@ -84,8 +84,12 @@ class Angles(object):
         """
 
         # Prepare Input Data -------------------------------------------------------------------------------------------
-        if raa is None and (iaa is None or vaa is None):
-            raise ValueError("If raa is not defined iaa AND vaa must be defined.")
+        if raa is None and (iaa is None and vaa is None):
+            raise ValueError("If raa is not defined iaa or vaa must be defined.")
+        elif iaa is None:
+            iaa = 0
+        elif vaa is None:
+            vaa = 0
 
         if (angle_unit in __ANGLE_UNIT_RAD__ or angle_unit in __ANGLE_UNIT_DEG__):
             pass
@@ -104,8 +108,11 @@ class Angles(object):
         if raa is not None and iaa is not None and vaa is not None:
             raise AssertionError("The relative, incidence and viewing azimuth angle is defined. "
                                  "Either raa or iaa AND vaa must be defined. ")
+
         if raa is None:
             self.raa_flag = False
+            iaa, vaa = asarrays((iaa, vaa), dtype=dtype)
+
             iaa = iaa
             vaa = vaa
             raa = iaa - vaa
@@ -282,7 +289,8 @@ class Angles(object):
         iza : array_like
         """
 
-        return Quantity(self.__array[0], unit=util.radians, name='Incidence Zenith Angle', constant=True)
+        # return Quantity(self.__array[0], unit=util.radians, name='Incidence Zenith Angle', constant=True)
+        return self.__array[0]
 
     @property
     def izaDeg(self):
@@ -293,7 +301,8 @@ class Angles(object):
         -------
         iza : array_like
         """
-        return Quantity(self.__arrayDeg[0], unit=util.degrees, name='Incidence Zenith Angle', constant=True)
+        # return Quantity(self.__arrayDeg[0], unit=util.degrees, name='Incidence Zenith Angle', constant=True)
+        return self.__arrayDeg[0]
 
     @property
     def vza(self):
@@ -304,7 +313,8 @@ class Angles(object):
         -------
         vza : array_like
         """
-        return Quantity(self.__array[1], unit=util.radians, name='Viewing Angle', constant=True)
+        # return Quantity(self.__array[1], unit=util.radians, name='Viewing Angle', constant=True)
+        return self.__array[1]
 
     @property
     def vzaDeg(self):
@@ -315,7 +325,8 @@ class Angles(object):
         -------
         vzaDeg : array_like
         """
-        return Quantity(self.__arrayDeg[1], unit=util.degrees, name='Viewing Angle', constant=True)
+        # return Quantity(self.__arrayDeg[1], unit=util.degrees, name='Viewing Angle', constant=True)
+        return self.__arrayDeg[1]
 
     @property
     def raa(self):
@@ -330,7 +341,8 @@ class Angles(object):
         -------
         raa : array_like
         """
-        return Quantity(self.__array[2], unit=util.radians, name='Relative Azimuth Angle', constant=True)
+        # return Quantity(self.__array[2], unit=util.radians, name='Relative Azimuth Angle', constant=True)
+        return self.__array[2]
 
     @property
     def raaDeg(self):
@@ -345,7 +357,8 @@ class Angles(object):
         -------
         raaDeg : array_like
         """
-        return Quantity(self.__arrayDeg[2], unit=util.degrees, name='Relative Azimuth Angle', constant=True)
+        # return Quantity(self.__arrayDeg[2], unit=util.degrees, name='Relative Azimuth Angle', constant=True)
+        return self.__arrayDeg[2]
 
     @property
     def iaa(self):
@@ -360,7 +373,8 @@ class Angles(object):
         -------
         iaa : array_like
         """
-        return Quantity(self.__array[3], unit=util.radians, name='Incidence Azimuth Angle', constant=True)
+        # return Quantity(self.__array[3], unit=util.radians, name='Incidence Azimuth Angle', constant=True)
+        return self.__array[3]
 
     @property
     def iaaDeg(self):
@@ -375,7 +389,8 @@ class Angles(object):
         -------
         iaaDeg : array_like
         """
-        return Quantity(self.__arrayDeg[3], unit=util.degrees, name='Incidence Azimuth Angle', constant=True)
+        # return Quantity(self.__arrayDeg[3], unit=util.degrees, name='Incidence Azimuth Angle', constant=True)
+        return self.__arrayDeg[3]
 
     @property
     def vaa(self):
@@ -390,7 +405,8 @@ class Angles(object):
         -------
         vaa : array_like
         """
-        return Quantity(self.__array[4], unit=util.radians, name='Viewing Azimuth Angle', constant=True)
+        # return Quantity(self.__array[4], unit=util.radians, name='Viewing Azimuth Angle', constant=True)
+        return self.__array[4]
 
     @property
     def vaaDeg(self):
@@ -405,7 +421,8 @@ class Angles(object):
         -------
         vaaDeg : array_like
         """
-        return Quantity(self.__arrayDeg[4], unit=util.degrees, name='Viewing Azimuth Angle', constant=True)
+        # return Quantity(self.__arrayDeg[4], unit=util.degrees, name='Viewing Azimuth Angle', constant=True)
+        return self.__arrayDeg[4]
 
     @property
     def alpha(self):
@@ -416,7 +433,8 @@ class Angles(object):
         -------
         alpha : array_like
         """
-        return Quantity(self.__array[5], unit=util.radians, name='Euler Angle Alpha', constant=True)
+        # return Quantity(self.__array[5], unit=util.radians, name='Euler Angle Alpha', constant=True)
+        return self.__array[5]
 
     @property
     def alphaDeg(self):
@@ -427,7 +445,8 @@ class Angles(object):
         -------
         alphaDeg : array_like
         """
-        return Quantity(self.__arrayDeg[5], unit=util.degrees, name='Euler Angle Alpha', constant=True)
+        # return Quantity(self.__arrayDeg[5], unit=util.degrees, name='Euler Angle Alpha', constant=True)
+        return self.__arrayDeg[5]
 
     @property
     def beta(self):
@@ -438,7 +457,8 @@ class Angles(object):
         -------
         beta : array_like
         """
-        return Quantity(self.__array[6], unit=util.radians, name='Euler Angle Beta', constant=True)
+        # return Quantity(self.__array[6], unit=util.radians, name='Euler Angle Beta', constant=True)
+        return self.__array[6]
 
     @property
     def betaDeg(self):
@@ -449,7 +469,8 @@ class Angles(object):
         -------
         betaDeg : array_like
         """
-        return Quantity(self.__arrayDeg[6], unit=util.degrees, name='Euler Angle Beta', constant=True)
+        # return Quantity(self.__arrayDeg[6], unit=util.degrees, name='Euler Angle Beta', constant=True)
+        return self.__arrayDeg[6]
 
     @property
     def B(self):
@@ -462,8 +483,8 @@ class Angles(object):
         B : array_like
         """
         B = sec(self.iza) + sec(self.vza)
-        B.set_name("Secants of iza + vza")
-        B.set_constant(True)
+        # B.set_name("Secants of iza + vza")
+        # B.set_constant(True)
         return B
 
     @property
@@ -477,8 +498,8 @@ class Angles(object):
         BDeg : array_like
         """
         B = sec(self.izaDeg) + sec(self.vzaDeg)
-        B.set_name("Secants of iza + vza")
-        B.set_constant(True)
+        # B.set_name("Secants of iza + vza")
+        # B.set_constant(True)
 
         return B
 
@@ -492,8 +513,8 @@ class Angles(object):
         mui : array_like
         """
         mui = np.cos(self.iza)
-        mui.set_name("Cosine of iza")
-        mui.set_constant(True)
+        # mui.set_name("Cosine of iza")
+        # mui.set_constant(True)
 
         return mui
 
@@ -507,8 +528,8 @@ class Angles(object):
         mui : array_like
         """
         muv = np.cos(self.vza)
-        muv.set_name("Cosine of vza")
-        muv.set_constant(True)
+        # muv.set_name("Cosine of vza")
+        # muv.set_constant(True)
 
         return muv
 
@@ -522,8 +543,8 @@ class Angles(object):
         phi : array_like
         """
         phi = np.abs((self.raa % (2. * const.pi)))
-        phi.set_name("Normalized Relative Azimuth Angle")
-        phi.set_constant(True)
+        # phi.set_name("Normalized Relative Azimuth Angle")
+        # phi.set_constant(True)
 
         return phi
 
@@ -757,7 +778,7 @@ class Angles(object):
         data = align_all(data)
 
         # DEG Angles
-        dataDeg = [item for item in self.__array]
+        dataDeg = [item for item in self.__arrayDeg]
 
         if isinstance(value, tuple):
             dataDeg = value + tuple(dataDeg, )

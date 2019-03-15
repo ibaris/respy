@@ -2,4 +2,4 @@
 """
 Created on  by Ismail Baris
 """
-from __future__ import division
+from .core import Sensor

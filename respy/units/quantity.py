@@ -22,7 +22,7 @@ import util as util
 from respy.units.auxil import __NONE_UNITS__, __OPERATOR__
 from respy.units.util import Zero, One, UnitError
 from respy.units.unit_ufuncs import (__CONVERT__MATH__, __MATH_UNIT_GETS_LOST__, __MATH_UNIT_REMAINS_STABLE__,
-                                     __CHECK_UNIT__, __MATH_LOGICAL_AND_MORE__, __NOT_IMPLEMENTED__)
+                                     __CHECK_UNIT__, __MATH_LOGICAL_AND_MORE__, __OPERATIONS__)
 
 np.seterr(divide='ignore', invalid='ignore')
 
@@ -168,6 +168,7 @@ class Quantity(np.ndarray):
         obj.subok = subok
         obj.ndmin = ndmin
         obj.quantity = True
+        obj.__QUANTITY__ = True
         obj.verbose = verbose
 
         return obj
@@ -205,6 +206,7 @@ class Quantity(np.ndarray):
             self._dimension = getattr(obj, '_dimension', None)
             self.quantity = getattr(obj, 'quantity', None)
             self.verbose = getattr(obj, 'verbose', None)
+            self.__QUANTITY__ = getattr(obj, '__QUANTITY__', None)
 
     def __array_wrap__(self, out_arr, context=None):
         return np.ndarray.__array_wrap__(self, out_arr, context)
@@ -215,8 +217,13 @@ class Quantity(np.ndarray):
                 and function.__name__ not in __MATH_UNIT_GETS_LOST__
                 and function.__name__ not in __CONVERT__MATH__
                 and function.__name__ not in __CHECK_UNIT__
-                and function.__name__ not in __MATH_LOGICAL_AND_MORE__):
-            raise NotImplementedError
+                and function.__name__ not in __MATH_LOGICAL_AND_MORE__
+                and function.__name__ not in __OPERATIONS__):
+
+            raise NotImplementedError("The ufunc {0} is not implemented.  If you believe this ufunc "
+                                      "should be supported, please raise an issue on "
+                                      "https://github.com/ibaris/pyrism"
+                                      .format(function.__name__))
 
         try:
             nin = function.nin

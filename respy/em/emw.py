@@ -249,15 +249,15 @@ class EM(object):
 
     @property
     def frequency(self):
-        return self.__frequency
+        return self.__frequency.value
 
     @property
     def wavelength(self):
-        return self.__wavelength
+        return self.__wavelength.value
 
     @property
     def wavenumber(self):
-        return self.__wavenumber
+        return self.__wavenumber.value
 
     @property
     def value(self):
@@ -274,7 +274,8 @@ class EM(object):
         """
         f = self.frequency.convert_to('1 / s')
         w = self.frequency.convert_to('m')
-        return w * f
+        s = w * f
+        return s.value
 
     @property
     def angular_speed(self):
@@ -287,7 +288,8 @@ class EM(object):
         """
         p2 = Quantity(2 * const.pi, 'rad')
         f = self.frequency.convert_to('1 / s')
-        return p2 * f
+        a_s = p2 * f
+        return a_s.value
 
     # --------------------------------------------------------------------------------------------------------
     # Callable Methods
