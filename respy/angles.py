@@ -3,14 +3,16 @@ import sys
 import warnings
 
 import numpy as np
-from respy.auxiliary import (sec, align_all, asarrays, DTYPES, PI)
+
+import respy.constants as const
+from respy.util import (sec, align_all, asarrays, DTYPES, __ANGLE_UNIT_DEG__, __ANGLE_UNIT_RAD__)
+from respy.units import Quantity, util
 
 # python 3.6 comparability
 if sys.version_info < (3, 0):
     srange = xrange
 else:
     srange = range
-
 
 
 class Angles(object):
@@ -82,25 +84,35 @@ class Angles(object):
         """
 
         # Prepare Input Data -------------------------------------------------------------------------------------------
-        if raa is None and (iaa is None or vaa is None):
-            raise ValueError("If raa is not defined iaa AND vaa must be defined.")
+        if raa is None and (iaa is None and vaa is None):
+            raise ValueError("If raa is not defined iaa or vaa must be defined.")
+        elif iaa is None:
+            iaa = 0
+        elif vaa is None:
+            vaa = 0
 
-        if (angle_unit is 'DEG' or angle_unit is 'deg') or (angle_unit is 'RAD' or angle_unit is 'rad'):
+        if (angle_unit in __ANGLE_UNIT_RAD__ or angle_unit in __ANGLE_UNIT_DEG__):
             pass
         else:
-            raise ValueError("angle_unit must be 'DEG' or 'RAD', but angle_unit is: {}".format(str(angle_unit)))
+            raise ValueError("angle_unit must be {0} or {1}, "
+                             "but the actual angle_unit is: {2}".format(str(__ANGLE_UNIT_RAD__),
+                                                                        str(__ANGLE_UNIT_DEG__),
+                                                                        str(angle_unit)))
 
         if dtype in DTYPES:
             pass
         else:
-            raise TypeError("dtype must be a numpy.dtype object. The dtype is {0}".format(str(dtype)))
+            raise TypeError("dtype must be a numpy.dtype object. The actual dtype is {0}".format(str(dtype)))
 
         # Assign relative azimuth angle flag
         if raa is not None and iaa is not None and vaa is not None:
             raise AssertionError("The relative, incidence and viewing azimuth angle is defined. "
                                  "Either raa or iaa AND vaa must be defined. ")
+
         if raa is None:
             self.raa_flag = False
+            iaa, vaa = asarrays((iaa, vaa), dtype=dtype)
+
             iaa = iaa
             vaa = vaa
             raa = iaa - vaa
@@ -129,14 +141,14 @@ class Angles(object):
         # Convert Angles depending on Angle Unit -----------------------------------------------------------------------
         self.__normalize = normalize
 
-        if angle_unit is 'DEG' or angle_unit is 'deg':
+        if angle_unit in __ANGLE_UNIT_DEG__:
             self.__array = np.deg2rad(temporal_array)
             self.__nbar = np.deg2rad(nbar)
 
             self.__arrayDeg = temporal_array
             self.__nbarDeg = nbar
 
-        elif angle_unit is 'RAD' or angle_unit is 'rad':
+        elif angle_unit in __ANGLE_UNIT_RAD__:
             self.__array = temporal_array
             self.__nbar = nbar
 
@@ -155,12 +167,12 @@ class Angles(object):
         self.__array[1][vza_mask] = np.abs(self.__array[1][vza_mask])
 
         for item in self.__array[2:-2]:
-            item[iza_mask] += PI
-            item[vza_mask] += PI
+            item[iza_mask] += const.pi
+            item[vza_mask] += const.pi
 
         for itemDeg in self.__arrayDeg[2:-2]:
-            itemDeg[iza_mask] += PI
-            itemDeg[vza_mask] += PI
+            itemDeg[iza_mask] += const.pi
+            itemDeg[vza_mask] += const.pi
 
         # Set Attributes -----------------------------------------------------------------------------------------------
         self.__norm = None
@@ -209,27 +221,36 @@ class Angles(object):
         return info
 
     def __repr__(self):
+        names = ['Incidence Zenith Angle', 'Viewing Angle', 'Relative Azimuth Angle', 'Incidence Azimuth Angle',
+                 'Viewing Azimuth Angle', 'Euler Angle Alpha', 'Euler Angle Beta']
+
+        prefix = '<{0} '.format(self.__class__.__name__)
+        sep = ', '
+        # iza, vza, raa, iaa, vaa, alpha, beta
+        angle_str = list()
         if self.angle_unit is 'RAD' or self.angle_unit is 'rad':
-            rep = "Angles(iza={0}, vza={1}, raa={2}, iaa={3}, vaa={4}, alpha={5}, beta={6}, normalize={7}, nbar={8}, " \
-                  "angle_unit={9}, align={10}, dtype={11})".format(str(self.iza), str(self.vza), str(self.raa),
-                                                                   str(self.iaa), str(self.vaa), str(self.alpha),
-                                                                   str(self.beta), str(self.normalize), str(self.nbar),
-                                                                   str(self.angle_unit), str(self.align),
-                                                                   str(self.dtype))
+            for i in range(self.array.shape[0]):
+                angle_str.append(np.array2string(self.array[i],
+                                                 separator=sep,
+                                                 prefix=prefix))
+            unit = util.radians
 
         else:
-            rep = "Angles(iza={0}, vza={1}, raa={2}, iaa={3}, vaa={4}, alpha={5}, beta={6}, normalize={7}, nbar={8}, " \
-                  "angle_unit={9}, align={10}, dtype={11})".format(str(self.izaDeg), str(self.vzaDeg), str(self.raaDeg),
-                                                                   str(self.iaaDeg), str(self.vaaDeg),
-                                                                   str(self.alphaDeg), str(self.betaDeg),
-                                                                   str(self.normalize), str(self.nbar),
-                                                                   str(self.angle_unit), str(self.align),
-                                                                   str(self.dtype))
+            for i in range(self.array.shape[0]):
+                angle_str.append(np.array2string(self.arrayDeg[i],
+                                                 separator=sep,
+                                                 prefix=prefix))
 
-        return rep
+            unit = util.degrees
+
+        return_list = ''
+        for i, item in enumerate(angle_str):
+            return_list += "{0}{1} {2} in [{3}]>\n".format(prefix, item, names[i], unit)
+
+        return return_list
 
     def __len__(self):
-        return len(self.__array)
+        return self.__array.shape[1]
 
     # ------------------------------------------------------------------------------------------------------------------
     # Property Access
@@ -244,7 +265,7 @@ class Angles(object):
         -------
         len : int
         """
-        return len(self.__array)
+        return self.__array.shape[1]
 
     @property
     def shape(self):
@@ -267,6 +288,8 @@ class Angles(object):
         -------
         iza : array_like
         """
+
+        # return Quantity(self.__array[0], unit=util.radians, name='Incidence Zenith Angle', constant=True)
         return self.__array[0]
 
     @property
@@ -278,6 +301,7 @@ class Angles(object):
         -------
         iza : array_like
         """
+        # return Quantity(self.__arrayDeg[0], unit=util.degrees, name='Incidence Zenith Angle', constant=True)
         return self.__arrayDeg[0]
 
     @property
@@ -289,6 +313,7 @@ class Angles(object):
         -------
         vza : array_like
         """
+        # return Quantity(self.__array[1], unit=util.radians, name='Viewing Angle', constant=True)
         return self.__array[1]
 
     @property
@@ -300,6 +325,7 @@ class Angles(object):
         -------
         vzaDeg : array_like
         """
+        # return Quantity(self.__arrayDeg[1], unit=util.degrees, name='Viewing Angle', constant=True)
         return self.__arrayDeg[1]
 
     @property
@@ -315,6 +341,7 @@ class Angles(object):
         -------
         raa : array_like
         """
+        # return Quantity(self.__array[2], unit=util.radians, name='Relative Azimuth Angle', constant=True)
         return self.__array[2]
 
     @property
@@ -330,6 +357,7 @@ class Angles(object):
         -------
         raaDeg : array_like
         """
+        # return Quantity(self.__arrayDeg[2], unit=util.degrees, name='Relative Azimuth Angle', constant=True)
         return self.__arrayDeg[2]
 
     @property
@@ -345,6 +373,7 @@ class Angles(object):
         -------
         iaa : array_like
         """
+        # return Quantity(self.__array[3], unit=util.radians, name='Incidence Azimuth Angle', constant=True)
         return self.__array[3]
 
     @property
@@ -360,6 +389,7 @@ class Angles(object):
         -------
         iaaDeg : array_like
         """
+        # return Quantity(self.__arrayDeg[3], unit=util.degrees, name='Incidence Azimuth Angle', constant=True)
         return self.__arrayDeg[3]
 
     @property
@@ -375,6 +405,7 @@ class Angles(object):
         -------
         vaa : array_like
         """
+        # return Quantity(self.__array[4], unit=util.radians, name='Viewing Azimuth Angle', constant=True)
         return self.__array[4]
 
     @property
@@ -390,6 +421,7 @@ class Angles(object):
         -------
         vaaDeg : array_like
         """
+        # return Quantity(self.__arrayDeg[4], unit=util.degrees, name='Viewing Azimuth Angle', constant=True)
         return self.__arrayDeg[4]
 
     @property
@@ -401,6 +433,7 @@ class Angles(object):
         -------
         alpha : array_like
         """
+        # return Quantity(self.__array[5], unit=util.radians, name='Euler Angle Alpha', constant=True)
         return self.__array[5]
 
     @property
@@ -412,6 +445,7 @@ class Angles(object):
         -------
         alphaDeg : array_like
         """
+        # return Quantity(self.__arrayDeg[5], unit=util.degrees, name='Euler Angle Alpha', constant=True)
         return self.__arrayDeg[5]
 
     @property
@@ -423,6 +457,7 @@ class Angles(object):
         -------
         beta : array_like
         """
+        # return Quantity(self.__array[6], unit=util.radians, name='Euler Angle Beta', constant=True)
         return self.__array[6]
 
     @property
@@ -434,6 +469,7 @@ class Angles(object):
         -------
         betaDeg : array_like
         """
+        # return Quantity(self.__arrayDeg[6], unit=util.degrees, name='Euler Angle Beta', constant=True)
         return self.__arrayDeg[6]
 
     @property
@@ -446,7 +482,10 @@ class Angles(object):
         -------
         B : array_like
         """
-        return sec(self.iza) + sec(self.vza)
+        B = sec(self.iza) + sec(self.vza)
+        # B.set_name("Secants of iza + vza")
+        # B.set_constant(True)
+        return B
 
     @property
     def BDeg(self):
@@ -458,7 +497,11 @@ class Angles(object):
         -------
         BDeg : array_like
         """
-        return sec(self.izaDeg) + sec(self.vzaDeg)
+        B = sec(self.izaDeg) + sec(self.vzaDeg)
+        # B.set_name("Secants of iza + vza")
+        # B.set_constant(True)
+
+        return B
 
     @property
     def mui(self):
@@ -469,7 +512,11 @@ class Angles(object):
         -------
         mui : array_like
         """
-        return np.cos(self.__array[0])
+        mui = np.cos(self.iza)
+        # mui.set_name("Cosine of iza")
+        # mui.set_constant(True)
+
+        return mui
 
     @property
     def muv(self):
@@ -480,18 +527,26 @@ class Angles(object):
         -------
         mui : array_like
         """
-        return np.cos(self.__array[1])
+        muv = np.cos(self.vza)
+        # muv.set_name("Cosine of vza")
+        # muv.set_constant(True)
+
+        return muv
 
     @property
     def phi(self):
         """
-        Relative azimuth angle normalized in a range of 2*PI
+        Relative azimuth angle normalized in a range of 2*pi
 
         Returns
         -------
         phi : array_like
         """
-        return np.abs((self.raa % (2. * PI)))
+        phi = np.abs((self.raa % (2. * const.pi)))
+        # phi.set_name("Normalized Relative Azimuth Angle")
+        # phi.set_constant(True)
+
+        return phi
 
     @property
     def geometries(self):
@@ -559,12 +614,12 @@ class Angles(object):
         if value in DTYPES:
             pass
         else:
-            raise TypeError("dtype must be a numpy.dtype object. The dtype is {0}".format(str(value)))
+            raise TypeError("dtype must be a numpy.dtype object. The actual dtype is {0}".format(str(value)))
 
         self.__dtype = value
 
         if self.__dtype == np.int:
-            warnings.warn("The dtype is {0}. This could cause errors in radians.")
+            warnings.warn("The dtype is np.int. This could lead to errors in unit radians.")
 
         self.__array = self.__change_dtype(self.__array, self.__nbar, self.__dtype)
         self.__arrayDeg = self.__change_dtype(self.__arrayDeg, self.__nbarDeg, self.__dtype)
@@ -578,7 +633,7 @@ class Angles(object):
         -------
         nbar : float
         """
-        return self.__nbar
+        return Quantity(self.__nbar, unit=util.rad, name='Normalization Angle', constant=True)
 
     @nbar.setter
     def nbar(self, value):
@@ -723,7 +778,7 @@ class Angles(object):
         data = align_all(data)
 
         # DEG Angles
-        dataDeg = [item for item in self.__array]
+        dataDeg = [item for item in self.__arrayDeg]
 
         if isinstance(value, tuple):
             dataDeg = value + tuple(dataDeg, )

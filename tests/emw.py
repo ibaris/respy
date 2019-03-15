@@ -50,8 +50,8 @@ class TestConversion:
             REF = DATA_ref[selection_two[i]]
             REF_UNIT = FREQ_UNIT[selection_two[i]]
 
-            TEST_REF = respy.convert_frequency(frequency=INPUT, unit=INPUT_UNIT, output=REF_UNIT)
-            TEST_INPUT = respy.convert_frequency(frequency=TEST_REF, unit=REF_UNIT, output=INPUT_UNIT)
+            TEST_REF = respy.EM.compute_frequency(INPUT, unit=INPUT_UNIT, output=REF_UNIT)
+            TEST_INPUT = respy.EM.compute_frequency(TEST_REF, unit=REF_UNIT, output=INPUT_UNIT)
 
             for j in range(TEST_REF.shape[0]):
                 assert np.allclose(REF[j], TEST_REF[j])
@@ -75,8 +75,8 @@ class TestConversion:
             REF = DATA_ref[selection_two[i]]
             REF_UNIT = WAVE_UNIT[selection_two[i]]
 
-            TEST_REF = respy.convert_wavelength(wavelength=INPUT, unit=INPUT_UNIT, output=REF_UNIT)
-            TEST_INPUT = respy.convert_wavelength(wavelength=TEST_REF, unit=REF_UNIT, output=INPUT_UNIT)
+            TEST_REF = respy.EM.compute_wavelength(INPUT, unit=INPUT_UNIT, output=REF_UNIT)
+            TEST_INPUT = respy.EM.compute_wavelength(TEST_REF, unit=REF_UNIT, output=INPUT_UNIT)
 
             for j in range(TEST_REF.shape[0]):
                 assert np.allclose(REF[j], TEST_REF[j])
@@ -109,7 +109,7 @@ class TestConversion:
                 freqcuency_ref_unit = FREQ_UNIT[i]
                 wavelength_ref_unit = WAVE_UNIT[i]
 
-                wavelength = respy.compute_wavelength(frequency=freqcuency_ref, unit=freqcuency_ref_unit,
+                wavelength = respy.EM.compute_wavelength(frequency=freqcuency_ref, unit=freqcuency_ref_unit,
                                                       output=wavelength_ref_unit)
 
                 frequency = respy.compute_frequency(wavelength=wavelength, unit=wavelength_ref_unit,
@@ -122,7 +122,7 @@ class TestConversion:
 class TestRaises:
     def test_which_band_raise(self):
         with pytest.raises(ValueError):
-            respy.which_band(1.26, unit='XXX')
+            respy.Bands.which_band(1.26, unit='XXX')
 
 
 @pytest.mark.webtest
@@ -139,9 +139,9 @@ class TestRaises:
     ])
 class TestSelectionRADAR:
     def test_which_band(self, frequency, band):
-        band_selected = respy.which_band(frequency)
-        wavelength = respy.compute_wavelength(frequency=frequency)
-        band_selected_with_wavelength = respy.which_band(wavelength, unit='cm')
+        band_selected = respy.Bands.which_band(frequency)
+        wavelength = respy.EM.compute_wavelength(frequency=frequency)
+        band_selected_with_wavelength = respy.Bands.which_band(wavelength, unit='cm')
 
         assert band_selected == band
         assert band_selected_with_wavelength == band
@@ -161,9 +161,9 @@ class TestSelectionRADAR:
             else:
                 pass
 
-        band_selected = respy.which_band(frequency)
-        wavelength = respy.compute_wavelength(frequency=frequency)
-        band_selected_with_wavelength = respy.which_band(wavelength, unit='cm')
+        band_selected = respy.Bands.which_band(frequency)
+        wavelength = respy.EM.compute_wavelength(frequency=frequency)
+        band_selected_with_wavelength = respy.Bands.which_band(wavelength, unit='cm')
 
         assert len(band_selected) == len(band)
         assert len(band_selected_with_wavelength) == len(band)
@@ -188,9 +188,9 @@ class TestSelectionRADAR:
     ])
 class TestSelectionOPTIC:
     def test_which_band(self, wavelength, band):
-        band_selected = respy.which_band(wavelength, 'nm')
+        band_selected = respy.Bands.which_band(wavelength, 'nm')
         frequency = respy.compute_frequency(wavelength=wavelength, unit='nm')
-        band_selected_with_frequency = respy.which_band(frequency, 'GHz')
+        band_selected_with_frequency = respy.Bands.which_band(frequency, 'GHz')
 
         assert band_selected == band
         assert band_selected_with_frequency == band
@@ -210,9 +210,9 @@ class TestSelectionOPTIC:
         wavelength = np.asarray([DATA[i][0] for i in range(len(DATA))])
         unique_bands = set(band)
 
-        band_selected = respy.which_band(wavelength, 'nm')
+        band_selected = respy.Bands.which_band(wavelength, 'nm')
         frequency = respy.compute_frequency(wavelength=wavelength, unit='nm')
-        band_selected_with_frequency = respy.which_band(frequency, 'GHz')
+        band_selected_with_frequency = respy.Bands.which_band(frequency, 'GHz')
 
         assert len(band_selected) == len(unique_bands)
         assert len(band_selected_with_frequency) == len(unique_bands)
