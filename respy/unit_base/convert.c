@@ -2464,9 +2464,9 @@ static const char __pyx_k_convert_to_unit[] = "convert_to_unit";
 static const char __pyx_k_dtype_is_object[] = "dtype_is_object";
 static const char __pyx_k_pyx_PickleError[] = "__pyx_PickleError";
 static const char __pyx_k_setstate_cython[] = "__setstate_cython__";
-static const char __pyx_k_respy_units_util[] = "respy.units.util";
 static const char __pyx_k_sympy_convert_to[] = "sympy_convert_to";
 static const char __pyx_k_pyx_unpickle_Enum[] = "__pyx_unpickle_Enum";
+static const char __pyx_k_respy_units_auxil[] = "respy.units.auxil";
 static const char __pyx_k_cline_in_traceback[] = "cline_in_traceback";
 static const char __pyx_k_strided_and_direct[] = "<strided and direct>";
 static const char __pyx_k_sympy_physics_units[] = "sympy.physics.units";
@@ -2620,7 +2620,7 @@ static PyObject *__pyx_n_s_reduce_cython;
 static PyObject *__pyx_n_s_reduce_ex;
 static PyObject *__pyx_n_s_respy_unit_base_convert;
 static PyObject *__pyx_kp_s_respy_unit_base_convert_pyx;
-static PyObject *__pyx_n_s_respy_units_util;
+static PyObject *__pyx_n_s_respy_units_auxil;
 static PyObject *__pyx_n_s_s;
 static PyObject *__pyx_n_s_setstate;
 static PyObject *__pyx_n_s_setstate_cython;
@@ -24949,7 +24949,7 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_reduce_ex, __pyx_k_reduce_ex, sizeof(__pyx_k_reduce_ex), 0, 0, 1, 1},
   {&__pyx_n_s_respy_unit_base_convert, __pyx_k_respy_unit_base_convert, sizeof(__pyx_k_respy_unit_base_convert), 0, 0, 1, 1},
   {&__pyx_kp_s_respy_unit_base_convert_pyx, __pyx_k_respy_unit_base_convert_pyx, sizeof(__pyx_k_respy_unit_base_convert_pyx), 0, 0, 1, 0},
-  {&__pyx_n_s_respy_units_util, __pyx_k_respy_units_util, sizeof(__pyx_k_respy_units_util), 0, 0, 1, 1},
+  {&__pyx_n_s_respy_units_auxil, __pyx_k_respy_units_auxil, sizeof(__pyx_k_respy_units_auxil), 0, 0, 1, 1},
   {&__pyx_n_s_s, __pyx_k_s, sizeof(__pyx_k_s), 0, 0, 1, 1},
   {&__pyx_n_s_setstate, __pyx_k_setstate, sizeof(__pyx_k_setstate), 0, 0, 1, 1},
   {&__pyx_n_s_setstate_cython, __pyx_k_setstate_cython, sizeof(__pyx_k_setstate_cython), 0, 0, 1, 1},
@@ -25727,7 +25727,7 @@ if (!__Pyx_RefNanny) {
  * cimport numpy as np
  * import numpy as np             # <<<<<<<<<<<<<<
  * from sympy.physics.units import convert_to as sympy_convert_to
- * from respy.units.util import Zero
+ * from respy.units.auxil import Zero
  */
   __pyx_t_1 = __Pyx_Import(__pyx_n_s_numpy, 0, -1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 12, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
@@ -25738,7 +25738,7 @@ if (!__Pyx_RefNanny) {
  * cimport numpy as np
  * import numpy as np
  * from sympy.physics.units import convert_to as sympy_convert_to             # <<<<<<<<<<<<<<
- * from respy.units.util import Zero
+ * from respy.units.auxil import Zero
  * 
  */
   __pyx_t_1 = PyList_New(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 13, __pyx_L1_error)
@@ -25758,7 +25758,7 @@ if (!__Pyx_RefNanny) {
   /* "respy/unit_base/convert.pyx":14
  * import numpy as np
  * from sympy.physics.units import convert_to as sympy_convert_to
- * from respy.units.util import Zero             # <<<<<<<<<<<<<<
+ * from respy.units.auxil import Zero             # <<<<<<<<<<<<<<
  * 
  * ctypedef fused DTYPE_ARRAY:
  */
@@ -25767,7 +25767,7 @@ if (!__Pyx_RefNanny) {
   __Pyx_INCREF(__pyx_n_s_Zero);
   __Pyx_GIVEREF(__pyx_n_s_Zero);
   PyList_SET_ITEM(__pyx_t_2, 0, __pyx_n_s_Zero);
-  __pyx_t_1 = __Pyx_Import(__pyx_n_s_respy_units_util, __pyx_t_2, -1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 14, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_Import(__pyx_n_s_respy_units_auxil, __pyx_t_2, -1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 14, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_t_2 = __Pyx_ImportFrom(__pyx_t_1, __pyx_n_s_Zero); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 14, __pyx_L1_error)

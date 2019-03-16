@@ -10,6 +10,10 @@ from __future__ import division
 from sympy.physics.units.dimensions import (Dimension, frequency, length, energy, power,
                                             temperature, volume, time, mass, current)
 
+__all__ = ['angle', 'area', 'volume', 'frequency', 'length', 'energy', 'power', 'temperature', 'time', 'mass',
+           'current']
+
+angle = Dimension(name='angle')
 area = Dimension(name='area', symbol='A')
 volume = volume
 frequency = frequency

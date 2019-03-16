@@ -11,7 +11,7 @@ from __future__ import division
 cimport numpy as np
 import numpy as np
 from sympy.physics.units import convert_to as sympy_convert_to
-from respy.units.util import Zero
+from respy.units.auxil import Zero
 
 ctypedef fused DTYPE_ARRAY:
     np.ndarray

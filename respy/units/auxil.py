@@ -5,11 +5,22 @@ Created on 26.01.2019 by Ismail Baris
 from __future__ import division
 
 import operator as op
+import sympy as sym
+from respy.units.unit import __unit__, __values__
 
-from respy.units.util import Zero, One
-from sympy import zoo, oo, S
+__OPERAND__ = ['*', '/', '+', '-', '**']
 
-__NONE_UNITS__ = [Zero, One, None, zoo, oo, S.NaN]
+__UNITS__ = dict(zip(__unit__, __values__))
+__SYMPY_CLASSES__ = tuple(sym.core.all_classes)
+__NONE_UNIT_TYPES__ = [sym.S.Zero, sym.S.One, None, sym.zoo, sym.oo, sym.S.NaN]
+__NONE_DIM_TYPES__ = [None, sym.zoo, sym.oo, sym.S.NaN]
+Zero = sym.S.Zero
+One = sym.S.One
+zoo = sym.zoo
+oo = sym.oo
+NaN = sym.S.NaN
+
+__NONE_UNITS__ = __NONE_UNIT_TYPES__
 
 __SAME_UNIT_OPERATOR__ = [op.add.__name__, op.sub.__name__, op.and_.__name__, op.xor.__name__,
                           op.or_.__name__, op.lshift.__name__, op.rshift.__name__, op.mod.__name__]

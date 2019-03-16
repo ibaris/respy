@@ -48,6 +48,13 @@ if use_cython:
     print ('******** Start compiling with CYTHON ********')
 
     ext_modules += [
+        Extension("respy.bin_units.conversion", ["respy/bin_units/conversion.pyx"], include_dirs=['.']),
+        Extension("respy.bin_units.auxil", ["respy/bin_units/auxil.pyx"], include_dirs=['.']),
+        Extension("respy.bin_units.decomposition", ["respy/bin_units/decomposition.pyx"], include_dirs=['.']),
+        Extension("respy.bin_units.util", ["respy/bin_units/util.pyx"], include_dirs=['.']),
+        Extension("respy.bin_units.wrapper", ["respy/bin_units/wrapper.pyx"], include_dirs=['.']),
+
+
         Extension("respy.unit_base.auxil", ["respy/unit_base/auxil.pyx"], include_dirs=['.']),
         Extension("respy.unit_base.convert", ["respy/unit_base/convert.pyx"], include_dirs=['.']),
         Extension("respy.unit_base.operations", ["respy/unit_base/operations.pyx"], include_dirs=['.']),

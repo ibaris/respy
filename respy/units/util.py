@@ -9,60 +9,13 @@ This module defines all units of `Quantity` objects.
 
 from __future__ import division
 
-import sympy.physics.units as sympy_units
-from sympy import S
-from sympy.physics.units.quantities import Quantity as sQuantity
+import sys
 
-from respy.units import dimensions
+from respy.bin_units.wrapper import (dim_isnone, get_unitstr, unit_isnone, get_unit, get_dim, dim_isone, dim_iszero)
+from respy.units.unit import __unit__, __values__
+from respy.units.dimensions import *
 
-__OPERAND__ = ['*', '/', '+', '-', '**']
-
-One = S.One
-Zero = S.Zero
-
-
-class UnitError(Exception):
-    pass
-
-
-class DimensionError(Exception):
-    pass
-
-
-class Units(dict):
-    """ Storage for all units.
-
-    Returns
-    -------
-    Dict with .dot access.
-
-    Notes
-    -----
-    There may be additional attributes not listed above depending of the
-    specific solver. Since this class is essentially a subclass of dict
-    with attribute accessors, one can see which attributes are available
-    using the `keys()` method. adar Backscatter values of multi scattering contribution of surface and volume
-    """
-
-    def __getattr__(self, name):
-        try:
-            return self[name]
-        except KeyError:
-            raise AttributeError("{} is not a valid unit. Use `keys()` method to see all available units".format(name))
-
-    __setattr__ = dict.__setitem__
-    __delattr__ = dict.__delitem__
-
-    def __repr__(self):
-        if self.keys():
-            m = max(map(len, list(self.keys()))) + 1
-            return '\n'.join([k.rjust(m) + ': ' + repr(v)
-                              for k, v in sorted(self.items())])
-        else:
-            return self.__class__.__name__ + "()"
-
-    def __dir__(self):
-        return list(self.keys())
+python3 = False if sys.version_info < (3, 0) else True
 
 
 class Frequency(dict):
@@ -389,294 +342,314 @@ class Other(dict):
         return list(self.keys())
 
 
-deg = degree = degrees = sympy_units.degree
-rad = radian = radians = sympy_units.radian
+class Volume(dict):
+    """ Storage for Volume units.
 
-decibel = dB = sQuantity("decibel", abbrev="dB")
-dB.set_dimension(One)
-dB.set_scale_factor(One)
+    Returns
+    -------
+    Dict with .dot access.
 
-millihertz = mhz = mHz = sQuantity("millihertz", abbrev="mHz")
-millihertz.set_dimension(dimensions.frequency)
-millihertz.set_scale_factor(1 / 1e3)
+    Notes
+    -----
+    There may be additional attributes not listed above depending of the
+    specific solver. Since this class is essentially a subclass of dict
+    with attribute accessors, one can see which attributes are available
+    using the `keys()` method. adar Backscatter values of multi scattering contribution of surface and volume
+    """
 
-centihertz = chz = cHz = sQuantity("centihertz", abbrev="cHz")
-centihertz.set_dimension(dimensions.frequency)
-centihertz.set_scale_factor(1 / 1e2)
+    def __getattr__(self, name):
+        try:
+            return self[name]
+        except KeyError:
+            raise AttributeError("{} is not a valid unit. Use `keys()` method to see all available units".format(name))
 
-decihertz = dhz = dHz = sQuantity("decihertz", abbrev="dHz")
-decihertz.set_dimension(dimensions.frequency)
-decihertz.set_scale_factor(1 / 1e1)
+    __setattr__ = dict.__setitem__
+    __delattr__ = dict.__delitem__
 
-hertz = hz = Hz = sQuantity("hertz", abbrev="Hz")
-hertz.set_dimension(dimensions.frequency)
-hertz.set_scale_factor(One)
+    def __repr__(self):
+        if self.keys():
+            m = max(map(len, list(self.keys()))) + 1
+            return '\n'.join([k.rjust(m) + ': ' + repr(v)
+                              for k, v in sorted(self.items())])
+        else:
+            return self.__class__.__name__ + "()"
 
-decahertz = dahz = daHz = sQuantity("decahertz", abbrev="daHz")
-decahertz.set_dimension(dimensions.frequency)
-decahertz.set_scale_factor(10)
+    def __dir__(self):
+        return list(self.keys())
 
-hectohertz = hhz = hHz = sQuantity("hectohertz", abbrev="hHz")
-hectohertz.set_dimension(dimensions.frequency)
-hectohertz.set_scale_factor(100)
 
-kilohertz = khz = kHz = sQuantity("kilohertz", abbrev="kHz")
-kilohertz.set_dimension(dimensions.frequency)
-kilohertz.set_scale_factor(1000)
+class Area(dict):
+    """ Storage for Volume units.
 
-megahertz = MHz = sQuantity("megahertz", abbrev="MHz")
-megahertz.set_dimension(dimensions.frequency)
-megahertz.set_scale_factor(1e6)
+    Returns
+    -------
+    Dict with .dot access.
 
-gigahertz = ghz = GHz = sQuantity("gigahertz", abbrev="GHz")
-gigahertz.set_dimension(dimensions.frequency)
-gigahertz.set_scale_factor(1e9)
+    Notes
+    -----
+    There may be additional attributes not listed above depending of the
+    specific solver. Since this class is essentially a subclass of dict
+    with attribute accessors, one can see which attributes are available
+    using the `keys()` method. adar Backscatter values of multi scattering contribution of surface and volume
+    """
 
-terahertz = thz = THz = sQuantity("terahertz", abbrev="THz")
-terahertz.set_dimension(dimensions.frequency)
-terahertz.set_scale_factor(1e12)
+    def __getattr__(self, name):
+        try:
+            return self[name]
+        except KeyError:
+            raise AttributeError("{} is not a valid unit. Use `keys()` method to see all available units".format(name))
 
-petahertz = phz = PHz = sQuantity("petahertz", abbrev="PHz")
-petahertz.set_dimension(dimensions.frequency)
-petahertz.set_scale_factor(1e15)
+    __setattr__ = dict.__setitem__
+    __delattr__ = dict.__delitem__
 
-nm = nanometers = nanometer = sympy_units.nm
-um = micrometers = micrometer = sympy_units.um
-mm = millimeters = millimeter = sympy_units.mm
-cm = centimeters = centimeter = sympy_units.cm
-dm = decimeters = decimeter = sympy_units.dm
-m = meters = meter = sympy_units.m
-km = kilometers = kilometer = sympy_units.km
+    def __repr__(self):
+        if self.keys():
+            m = max(map(len, list(self.keys()))) + 1
+            return '\n'.join([k.rjust(m) + ': ' + repr(v)
+                              for k, v in sorted(self.items())])
+        else:
+            return self.__class__.__name__ + "()"
 
-s = second = seconds = sympy_units.second
-minute = minutes = sympy_units.minute
-h = hour = hours = sympy_units.hour
+    def __dir__(self):
+        return list(self.keys())
 
-K = kelvins = kelvin = sympy_units.K
 
-J = joules = joule = sympy_units.J
+class Angles(dict):
+    """ Storage for other, angle units.
 
-W = watt = watts = sympy_units.watt
+    Returns
+    -------
+    Dict with .dot access.
 
-milligram = milligrams = mg = sympy_units.milligram
-microgram = micrograms = ug = sympy_units.microgram
-gram = grams = g = sympy_units.gram
-kilogram = kilograms = kg = sympy_units.kilogram
+    Notes
+    -----
+    There may be additional attributes not listed above depending of the
+    specific solver. Since this class is essentially a subclass of dict
+    with attribute accessors, one can see which attributes are available
+    using the `keys()` method. adar Backscatter values of multi scattering contribution of surface and volume
+    """
 
-ampere = amperes = A = sympy_units.ampere
+    def __getattr__(self, name):
+        try:
+            return self[name]
+        except KeyError:
+            raise AttributeError("{} is not a valid unit. Use `keys()` method to see all available units".format(name))
 
-mass = Mass(milligram=milligram,
-            milligrams=milligrams,
-            mg=mg,
-            microgram=microgram,
-            micrograms=micrograms,
-            ug=ug,
-            gram=gram,
-            grams=grams,
-            g=g,
-            kilogram=kilogram,
-            kilograms=kilograms,
-            kg=kg)
+    __setattr__ = dict.__setitem__
+    __delattr__ = dict.__delitem__
 
-current = Current(ampere=ampere,
-                  amperes=amperes,
-                  A=A)
+    def __repr__(self):
+        if self.keys():
+            m = max(map(len, list(self.keys()))) + 1
+            return '\n'.join([k.rjust(m) + ': ' + repr(v)
+                              for k, v in sorted(self.items())])
+        else:
+            return self.__class__.__name__ + "()"
 
-frequency = Frequency(millihertz=millihertz,
-                      mhz=mhz,
-                      mHz=mHz,
-                      centihertz=centihertz,
-                      chz=chz,
-                      cHz=cHz,
-                      decihertz=decihertz,
-                      dhz=dhz,
-                      dHz=dHz,
-                      hertz=hertz,
-                      hz=hz,
-                      Hz=Hz,
-                      decahertz=decahertz,
-                      dahz=dahz,
-                      daHz=daHz,
-                      hectohertz=hectohertz,
-                      hhz=hhz,
-                      hHz=hHz,
-                      kilohertz=kilohertz,
-                      khz=khz,
-                      kHz=kHz,
-                      megahertz=megahertz,
-                      MHz=MHz,
-                      gigahertz=gigahertz,
-                      ghz=ghz,
-                      GHz=GHz,
-                      terahertz=terahertz,
-                      thz=thz,
-                      THz=THz,
-                      petahertz=petahertz,
-                      phz=phz,
-                      PHz=PHz)
+    def __dir__(self):
+        return list(self.keys())
 
-length = Length(nm=nm,
-                um=um,
-                mm=mm,
-                cm=cm,
-                dm=dm,
-                m=m,
-                km=km,
-                nanometers=nanometers,
-                micrometers=micrometers,
-                millimeters=millimeters,
-                centimeter=centimeter,
-                decimeters=decimeters,
-                meters=meters,
-                kilometers=kilometers,
-                nanometer=nanometer,
-                micrometer=micrometer,
-                millimeter=millimeter,
-                centimeters=centimeters,
-                decimeter=decimeter,
-                meter=meter,
-                kilometer=kilometer)
 
-time = Time(second=second,
-            minute=minute,
-            hour=hour,
-            seconds=seconds,
-            minutes=minutes,
-            hours=hours,
-            s=s,
-            h=h)
+class Units(dict):
+    """ Storage for all units.
 
-energy = Energy(J=J,
-                joule=joule,
-                joules=joules)
+    Returns
+    -------
+    Dict with .dot access.
 
-power = Power(W=W,
-              watt=watt,
-              watts=watts)
+    Notes
+    -----
+    There may be additional attributes not listed above depending of the
+    specific solver. Since this class is essentially a subclass of dict
+    with attribute accessors, one can see which attributes are available
+    using the `keys()` method. adar Backscatter values of multi scattering contribution of surface and volume
+    """
+    # Units = Units()
+    Frequency = Frequency()
+    Length = Length()
+    Energy = Energy()
+    Power = Power()
+    Time = Time()
+    Temperature = Temperature()
+    Mass = Mass()
+    Current = Current()
+    Other = Other()
+    Area = Area()
+    Angles = Angles()
+    Volume = Volume()
 
-temperature = Temperature(K=K,
-                          kelvin=kelvin,
-                          kelvins=kelvins)
+    __unit_dict__ = {"frequency": Frequency,
+                     'length': Length,
+                     "energy": Energy,
+                     "power": Power,
+                     "time": Time,
+                     "temperature": Temperature,
+                     'mass': Mass,
+                     "current": Current,
+                     'other': Other,
+                     'area': Area,
+                     'volume': Volume,
+                     'angle': Angles}
 
-other = Other(decibel=decibel,
-              dB=dB,
-              deg=deg,
-              degree=degree,
-              degrees=degrees,
-              rad=rad,
-              radian=radian,
-              radians=radians)
+    dimensions = {'angle': angle, 'area': area, 'volume': volume, 'frequency': frequency, 'length': length,
+                  'energy': energy, 'power': power,
+                  'temperature': temperature, 'time': time, 'mass': mass,
+                  'current': current}
 
-Units = Units(frequency=frequency, length=length, time=time, energy=energy, power=power, temperature=temperature,
-              other=other, mass=mass, current=current)
+    def __init__(self):
+        self.__unit_dict = Units.__unit_dict__
+        self.units = dict(zip(__unit__, __values__))
+        self.dimensions = Units.dimensions
 
-current = Current(ampere=ampere,
-                  amperes=amperes,
-                  A=A)
+        self.__setup_units()
 
-__UNITS__ = {"-": None,
+    def __getattr__(self, name):
+        try:
+            return self[name]
+        except KeyError:
+            raise AttributeError("{} is not a valid unit. Use `keys()` method to see all available units".format(name))
 
-             "decibel": decibel,
-             "dB": dB,
-             "deg": deg,
-             "degree": degree,
-             "degrees": degrees,
-             "rad": rad,
-             "radian": radian,
-             "radians": radians,
+    __setattr__ = dict.__setitem__
+    __delattr__ = dict.__delitem__
 
-             "millihertz": millihertz,
-             "mhz": mhz,
-             "mHz": mHz,
-             "centihertz": centihertz,
-             "chz": chz,
-             "cHz": cHz,
-             "decihertz": decihertz,
-             "dhz": dhz,
-             "dHz": dHz,
-             "hertz": hertz,
-             "hz": hz,
-             "Hz": Hz,
-             "decahertz": decahertz,
-             "dahz": dahz,
-             "daHz": daHz,
-             "hectohertz": hectohertz,
-             "hhz": hhz,
-             "hHz": hHz,
-             "kilohertz": kilohertz,
-             "khz": khz,
-             "kHz": kHz,
-             "megahertz": megahertz,
-             "MHz": MHz,
-             "gigahertz": gigahertz,
-             "ghz": ghz,
-             "GHz": GHz,
-             "terahertz": terahertz,
-             "thz": thz,
-             "THz": THz,
-             "petahertz": petahertz,
-             "phz": phz,
-             "PHz": PHz,
+    def __repr__(self):
+        if self.keys():
+            m = max(map(len, list(self.keys()))) + 1
+            return '\n'.join([k.rjust(m) + ': ' + repr(v)
+                              for k, v in sorted(self.items())])
+        else:
+            return self.__class__.__name__ + "()"
 
-             "nm": nm,
-             "um": um,
-             "mm": mm,
-             "cm": cm,
-             "dm": dm,
-             "m": m,
-             "km": km,
+    def __dir__(self):
+        return list(self.keys())
 
-             "nanometers": nanometers,
-             "micrometers": micrometers,
-             "millimeters": millimeters,
-             "centimeter": centimeter,
-             "decimeters": decimeters,
-             "meters": meters,
-             "kilometers": kilometers,
+    def __setup_units(self):
+        """
+        Setup Unit class with all available units and dimensions.
 
-             "nanometer": nanometer,
-             "micrometer": micrometer,
-             "millimeter": millimeter,
-             "centimeters": centimeters,
-             "decimeter": decimeter,
-             "meter": meter,
-             "kilometer": kilometer,
+        Returns
+        -------
+        None
+        """
+        for item in self.units.keys():
+            dimension = self.units[item].dimension.name
 
-             "second": second,
-             "minute": minute,
-             "hour": hour,
+            if dim_isnone(self.units[item]) or dim_isone(self.units[item]) or dim_iszero(self.units[item]):
+                self.__unit_dict['other'][str(item)] = self.units[item]
+            else:
+                self.__unit_dict[str(dimension)][str(item)] = self.units[item]
 
-             "seconds": seconds,
-             "minutes": minutes,
-             "hours": hours,
+        for item in self.__unit_dict.keys():
+            self[item] = self.__unit_dict[item]
 
-             "s": s,
-             "h": h,
+    @staticmethod
+    def str2unit(unit):
+        """
+        Get a unit object from a str or char*.
 
-             "K": K,
-             "kelvin": kelvin,
-             "kelvins": kelvins,
+        Parameters
+        ----------
+        unit : str or char*
+            Desired unit in str format.
 
-             "J": J,
-             "joule": joule,
-             "joules": joules,
+        Returns
+        -------
+        object
 
-             "W": W,
-             "watt": watt,
-             "watts": watts,
+        Notes
+        -----
+        str2unit works only with strings. Function `get_unit` can handle also sympy expressions and None-Type units and
+        dimension.
+        """
+        return get_unitstr(unit)
 
-             "milligram": milligram,
-             "milligrams": milligrams,
-             "mg": mg,
-             "microgram": microgram,
-             "micrograms": micrograms,
-             "ug": ug,
-             "gram": gram,
-             "grams": grams,
-             "g": g,
-             "kilogram": kilogram,
-             "kilograms": kilograms,
-             "kg": kg,
-             "ampere": ampere,
-             "amperes": amperes,
-             "A": A}
+    @staticmethod
+    def unit2str(unit):
+        """
+        Get a str from a unit object.
+
+        Parameters
+        ----------
+        unit : object
+            Desired unit in str format.
+
+        Returns
+        -------
+        str
+
+        """
+        if unit_isnone(unit):
+            return b''
+        else:
+            return str(unit)
+
+    @staticmethod
+    def get_unit(unit):
+        """
+        Get unit object from string or unit object (sympy).
+
+        Parameters
+        ----------
+        unit : str, char or unit object.
+
+        Returns
+        -------
+        object
+
+        Notes
+        -----
+        str2unit works only with strings. This function can handle also sympy expressions and None-Type units and
+        dimension.
+        """
+        return get_unit(unit)
+
+    @staticmethod
+    def get_dim(unit):
+        """
+        Get dimension from a unit object.
+
+        Parameters
+        ----------
+        unit : object
+            Unit expression.
+
+        Returns
+        -------
+        dimension
+        """
+        return get_dim(unit)
+
+    @staticmethod
+    def unit_isnone(unit):
+        """
+        Check if a unit has a None-Typed object.
+
+        Parameters
+        ----------
+        unit : object
+            Unit expression.
+
+        Returns
+        -------
+        bool
+        """
+        return unit_isnone(unit)
+
+    @staticmethod
+    def dim_isnone(unit):
+        """
+        Check if a dimension of a unit has a None-Typed object.
+
+        Parameters
+        ----------
+        unit : object
+            Unit expression.
+
+        Returns
+        -------
+        bool
+        """
+        return dim_isnone(unit)
+
+
+Units = Units()

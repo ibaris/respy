@@ -10,7 +10,8 @@ This Module is the base for every operation of `Quantity` objects.
 from __future__ import division
 import numpy as np
 cimport numpy as np
-from respy.units.util import Zero, One, UnitError, DimensionError
+from respy.units.auxil import Zero, One
+from respy.errors import UnitError, DimensionError
 from respy.unit_base.util cimport check_names
 from cpython cimport bool
 from respy.units.auxil import __NONE_UNITS__, __SAME_UNIT_OPERATOR__

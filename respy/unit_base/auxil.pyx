@@ -9,7 +9,9 @@ This Module is the base for expression decompositions and unit and dimension bas
 from __future__ import division
 import numpy as np
 cimport numpy as np
-from respy.units.util import UnitError, __UNITS__, Zero, One
+from respy.units.auxil import Zero, One, __UNITS__
+from respy.errors import UnitError
+
 from respy.units.dimensions import area, volume, length
 import sympy
 from respy.units.auxil import __NONE_UNITS__

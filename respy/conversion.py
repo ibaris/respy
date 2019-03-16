@@ -8,7 +8,7 @@ from respy.units import Quantity
 
 
 class Conversion(object):
-    def __init__(self, value, vza=None, value_unit="BRDF", angle_unit='RAD', quantity=True):
+    def __init__(self, value, vza=None, value_unit="BRDF", angle_unit='RAD', quantity=False):
         """
         Conversion of BRDF, BRF, BSC and BSC in dB.
 

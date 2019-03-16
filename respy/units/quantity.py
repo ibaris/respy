@@ -10,17 +10,19 @@ but will deal with unit conversions internally. The base of the `Quantity` objec
 """
 from __future__ import division
 
+import numpy as np
+from respy.units.util import Units
+
 import inspect
 
-import numpy as np
 from respy.unit_base.auxil import decompose_expr_to_atoms
-from respy.unit_base.auxil import get_unit, get_dimension
-from respy.unit_base.convert import convert_to_unit
+from respy.bin_units.wrapper import convert_to_unit
 from respy.unit_base.operations import compute_logical_operation, compute_bitwise_operation, compute_operation
 
-import util as util
-from respy.units.auxil import __NONE_UNITS__, __OPERATOR__
-from respy.units.util import Zero, One, UnitError
+from respy.units import dimensions
+
+from respy.units.auxil import __NONE_UNITS__, __OPERATOR__, Zero, One
+from respy.errors import UnitError
 from respy.units.unit_ufuncs import (__CONVERT__MATH__, __MATH_UNIT_GETS_LOST__, __MATH_UNIT_REMAINS_STABLE__,
                                      __CHECK_UNIT__, __MATH_LOGICAL_AND_MORE__, __NOT_IMPLEMENTED__)
 
@@ -82,7 +84,7 @@ class Quantity(np.ndarray):
 
     See Also
     --------
-    respry.units.util.Units
+    respry.units.Units
 
     """
 
@@ -149,9 +151,9 @@ class Quantity(np.ndarray):
         if unit is None:
             obj._unit = Zero
         else:
-            obj._unit = get_unit(unit)
+            obj._unit = Units.get_unit(unit)
 
-        obj._dimension = get_dimension(obj._unit)
+        obj._dimension = Units.get_dim(obj._unit)
 
         obj.value = x
         obj._dtype = x.dtype
@@ -808,25 +810,25 @@ class Quantity(np.ndarray):
         respy.units.Quantity or None
 
         """
-        unit = get_unit(unit)
+        unit = Units.get_unit(unit)
 
-        if unit == 1 / util.Units.time.s and self.dimension == util.dimensions.frequency:
+        if unit == 1 / Units.time.s and self.dimension == dimensions.frequency:
             scaled_value = self.value.astype(self._dtype) * self.unit.scale_factor
 
-            value = scaled_value / util.Units[str(self.dimension.name)]['Hz'].scale_factor
+            value = scaled_value / Units[str(self.dimension.name)]['Hz'].scale_factor
 
         elif hasattr(unit, 'dimension'):
 
-            if self.unit == 1 / util.Units.time.s and unit.dimension == util.dimensions.frequency:
+            if self.unit == 1 / Units.time.s and unit.dimension == dimensions.frequency:
                 scaled_value = self.value.astype(self._dtype)
 
-                value = scaled_value / util.Units[str(unit.dimension.name)][str(unit)].scale_factor
+                value = scaled_value / Units[str(unit.dimension.name)][str(unit)].scale_factor
 
             elif unit.dimension == self.dimension:
-                scaled_value = self.value.astype(self._dtype) * util.Units[str(unit.dimension.name)][
+                scaled_value = self.value.astype(self._dtype) * Units[str(unit.dimension.name)][
                     str(self.unit)].scale_factor
 
-                value = scaled_value / util.Units[str(unit.dimension.name)][str(unit)].scale_factor
+                value = scaled_value / Units[str(unit.dimension.name)][str(unit)].scale_factor
 
             else:
                 value = np.zeros_like(self.value, dtype=self._dtype)
@@ -879,14 +881,14 @@ class Quantity(np.ndarray):
         self.ndmin = ndmin
         self._name = name
 
-        self._unit = get_unit(unit)
-        self._dimension = get_dimension(self._unit)
+        self._unit = Units.get_unit(unit)
+        self._dimension = Units.get_dim(self._unit)
 
     def __create_new_instance(self, value, unit=None, name=None, dtype=None):
 
         quantity_subclass = self.__class__
 
-        unit = get_unit(unit)
+        unit = Units.get_unit(unit)
 
         if dtype is None:
             dtype = self._dtype

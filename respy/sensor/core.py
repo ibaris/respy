@@ -20,6 +20,9 @@ class Sensor(Angles, EM):
         self.input_unit = unit
         self.output = output
 
+        self._args = (
+        input, iza, vza, raa, iaa, vaa, normalize, nbar, angle_unit, align, dtype, unit, output, identify, name)
+
     def __repr__(self):
         prefix = '<{0} '.format(self.__class__.__name__)
         sep = ', '
