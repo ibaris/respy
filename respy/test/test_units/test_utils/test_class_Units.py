@@ -32,6 +32,44 @@ class TestAttributes:
         assert (len(Units.units))
 
 
+dir_list = ['_Units__unit_dict',
+            'angle',
+            'area',
+            'current',
+            'dimensions',
+            'energy',
+            'frequency',
+            'length',
+            'mass',
+            'other',
+            'power',
+            'temperature',
+            'time',
+            'units',
+            'volume']
+
+
+class TestDictMethods:
+    def test_dicts(self):
+
+        assert dir(Units) == dir_list
+
+    def test_dicts_err(self):
+        keys = ['a', 'b', 'c']
+        for item in keys:
+            with pytest.raises(AttributeError):
+                Units.item
+
+    def test_links_to_dimensions(self):
+        for i in range(1, len(dir_list)):
+            item = dir_list[i]
+
+            if item in ['dimensions', 'units']:
+                pass
+            else:
+                assert item in str(Units[item].__class__).lower()
+
+
 class TestMethodsConversion:
     def test_2unit(self):
         unit_str = Units.units.keys()
@@ -121,6 +159,7 @@ class TestMethodsConversion:
             with pytest.raises(KeyError):
                 Units[item]
 
+
 class TestMethods:
     def test_get_dim_all(self):
         unit_str = Units.units.keys()
@@ -129,34 +168,34 @@ class TestMethods:
             unit = Units.units[item]
             dim = Units.get_dim(unit)
 
-            assert(unit.dimension == dim)
+            assert (unit.dimension == dim)
 
     def test_get_dim_area(self):
         unit_str = Units.length.keys()
 
         for item in unit_str:
-            unit = Units.units[item]**2
+            unit = Units.units[item] ** 2
             dim = Units.get_dim(unit)
 
-            assert(Units.dimensions['area'] == dim)
+            assert (Units.dimensions['area'] == dim)
 
     def test_get_dim_volume(self):
         unit_str = Units.length.keys()
 
         for item in unit_str:
-            unit = Units.units[item]**3
+            unit = Units.units[item] ** 3
             dim = Units.get_dim(unit)
 
-            assert(Units.dimensions['volume'] == dim)
+            assert (Units.dimensions['volume'] == dim)
 
     def test_get_dim_ones(self):
         unit_str = Units.length.keys()
 
         for item in unit_str:
-            unit = Units.units[item]**4
+            unit = Units.units[item] ** 4
             dim = Units.get_dim(unit)
 
-            assert(One == dim)
+            assert (One == dim)
 
     def test_get_dim_zeros(self):
         items = ['1 / GHz ** 2', '1 / m', '1 / nm ** 3']
@@ -164,5 +203,21 @@ class TestMethods:
         for item in items:
             dim = Units.get_dim(item)
 
-            assert(Zero == dim)
+            assert (Zero == dim)
 
+    def test_dim_isone(self):
+        unit_str = Units.length.keys()
+
+        for item in unit_str:
+            unit = Units.units[item] ** 4
+            dim = Units.dim_isnone(unit)
+
+            assert dim
+
+    def test_dim_iszero(self):
+        items = ['1 / GHz ** 2', '1 / m', '1 / nm ** 3']
+
+        for item in items:
+            dim = Units.dim_iszero(item)
+
+            assert dim

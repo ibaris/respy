@@ -214,13 +214,28 @@ class Conversion(object):
         BRDF value : int, float or array_like
 
         """
-        if angle_unit in __ANGLE_UNIT_RAD__:
-            return BSC / (cos(vza) * (4 * const.pi))
+        try:
+            result = np.zeros_like(BSC)
+            if angle_unit in __ANGLE_UNIT_RAD__:
+                for i in range(BSC.shape[0]):
+                    result[i] = BSC[i] / (cos(vza[i]) * (4 * const.pi))
 
-        elif angle_unit in __ANGLE_UNIT_DEG__:
-            return BSC / (cos(rad(vza)) * (4 * const.pi))
-        else:
-            raise ValueError("angle_unit must be 'RAD' or 'DEG'")
+            elif angle_unit in __ANGLE_UNIT_DEG__:
+                for i in range(BSC.shape[0]):
+                    result[i] = BSC[i] / (cos(rad(vza[i])) * (4 * const.pi))
+            else:
+                raise ValueError("angle_unit must be 'RAD' or 'DEG'")
+
+        except (TypeError, IndexError):
+            if angle_unit in __ANGLE_UNIT_RAD__:
+                result = BSC / (cos(vza) * (4 * const.pi))
+
+            elif angle_unit in __ANGLE_UNIT_DEG__:
+                result = BSC / (cos(rad(vza)) * (4 * const.pi))
+            else:
+                raise ValueError("angle_unit must be 'RAD' or 'DEG'")
+
+        return result
 
     @staticmethod
     def BRDF_to_BRF(BRDF):
@@ -267,10 +282,26 @@ class Conversion(object):
         BRDF value : int, float or array_like
 
         """
-        if angle_unit in __ANGLE_UNIT_RAD__:
-            return BRDF * cos(vza) * 4 * const.pi
+        try:
+            result = np.zeros_like(BRDF)
+            if angle_unit in __ANGLE_UNIT_RAD__:
+                for i in range(BRDF.shape[0]):
+                    result[i] = BRDF[i] * cos(vza[i]) * 4 * const.pi
 
-        elif angle_unit in __ANGLE_UNIT_DEG__:
-            return BRDF * cos(rad(vza)) * (4 * const.pi)
-        else:
-            raise ValueError("angle_unit must be 'RAD' or 'DEG'")
+            elif angle_unit in __ANGLE_UNIT_DEG__:
+                for i in range(BRDF.shape[0]):
+                    result[i] = BRDF[i] * cos(rad(vza[i])) * 4 * const.pi
+            else:
+                raise ValueError("angle_unit must be 'RAD' or 'DEG'")
+
+        except (TypeError, IndexError):
+            if angle_unit in __ANGLE_UNIT_RAD__:
+                result = BRDF * cos(vza) * 4 * const.pi
+
+            elif angle_unit in __ANGLE_UNIT_DEG__:
+                result = BRDF * cos(rad(vza)) * 4 * const.pi
+            else:
+                raise ValueError("angle_unit must be 'RAD' or 'DEG'")
+
+        return result
+

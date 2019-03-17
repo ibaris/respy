@@ -5,7 +5,7 @@ from scipy import stats
 
 __all__ = ["isquantity", "rad", "deg", "sec", "cot", "align_all", "max_length", "asarrays", "same_len",
            "stacks", "zeros_likes", "inf_to_num", "get_geometries", "chi", "same_shape", "isdim1",
-           "Pearson", "RSME", "OpticalResult", "valid_dtype"]
+           "Pearson", "RSME", "OpticalResult", "valid_dtype", "UBRSME"]
 
 DTYPES = [np.bool, np.byte, np.ubyte, np.short, np.ushort, np.intc, np.uintc, np.int_, np.uint, np.longlong,
           np.ulonglong, np.half, np.float, np.float16, np.single, np.double, np.longdouble, np.csingle, np.cdouble,

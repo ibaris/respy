@@ -414,7 +414,7 @@ class Area(dict):
         return list(self.keys())
 
 
-class Angles(dict):
+class Angle(dict):
     """ Storage for other, angle units.
 
     Returns
@@ -475,7 +475,7 @@ class Units(dict):
     Current = Current()
     Other = Other()
     Area = Area()
-    Angles = Angles()
+    Angle = Angle()
     Volume = Volume()
 
     __unit_dict__ = {"frequency": Frequency,
@@ -489,7 +489,7 @@ class Units(dict):
                      'other': Other,
                      'area': Area,
                      'volume': Volume,
-                     'angle': Angles}
+                     'angle': Angle}
 
     dimensions = {'angle': angle, 'area': area, 'volume': volume, 'frequency': frequency, 'length': length,
                   'energy': energy, 'power': power,
@@ -650,6 +650,22 @@ class Units(dict):
         bool
         """
         return dim_isnone(unit)
+
+    @staticmethod
+    def dim_iszero(unit):
+        """
+        Check if a dimension of a unit is Zero.
+
+        Parameters
+        ----------
+        unit : object
+            Unit expression.
+
+        Returns
+        -------
+        bool
+        """
+        return dim_iszero(unit)
 
 
 Units = Units()
